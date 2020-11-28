@@ -1,0 +1,20 @@
+/* vim: sw=4:ts=4:et
+ */
+
+.bigbutton {
+	background-color: lightblue;
+	font-size: 100px;
+	border-radius: 50px;
+    min-width: 150px;
+    min-height: 150px;
+}
+
+.bigbutton:hover {
+	background-color: blue;
+}
+
+.bigbutton:active {
+	background-color: blue;
+	font-size: 80px;
+}
+

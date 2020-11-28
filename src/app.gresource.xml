@@ -1,0 +1,8 @@
+<!-- vim: ts=4:sw=4:et 
+-->
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+    <gresource prefix="/stylesheets">
+        <file>appstyle.css</file>
+    </gresource>
+</gresources>

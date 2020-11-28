@@ -1,0 +1,6 @@
+/obd-scanner-gtk
+/resources.c
+/*.o
+/*.in
+/Makefile
+/.deps
