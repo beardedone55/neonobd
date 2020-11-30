@@ -23,7 +23,15 @@ BlueTooth::~BlueTooth()
 
 void BlueTooth::manager_created(Glib::RefPtr<Gio::AsyncResult> &result)
 {
-    manager = Gio::DBus::ObjectManagerClient::create_for_bus_finish(result);
+    try
+    {
+        manager = Gio::DBus::ObjectManagerClient::create_for_bus_finish(result);
+    }
+    catch(Glib::Error e)
+    {
+        error(e.what());
+        return;
+    }
     if(manager)
     {
         manager->signal_object_added().connect(
@@ -37,12 +45,15 @@ void BlueTooth::manager_created(Glib::RefPtr<Gio::AsyncResult> &result)
         for(auto &object : objects)
             add_object(object);
     }
-
+    //export_profile();
+    //export_agent();
+    register_profile();
+    register_agent();
 }
 
 BlueTooth::Proxy
 BlueTooth::get_interface(const DBusObject &obj,
-              const Glib::ustring &name)
+                         const Glib::ustring &name)
 {
 #ifdef GTK4
     return std::dynamic_pointer_cast<Gio::DBus::Proxy>(obj->get_interface(name));
@@ -84,6 +95,21 @@ Glib::ustring BlueTooth::device_name(const Proxy &proxy)
     return address.get();
 } 
 
+void BlueTooth::update_default_interface(const DBusObject &obj,
+                                         Proxy &default_interface,
+                                         const Glib::ustring & interface_name,
+                                         bool addObject)
+{
+    auto interface = get_interface(obj, interface_name);
+    if(get_interface(obj, interface_name))
+    {
+        if(addObject)
+            default_interface = interface;
+        else
+            default_interface.reset();
+    }
+}
+
 void BlueTooth::add_remove_object(const DBusObject & obj,
                                   bool addObject)
 {
@@ -91,6 +117,10 @@ void BlueTooth::add_remove_object(const DBusObject & obj,
     //or device and modify the appropriate set.
     if(!update_object_list(obj, controllers, "org.bluez.Adapter1", controller_name, addObject))
         update_object_list(obj, remoteDevices, "org.bluez.Device1", device_name, addObject);
+
+    //We also need to save away the agent manager and profile manager when they appear.
+    update_default_interface(obj, agentManager, "org.bluez.AgentManager1", addObject);
+    update_default_interface(obj, profileManager, "org.bluez.ProfileManager1", addObject);
 }
 
 bool BlueTooth::select_controller(const Glib::ustring &controller_name)
@@ -125,15 +155,15 @@ void BlueTooth::emit_probe_progress(int percentComplete)
 void BlueTooth::stop_probe_finish(Glib::RefPtr<Gio::AsyncResult>& result,
                                   Proxy controller)
 {
-    auto status = controller->call_finish(result);
-    std::cout << status.get_type_string() << " returned from stop probe." << std::endl;
+    try { controller->call_finish(result); }
+    catch(Glib::Error e) { error(e.what()); }
+
     emit_probe_progress(100);
 }
 
 void BlueTooth::stop_probe()
 {
     //Timeout occurred; stop probing devices.
-    std::cout << "stop_probe() called." << std::endl;
     if(selected_controller)
     {
         selected_controller->call("StopDiscovery",
@@ -161,8 +191,13 @@ void BlueTooth::probe_finish(Glib::RefPtr<Gio::AsyncResult>& result,
                              Proxy controller)
 {
     //StartDiscovery command issued; now wait for timeout
-    auto status = controller->call_finish(result);
-    std::cout << status.get_type_string() << " returned from probe." << std::endl;
+    try { controller->call_finish(result); }
+    catch(Glib::Error e)
+    {
+        error(e.what());
+        emit_probe_progress(100);
+        return;
+    }
 
     //Convert timeout to milliseconds, and interrupt every time
     //we are 100th the way to completion, hence the *1000/100
@@ -174,7 +209,6 @@ void BlueTooth::probe_finish(Glib::RefPtr<Gio::AsyncResult>& result,
 
 void BlueTooth::probe_remote_devices(unsigned int probeTime)
 {
-    std::cout << "probe_remote_devices() called." << std::endl;
     if(probe_in_progress)
         return;
     
@@ -188,7 +222,10 @@ void BlueTooth::probe_remote_devices(unsigned int probeTime)
                                       selected_controller));
     } 
     else 
+    {
+        error("No bluetooth controller selected.");
         emit_probe_progress(100);  //Cannot probe devices
+    }
 
 }
 
@@ -243,4 +280,88 @@ std::vector<Glib::ustring> BlueTooth::get_device_names()
 std::vector<Glib::ustring> BlueTooth::get_device_addresses()
 {
     return get_property_values(remoteDevices, "Address");
+}
+
+void BlueTooth::error(const Glib::ustring &err_msg)
+{
+    std::cout << err_msg << std::endl;
+}
+
+constexpr auto OBJECT_PATH = "/org/obd-scanner/serial";
+constexpr auto SP_UUID = "00001101-0000-1000-8000-00805f9b34fb";
+
+void BlueTooth::register_complete(Glib::RefPtr<Gio::AsyncResult>& result,
+                                  Proxy manager)
+{
+    //RegisterAgent and RegisterProfile don't
+    //return anything.  This just checks if there were
+    //errors.
+    try {manager->call_finish(result);}
+    catch(Glib::Error e) {error(e.what());}
+}
+
+void BlueTooth::register_profile()
+{
+    if(!profileManager)
+        return;
+
+    //RegisterProfile parameters:
+    //   String profile
+    //   String uuid
+    //   Dict   options
+    std::vector<Glib::VariantBase> register_profile_params;
+
+    //String profile
+    auto profile = Glib::Variant<Glib::DBusObjectPathString>::create(OBJECT_PATH);
+    register_profile_params.push_back(profile);
+
+    //String uuid
+    auto uuid = Glib::Variant<Glib::ustring>::create(SP_UUID);
+    register_profile_params.push_back(uuid);
+
+    //Dict {string, variant} options:
+    //   Name = "obd-serial"
+    //   Service = SP_UUID
+    //   Role = "client"
+    //   Channel = (uint16) 1
+    //   AutoConnect = (bool) true
+    std::map<Glib::ustring, Glib::VariantBase> options;
+    options["Name"] = Glib::Variant<Glib::ustring>::create("obd-serial");
+    options["Service"] = uuid;
+    options["Role"] = Glib::Variant<Glib::ustring>::create("client");
+    options["Channel"] = Glib::Variant<guint16>::create(1);
+    options["AutoConnect"] = Glib::Variant<bool>::create(true);
+
+    register_profile_params.push_back(
+            Glib::Variant<std::map<Glib::ustring, Glib::VariantBase>>::create(options));
+
+    auto parameters = Glib::VariantContainerBase::create_tuple(register_profile_params);
+
+    profileManager->call("RegisterProfile",
+                         sigc::bind<Proxy>(
+                            sigc::mem_fun(*this, &BlueTooth::register_complete),
+                            profileManager),
+                         parameters);
+}
+
+void BlueTooth::register_agent()
+{
+    if(!agentManager)
+        return;
+    //RegisterAgent parameters:
+    //   String agent
+    //   String capabilities
+    auto parameters =
+        Glib::VariantContainerBase::create_tuple(
+            std::vector<Glib::VariantBase>(
+            {
+                Glib::Variant<Glib::DBusObjectPathString>::create(OBJECT_PATH),
+                Glib::Variant<Glib::ustring>::create("KeyboardDisplay"),
+            }));
+
+    agentManager->call("RegisterAgent",
+                       sigc::bind<Proxy>(
+                           sigc::mem_fun(*this, &BlueTooth::register_complete),
+                           agentManager),
+                       parameters);
 }

@@ -1,7 +1,7 @@
-#ifndef _SETTINGS_VIEW_H_
-#define _SETTINGS_VIEW_H_
+#pragma once
 
 #include <gtkmm.h>
+#include "combobox.h"
 
 class MainWindow;
 
@@ -23,7 +23,7 @@ class SettingsView : public Gtk::VBox {
         Gtk::Label              btHostLabel;
         Gtk::ComboBoxText       btHostCombo;
         Gtk::Label              btDeviceLabel;
-        Gtk::ComboBoxText       btDeviceCombo;
+        ComboBox<Glib::ustring, Glib::ustring>  btDeviceCombo;
         Gtk::Button             btDeviceScan;
         Gtk::Label              btScanLabel;
         Gtk::ProgressBar        btScanProgress;
@@ -35,5 +35,3 @@ class SettingsView : public Gtk::VBox {
         void scanComplete();
         void updateScanProgress(int percentComplete);
 };
-
-#endif

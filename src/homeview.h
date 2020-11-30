@@ -19,6 +19,7 @@ class HomeView : public Gtk::Grid {
         };
         MainWindow &main_window;
         BigButton settings_btn;
+        BigButton connect_btn;
 
 };
 

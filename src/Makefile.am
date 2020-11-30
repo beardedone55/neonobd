@@ -8,6 +8,7 @@ obd_scanner_gtk_SOURCES = \
 	resources.c
 
 obd_scanner_gtk_CPPFLAGS = $(GTKMM_CFLAGS) -std=c++17
+obd_scanner_gtk_CFLAGS = $(GTKMM_CFLAGS)
 obd_scanner_gtk_LDFLAGS = $(GTKMM_LIBS)
 
 export PKG_CONFIG_PATH = /usr/local/lib/pkgconfig

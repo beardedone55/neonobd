@@ -30,6 +30,8 @@ class BlueTooth {
         ProxyMap controllers;
         ProxyMap remoteDevices;
         Proxy selected_controller;
+        Proxy agentManager;
+        Proxy profileManager;
         ObjectManager manager;
         sigc::signal<void,int> probe_progress_signal;
         bool probe_in_progress;
@@ -59,7 +61,16 @@ class BlueTooth {
                                 const Glib::ustring &interface_name,
                                 Glib::ustring(*name_func)(const Proxy&),
                                 bool addObject);
+        void update_default_interface(const DBusObject &obj,
+                                      Proxy &default_interface,
+                                      const Glib::ustring & interface_name,
+                                      bool addObject);
         static Glib::ustring controller_name(const Proxy &proxy);
         static Glib::ustring device_name(const Proxy &proxy);
+        void register_profile();
+        void register_agent();
+        void register_complete(Glib::RefPtr<Gio::AsyncResult>& result,
+                               Proxy manager);
+        void error(const Glib::ustring &err_msg);
 };
 

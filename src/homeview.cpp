@@ -12,6 +12,7 @@ HomeView::BigButton::~BigButton() {}
 
 HomeView::HomeView(MainWindow &window) :
    settings_btn {"⚙️️"},
+   connect_btn {"🔃"},
    main_window{window}
 {
     set_name("homeview");
@@ -22,6 +23,7 @@ HomeView::HomeView(MainWindow &window) :
     main_window.connect_view_button(settings_btn, this, &main_window.settingsView);
 
     add(settings_btn);
+    add(connect_btn);
     show_all_children();
 }
 

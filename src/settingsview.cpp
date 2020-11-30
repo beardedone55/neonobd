@@ -77,8 +77,10 @@ void SettingsView::scanComplete()
     //Update Combo Box
     auto devices = bt.get_device_names_addresses();
     btDeviceCombo.remove_all();
-    for (auto &[name, address] : devices)
-        btDeviceCombo.append(address + "<" + name + ">");
+    for (auto &[address, name] : devices)
+        btDeviceCombo.append(address, "<" + name + ">");
+
+    btDeviceCombo.set_active(0);
 
     btScanConnection.disconnect();
     
