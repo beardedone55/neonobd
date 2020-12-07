@@ -21,8 +21,11 @@
 
 class BlueTooth {
     public:
-        BlueTooth();
-        ~BlueTooth();
+        static BlueTooth &get_instance
+        {
+            static BlueTooth bt;
+            return bt;
+        }
 
         //Host Controller Methods
         std::vector<int> get_controller_numbers();
@@ -38,6 +41,10 @@ class BlueTooth {
         int probe_remote_devices(unsigned int maxDevices = 255, 
                                  unsigned int probeTime = 10);
     private:
+        BlueTooth();
+        BlueTooth(const BlueTooth&) = delete;
+        void operator=(const BlueTooth&) = delete;
+        ~BlueTooth();
         std::vector<hci_dev_info> controllers;
         std::vector<inquiry_info> remoteDevices;
         hci_dev_info *selected_controller;

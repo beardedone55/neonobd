@@ -42,6 +42,7 @@ $(top_srcdir)/configure	src/Makefile.in	/^$(top_srcdir)\/configure:  $(am__confi
 .c.o	src/Makefile.in	/^.c.o:$/;"	t
 .c.obj	src/Makefile	/^.c.obj:$/;"	t
 .c.obj	src/Makefile.in	/^.c.obj:$/;"	t
+.combobox	src/appstyle.css	/^.combobox {$/;"	c
 .cpp.o	src/Makefile	/^.cpp.o:$/;"	t
 .cpp.o	src/Makefile.in	/^.cpp.o:$/;"	t
 .cpp.obj	src/Makefile	/^.cpp.obj:$/;"	t
@@ -122,6 +123,8 @@ AWK	Makefile	/^AWK = gawk$/;"	m
 AWK	Makefile.in	/^AWK = @AWK@$/;"	m
 AWK	src/Makefile	/^AWK = gawk$/;"	m
 AWK	src/Makefile.in	/^AWK = @AWK@$/;"	m
+Agent1_definition	src/obd-bluetooth-dbus.cpp	/^constexpr auto Agent1_definition =$/;"	v	typeref:typename:auto
+AsyncResult	src/obd-bluetooth-dbus.h	/^        using AsyncResult = Glib::RefPtr<Gio::AsyncResult>;$/;"	t	class:BlueTooth	typeref:typename:Glib::RefPtr<Gio::AsyncResult>
 BUS_TYPE_SYSTEM	src/obd-bluetooth-dbus.cpp	/^#define BUS_TYPE_SYSTEM /;"	d	file:
 BigButton	src/homeview.cpp	/^HomeView::BigButton::BigButton(const Glib::ustring &label = "") : Gtk::Button{label}$/;"	f	class:HomeView::BigButton
 BigButton	src/homeview.h	/^        class BigButton : public Gtk::Button$/;"	c	class:HomeView
@@ -191,6 +194,8 @@ CYGPATH_W	Makefile	/^CYGPATH_W = echo$/;"	m
 CYGPATH_W	Makefile.in	/^CYGPATH_W = @CYGPATH_W@$/;"	m
 CYGPATH_W	src/Makefile	/^CYGPATH_W = echo$/;"	m
 CYGPATH_W	src/Makefile.in	/^CYGPATH_W = @CYGPATH_W@$/;"	m
+ComboBox	src/combobox.h	/^        ComboBox()$/;"	f	class:ComboBox
+ComboBox	src/combobox.h	/^class ComboBox : public Gtk::ComboBox$/;"	c
 DATA	Makefile	/^DATA = $(dist_doc_DATA)$/;"	m
 DATA	Makefile.in	/^DATA = $(dist_doc_DATA)$/;"	m
 DBusObject	src/obd-bluetooth-dbus.h	/^        using DBusObject = Glib::RefPtr<Gio::DBus::Object>;$/;"	t	class:BlueTooth	typeref:typename:Glib::RefPtr<Gio::DBus::Object>
@@ -330,6 +335,7 @@ Makefile	Makefile	/^Makefile: $(srcdir)\/Makefile.in $(top_builddir)\/config.sta
 Makefile	Makefile.in	/^Makefile: $(srcdir)\/Makefile.in $(top_builddir)\/config.status$/;"	t
 Makefile	src/Makefile	/^Makefile: $(srcdir)\/Makefile.in $(top_builddir)\/config.status$/;"	t
 Makefile	src/Makefile.in	/^Makefile: $(srcdir)\/Makefile.in $(top_builddir)\/config.status$/;"	t
+MethodInvocation	src/obd-bluetooth-dbus.h	/^        using MethodInvocation = Glib::RefPtr<Gio::DBus::MethodInvocation>;$/;"	t	class:BlueTooth	typeref:typename:Glib::RefPtr<Gio::DBus::MethodInvocation>
 NORMAL_INSTALL	Makefile	/^NORMAL_INSTALL = :$/;"	m
 NORMAL_INSTALL	Makefile.in	/^NORMAL_INSTALL = :$/;"	m
 NORMAL_INSTALL	src/Makefile	/^NORMAL_INSTALL = :$/;"	m
@@ -338,6 +344,7 @@ NORMAL_UNINSTALL	Makefile	/^NORMAL_UNINSTALL = :$/;"	m
 NORMAL_UNINSTALL	Makefile.in	/^NORMAL_UNINSTALL = :$/;"	m
 NORMAL_UNINSTALL	src/Makefile	/^NORMAL_UNINSTALL = :$/;"	m
 NORMAL_UNINSTALL	src/Makefile.in	/^NORMAL_UNINSTALL = :$/;"	m
+OBJECT_PATH	src/obd-bluetooth-dbus.cpp	/^constexpr auto OBJECT_PATH = "\/org\/obd_scanner\/serial";$/;"	v	typeref:typename:auto
 OBJEXT	Makefile	/^OBJEXT = o$/;"	m
 OBJEXT	Makefile.in	/^OBJEXT = @OBJEXT@$/;"	m
 OBJEXT	src/Makefile	/^OBJEXT = o$/;"	m
@@ -425,6 +432,7 @@ PRE_UNINSTALL	src/Makefile	/^PRE_UNINSTALL = :$/;"	m
 PRE_UNINSTALL	src/Makefile.in	/^PRE_UNINSTALL = :$/;"	m
 PROGRAMS	src/Makefile	/^PROGRAMS = $(bin_PROGRAMS)$/;"	m
 PROGRAMS	src/Makefile.in	/^PROGRAMS = $(bin_PROGRAMS)$/;"	m
+Profile1_definition	src/obd-bluetooth-dbus.cpp	/^constexpr auto Profile1_definition =$/;"	v	typeref:typename:auto
 Proxy	src/obd-bluetooth-dbus.h	/^        using Proxy = Glib::RefPtr<Gio::DBus::Proxy>;$/;"	t	class:BlueTooth	typeref:typename:Glib::RefPtr<Gio::DBus::Proxy>
 ProxyMap	src/obd-bluetooth-dbus.h	/^        using ProxyMap = std::map<Glib::ustring, Glib::RefPtr<Gio::DBus::Proxy>>;$/;"	t	class:BlueTooth	typeref:typename:std::map<Glib::ustring,Glib::RefPtr<Gio::DBus::Proxy>>
 README	Makefile.am	/^dist_doc_DATA = README$/;"	D	directory:doc
@@ -434,6 +442,7 @@ RECURSIVE_TARGETS	Makefile	/^RECURSIVE_TARGETS = all-recursive check-recursive c
 RECURSIVE_TARGETS	Makefile.in	/^RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \\$/;"	m
 SECTION	src/resources.c	/^# define SECTION /;"	d	file:
 SECTION	src/resources.c	/^# define SECTION$/;"	d	file:
+SERIAL_PORT_UUID	src/obd-bluetooth-dbus.cpp	/^constexpr auto SERIAL_PORT_UUID = "00001101-0000-1000-8000-00805f9b34fb";$/;"	v	typeref:typename:auto
 SET_MAKE	Makefile	/^SET_MAKE = $/;"	m
 SET_MAKE	Makefile.in	/^SET_MAKE = @SET_MAKE@$/;"	m
 SET_MAKE	src/Makefile	/^SET_MAKE = $/;"	m
@@ -501,10 +510,11 @@ _MAINWINDOW_H_	src/mainwindow.h	/^#define _MAINWINDOW_H_$/;"	d
 _OBD_BLUETOOTH_	src/obd-bluetooth.h	/^#define _OBD_BLUETOOTH_$/;"	d
 _PKG_CONFIG	aclocal.m4	/^m4_define([_PKG_CONFIG],$/;"	d
 _PKG_SHORT_ERRORS_SUPPORTED	aclocal.m4	/^AC_DEFUN([_PKG_SHORT_ERRORS_SUPPORTED],$/;"	m
-_SETTINGS_VIEW_H_	src/settingsview.h	/^#define _SETTINGS_VIEW_H_$/;"	d
 _WAIT_DIALOG_H_	src/waitdialog.h	/^#define _WAIT_DIALOG_H_$/;"	d
-__anon02acad08010a	src/resources.c	/^static const SECTION union { const guint8 data[437]; const double alignment; void * const ptr;} /;"	u	file:
-__anon02acad08020a	src/resources.c	/^static const SECTION union { const guint8 data[437]; const double alignment; void * const ptr;} /;"	u	file:
+__anon02acad08010a	src/resources.c	/^static const SECTION union { const guint8 data[457]; const double alignment; void * const ptr;} /;"	u	file:
+__anon02acad08020a	src/resources.c	/^static const SECTION union { const guint8 data[457]; const double alignment; void * const ptr;} /;"	u	file:
+__anon98ab62eb0102	src/combobox.h	/^            std::apply([this](auto&&... cols){((column_record.add(cols)), ...);}, columns);$/;"	f	function:ComboBox::ComboBox	file:
+__anon98ab62eb0202	src/combobox.h	/^            std::apply([this](auto&&... cols){((pack_start(cols)), ...);}, columns);$/;"	f	function:ComboBox::ComboBox	file:
 abs_builddir	Makefile	/^abs_builddir = \/home\/brian\/obd-scanner$/;"	m
 abs_builddir	Makefile.in	/^abs_builddir = @abs_builddir@$/;"	m
 abs_builddir	src/Makefile	/^abs_builddir = \/home\/brian\/obd-scanner\/src$/;"	m
@@ -533,9 +543,13 @@ ac_fn_c_try_compile	configure	/^ac_fn_c_try_compile ()$/;"	f
 ac_fn_cxx_try_compile	configure	/^ac_fn_cxx_try_compile ()$/;"	f
 add_object	src/obd-bluetooth-dbus.cpp	/^#define add_object(/;"	d	file:
 add_remove_object	src/obd-bluetooth-dbus.cpp	/^void BlueTooth::add_remove_object(const DBusObject & obj,$/;"	f	class:BlueTooth	typeref:typename:void
+agentManager	src/obd-bluetooth-dbus.h	/^        Proxy agentManager;$/;"	m	class:BlueTooth	typeref:typename:Proxy
+agent_cancel	src/obd-bluetooth-dbus.h	/^        sigc::signal<void> agent_cancel;$/;"	m	class:BlueTooth	typeref:typename:sigc::signal<void>
+agent_method	src/obd-bluetooth-dbus.cpp	/^BlueTooth::agent_method(const Glib::RefPtr<Gio::DBus::Connection>&,$/;"	f	class:BlueTooth	typeref:typename:void
+agent_vtable	src/obd-bluetooth-dbus.h	/^        Gio::DBus::InterfaceVTable agent_vtable; $/;"	m	class:BlueTooth	typeref:typename:Gio::DBus::InterfaceVTable
 aix_post_process_depfile	depcomp	/^aix_post_process_depfile ()$/;"	f
-alignment	src/resources.c	/^static const SECTION union { const guint8 data[437]; const double alignment; void * const ptr;} /;"	m	union:__anon02acad08010a	typeref:typename:const double	file:
-alignment	src/resources.c	/^static const SECTION union { const guint8 data[437]; const double alignment; void * const ptr;} /;"	m	union:__anon02acad08020a	typeref:typename:const double	file:
+alignment	src/resources.c	/^static const SECTION union { const guint8 data[457]; const double alignment; void * const ptr;} /;"	m	union:__anon02acad08010a	typeref:typename:const double	file:
+alignment	src/resources.c	/^static const SECTION union { const guint8 data[457]; const double alignment; void * const ptr;} /;"	m	union:__anon02acad08020a	typeref:typename:const double	file:
 all	Makefile	/^all: config.h$/;"	t
 all	Makefile.in	/^all: config.h$/;"	t
 all	src/Makefile	/^all: all-am$/;"	t
@@ -724,8 +738,9 @@ am__vpath_adj_setup	Makefile.in	/^am__vpath_adj_setup = srcdirstrip=`echo "$(src
 am_obd_scanner_gtk_OBJECTS	src/Makefile	/^am_obd_scanner_gtk_OBJECTS = obd_scanner_gtk-mainwindow.$(OBJEXT) \\$/;"	m
 am_obd_scanner_gtk_OBJECTS	src/Makefile.in	/^am_obd_scanner_gtk_OBJECTS = obd_scanner_gtk-mainwindow.$(OBJEXT) \\$/;"	m
 app_get_resource	src/resources.c	/^GResource *app_get_resource (void)$/;"	f	typeref:typename:GResource *
-app_resource_data	src/resources.c	/^static const SECTION union { const guint8 data[437]; const double alignment; void * const ptr;} /;"	v	typeref:typename:const union __anon02acad08010a
-app_resource_data	src/resources.c	/^static const SECTION union { const guint8 data[437]; const double alignment; void * const ptr;} /;"	v	typeref:typename:const union __anon02acad08020a
+app_resource_data	src/resources.c	/^static const SECTION union { const guint8 data[457]; const double alignment; void * const ptr;} /;"	v	typeref:typename:const union __anon02acad08010a
+app_resource_data	src/resources.c	/^static const SECTION union { const guint8 data[457]; const double alignment; void * const ptr;} /;"	v	typeref:typename:const union __anon02acad08020a
+append	src/combobox.h	/^        void append(const T&... args)$/;"	f	class:ComboBox	typeref:typename:void
 as_fn_append	config.status	/^  as_fn_append ()$/;"	f
 as_fn_append	configure	/^  as_fn_append ()$/;"	f
 as_fn_arith	config.status	/^  as_fn_arith ()$/;"	f
@@ -746,6 +761,7 @@ as_fn_set_status	configure	/^as_fn_set_status ()$/;"	f
 as_fn_success	configure	/^as_fn_success () { as_fn_return 0; }$/;"	f
 as_fn_unset	config.status	/^as_fn_unset ()$/;"	f
 as_fn_unset	configure	/^as_fn_unset ()$/;"	f
+assignValues	src/combobox.h	/^        void assignValues(Gtk::TreeModel::Row &row,$/;"	f	class:ComboBox	typeref:typename:void
 bin_PROGRAMS	src/Makefile	/^bin_PROGRAMS = obd-scanner-gtk$(EXEEXT)$/;"	m
 bin_PROGRAMS	src/Makefile.am	/^bin_PROGRAMS = obd-scanner-gtk$/;"	m
 bin_PROGRAMS	src/Makefile.in	/^bin_PROGRAMS = obd-scanner-gtk$(EXEEXT)$/;"	m
@@ -753,9 +769,9 @@ bindir	Makefile	/^bindir = ${exec_prefix}\/bin$/;"	m
 bindir	Makefile.in	/^bindir = @bindir@$/;"	m
 bindir	src/Makefile	/^bindir = ${exec_prefix}\/bin$/;"	m
 bindir	src/Makefile.in	/^bindir = @bindir@$/;"	m
-bluetooth	src/mainwindow.h	/^        BlueTooth bluetooth;$/;"	m	class:MainWindow	typeref:typename:BlueTooth
+bluetooth	src/mainwindow.h	/^        BlueTooth &bluetooth;$/;"	m	class:MainWindow	typeref:typename:BlueTooth &
 bluetooth_rb	src/settingsview.h	/^        Gtk::RadioButton        bluetooth_rb,$/;"	m	class:SettingsView	typeref:typename:Gtk::RadioButton
-btDeviceCombo	src/settingsview.h	/^        Gtk::ComboBoxText       btDeviceCombo;$/;"	m	class:SettingsView	typeref:typename:Gtk::ComboBoxText
+btDeviceCombo	src/settingsview.h	/^        ComboBox<Glib::ustring, Glib::ustring>  btDeviceCombo;$/;"	m	class:SettingsView	typeref:typename:ComboBox<Glib::ustring,Glib::ustring>
 btDeviceLabel	src/settingsview.h	/^        Gtk::Label              btDeviceLabel;$/;"	m	class:SettingsView	typeref:typename:Gtk::Label
 btDeviceScan	src/settingsview.h	/^        Gtk::Button             btDeviceScan;$/;"	m	class:SettingsView	typeref:typename:Gtk::Button
 btGrid	src/settingsview.h	/^        Gtk::Grid               btGrid;$/;"	m	class:SettingsView	typeref:typename:Gtk::Grid
@@ -799,9 +815,13 @@ clean-generic	src/Makefile.in	/^clean-generic:$/;"	t
 clean-local	src/Makefile	/^clean-local:$/;"	t
 clean-local	src/Makefile.am	/^clean-local:$/;"	t
 clean-local	src/Makefile.in	/^clean-local:$/;"	t
+column_record	src/combobox.h	/^        Gtk::TreeModelColumnRecord column_record;$/;"	m	class:ComboBox	typeref:typename:Gtk::TreeModelColumnRecord
+columns	src/combobox.h	/^        std::tuple<Gtk::TreeModelColumn<T>...> columns;$/;"	m	class:ComboBox	typeref:typename:std::tuple<Gtk::TreeModelColumn<T>...>
 config.h	Makefile	/^config.h: stamp-h1$/;"	t
 config.h	Makefile.in	/^config.h: stamp-h1$/;"	t
+connect_btn	src/homeview.h	/^        BigButton connect_btn;$/;"	m	class:HomeView	typeref:typename:BigButton
 connect_view_button	src/mainwindow.cpp	/^void MainWindow::connect_view_button(Gtk::Button &button,$/;"	f	class:MainWindow	typeref:typename:void
+connected_device_path	src/obd-bluetooth-dbus.h	/^        Glib::DBusObjectPathString connected_device_path;$/;"	m	class:BlueTooth	typeref:typename:Glib::DBusObjectPathString
 connectionFrame	src/settingsview.h	/^        Gtk::Frame              connectionFrame;$/;"	m	class:SettingsView	typeref:typename:Gtk::Frame
 connectionGrid	src/settingsview.h	/^        Gtk::Grid               connectionGrid;$/;"	m	class:SettingsView	typeref:typename:Gtk::Grid
 connectionTypes	src/settingsview.h	/^        Gtk::RadioButton::Group connectionTypes;$/;"	m	class:SettingsView	typeref:typename:Gtk::RadioButton::Group
@@ -830,8 +850,8 @@ ctags-am	Makefile	/^ctags-am: $(TAGS_DEPENDENCIES) $(am__tagged_files)$/;"	t
 ctags-am	Makefile.in	/^ctags-am: $(TAGS_DEPENDENCIES) $(am__tagged_files)$/;"	t
 ctags-am	src/Makefile	/^ctags-am: $(TAGS_DEPENDENCIES) $(am__tagged_files)$/;"	t
 ctags-am	src/Makefile.in	/^ctags-am: $(TAGS_DEPENDENCIES) $(am__tagged_files)$/;"	t
-data	src/resources.c	/^static const SECTION union { const guint8 data[437]; const double alignment; void * const ptr;} /;"	m	union:__anon02acad08010a	typeref:typename:const guint8[437]	file:
-data	src/resources.c	/^static const SECTION union { const guint8 data[437]; const double alignment; void * const ptr;} /;"	m	union:__anon02acad08020a	typeref:typename:const guint8[437]	file:
+data	src/resources.c	/^static const SECTION union { const guint8 data[457]; const double alignment; void * const ptr;} /;"	m	union:__anon02acad08010a	typeref:typename:const guint8[457]	file:
+data	src/resources.c	/^static const SECTION union { const guint8 data[457]; const double alignment; void * const ptr;} /;"	m	union:__anon02acad08020a	typeref:typename:const guint8[457]	file:
 datadir	Makefile	/^datadir = ${datarootdir}$/;"	m
 datadir	Makefile.in	/^datadir = @datadir@$/;"	m
 datadir	src/Makefile	/^datadir = ${datarootdir}$/;"	m
@@ -840,9 +860,13 @@ datarootdir	Makefile	/^datarootdir = ${prefix}\/share$/;"	m
 datarootdir	Makefile.in	/^datarootdir = @datarootdir@$/;"	m
 datarootdir	src/Makefile	/^datarootdir = ${prefix}\/share$/;"	m
 datarootdir	src/Makefile.in	/^datarootdir = @datarootdir@$/;"	m
+dbus_confirm_request	src/obd-bluetooth-dbus.cpp	/^void BlueTooth::dbus_confirm_request(bool confirmed,$/;"	f	class:BlueTooth	typeref:typename:void
+dbus_return	src/obd-bluetooth-dbus.cpp	/^void BlueTooth::dbus_return(MethodInvocation & invocation,$/;"	f	class:BlueTooth	typeref:typename:void
 depcomp	src/Makefile	/^depcomp = $(SHELL) $(top_srcdir)\/depcomp$/;"	m
 depcomp	src/Makefile.in	/^depcomp = $(SHELL) $(top_srcdir)\/depcomp$/;"	m
 device_name	src/obd-bluetooth-dbus.cpp	/^Glib::ustring BlueTooth::device_name(const Proxy &proxy)$/;"	f	class:BlueTooth	typeref:typename:Glib::ustring
+display_pass_key	src/obd-bluetooth-dbus.h	/^        sigc::signal<void, Glib::ustring, guint32, guint16> display_pass_key;$/;"	m	class:BlueTooth	typeref:typename:sigc::signal<void,Glib::ustring,guint32,guint16>
+display_pin_code	src/obd-bluetooth-dbus.h	/^        sigc::signal<void, Glib::ustring, Glib::ustring> display_pin_code;$/;"	m	class:BlueTooth	typeref:typename:sigc::signal<void,Glib::ustring,Glib::ustring>
 dist	Makefile	/^dist dist-all:$/;"	t
 dist	Makefile.in	/^dist dist-all:$/;"	t
 dist-all	Makefile	/^dist dist-all:$/;"	t
@@ -923,10 +947,13 @@ dvidir	Makefile.in	/^dvidir = @dvidir@$/;"	m
 dvidir	src/Makefile	/^dvidir = ${docdir}$/;"	m
 dvidir	src/Makefile.in	/^dvidir = @dvidir@$/;"	m
 emit_probe_progress	src/obd-bluetooth-dbus.cpp	/^void BlueTooth::emit_probe_progress(int percentComplete)$/;"	f	class:BlueTooth	typeref:typename:void
+error	src/obd-bluetooth-dbus.cpp	/^void BlueTooth::error(const Glib::ustring &err_msg)$/;"	f	class:BlueTooth	typeref:typename:void
 exec_prefix	Makefile	/^exec_prefix = ${prefix}$/;"	m
 exec_prefix	Makefile.in	/^exec_prefix = @exec_prefix@$/;"	m
 exec_prefix	src/Makefile	/^exec_prefix = ${prefix}$/;"	m
 exec_prefix	src/Makefile.in	/^exec_prefix = @exec_prefix@$/;"	m
+export_agent	src/obd-bluetooth-dbus.cpp	/^void BlueTooth::export_agent()$/;"	f	class:BlueTooth	typeref:typename:void
+export_profile	src/obd-bluetooth-dbus.cpp	/^void BlueTooth::export_profile()$/;"	f	class:BlueTooth	typeref:typename:void
 func_cl_dashL	compile	/^func_cl_dashL ()$/;"	f
 func_cl_dashl	compile	/^func_cl_dashl ()$/;"	f
 func_cl_wrapper	compile	/^func_cl_wrapper ()$/;"	f
@@ -942,6 +969,8 @@ get_device_name	src/obd-bluetooth.cpp	/^std::string BlueTooth::get_device_name(u
 get_device_names	src/obd-bluetooth-dbus.cpp	/^std::vector<Glib::ustring> BlueTooth::get_device_names()$/;"	f	class:BlueTooth	typeref:typename:std::vector<Glib::ustring>
 get_device_names	src/obd-bluetooth.cpp	/^std::vector<std::string> BlueTooth::get_device_names(int timeout)$/;"	f	class:BlueTooth	typeref:typename:std::vector<std::string>
 get_device_names_addresses	src/obd-bluetooth-dbus.cpp	/^BlueTooth::get_device_names_addresses()$/;"	f	class:BlueTooth	typeref:typename:std::map<Glib::ustring,Glib::ustring>
+get_instance	src/obd-bluetooth-dbus.h	/^        static BlueTooth & get_instance()$/;"	f	class:BlueTooth	typeref:typename:BlueTooth &
+get_instance	src/obd-bluetooth.h	/^        static BlueTooth &get_instance$/;"	m	class:BlueTooth	typeref:typename:BlueTooth &
 get_interface	src/obd-bluetooth-dbus.cpp	/^BlueTooth::get_interface(const DBusObject &obj,$/;"	f	class:BlueTooth	typeref:typename:BlueTooth::Proxy
 get_property_value	src/obd-bluetooth-dbus.cpp	/^BlueTooth::get_property_value(const Proxy &proxy,$/;"	f	class:BlueTooth	typeref:typename:Glib::ustring
 get_property_values	src/obd-bluetooth-dbus.cpp	/^BlueTooth::get_property_values($/;"	f	class:BlueTooth	typeref:typename:std::vector<Glib::ustring>
@@ -1096,6 +1125,7 @@ libexecdir	Makefile	/^libexecdir = ${exec_prefix}\/libexec$/;"	m
 libexecdir	Makefile.in	/^libexecdir = @libexecdir@$/;"	m
 libexecdir	src/Makefile	/^libexecdir = ${exec_prefix}\/libexec$/;"	m
 libexecdir	src/Makefile.in	/^libexecdir = @libexecdir@$/;"	m
+list_store	src/combobox.h	/^        Glib::RefPtr<Gtk::ListStore> list_store;$/;"	m	class:ComboBox	typeref:typename:Glib::RefPtr<Gtk::ListStore>
 localedir	Makefile	/^localedir = ${datarootdir}\/locale$/;"	m
 localedir	Makefile.in	/^localedir = @localedir@$/;"	m
 localedir	src/Makefile	/^localedir = ${datarootdir}\/locale$/;"	m
@@ -1121,7 +1151,7 @@ maintainer-clean-generic	src/Makefile	/^maintainer-clean-generic:$/;"	t
 maintainer-clean-generic	src/Makefile.in	/^maintainer-clean-generic:$/;"	t
 make_dummy_depfile	depcomp	/^make_dummy_depfile ()$/;"	f
 manager	src/obd-bluetooth-dbus.h	/^        ObjectManager manager;$/;"	m	class:BlueTooth	typeref:typename:ObjectManager
-manager_created	src/obd-bluetooth-dbus.cpp	/^void BlueTooth::manager_created(Glib::RefPtr<Gio::AsyncResult> &result)$/;"	f	class:BlueTooth	typeref:typename:void
+manager_created	src/obd-bluetooth-dbus.cpp	/^void BlueTooth::manager_created(AsyncResult & result)$/;"	f	class:BlueTooth	typeref:typename:void
 mandir	Makefile	/^mandir = ${datarootdir}\/man$/;"	m
 mandir	Makefile.in	/^mandir = @mandir@$/;"	m
 mandir	src/Makefile	/^mandir = ${datarootdir}\/man$/;"	m
@@ -1177,6 +1207,9 @@ obd_scanner_gtk-settingsview.o	src/Makefile	/^obd_scanner_gtk-settingsview.o: se
 obd_scanner_gtk-settingsview.o	src/Makefile.in	/^obd_scanner_gtk-settingsview.o: settingsview.cpp$/;"	t
 obd_scanner_gtk-settingsview.obj	src/Makefile	/^obd_scanner_gtk-settingsview.obj: settingsview.cpp$/;"	t
 obd_scanner_gtk-settingsview.obj	src/Makefile.in	/^obd_scanner_gtk-settingsview.obj: settingsview.cpp$/;"	t
+obd_scanner_gtk_CFLAGS	src/Makefile	/^obd_scanner_gtk_CFLAGS = $(GTKMM_CFLAGS)$/;"	m
+obd_scanner_gtk_CFLAGS	src/Makefile.am	/^obd_scanner_gtk_CFLAGS = $(GTKMM_CFLAGS)$/;"	m
+obd_scanner_gtk_CFLAGS	src/Makefile.in	/^obd_scanner_gtk_CFLAGS = $(GTKMM_CFLAGS)$/;"	m
 obd_scanner_gtk_CPPFLAGS	src/Makefile	/^obd_scanner_gtk_CPPFLAGS = $(GTKMM_CFLAGS) -std=c++17$/;"	m
 obd_scanner_gtk_CPPFLAGS	src/Makefile.am	/^obd_scanner_gtk_CPPFLAGS = $(GTKMM_CFLAGS) -std=c++17$/;"	m
 obd_scanner_gtk_CPPFLAGS	src/Makefile.in	/^obd_scanner_gtk_CPPFLAGS = $(GTKMM_CFLAGS) -std=c++17$/;"	m
@@ -1229,12 +1262,15 @@ prefix	Makefile	/^prefix = \/usr\/local$/;"	m
 prefix	Makefile.in	/^prefix = @prefix@$/;"	m
 prefix	src/Makefile	/^prefix = \/usr\/local$/;"	m
 prefix	src/Makefile.in	/^prefix = @prefix@$/;"	m
-probe_finish	src/obd-bluetooth-dbus.cpp	/^void BlueTooth::probe_finish(Glib::RefPtr<Gio::AsyncResult>& result, $/;"	f	class:BlueTooth	typeref:typename:void
+probe_finish	src/obd-bluetooth-dbus.cpp	/^void BlueTooth::probe_finish(AsyncResult & result,$/;"	f	class:BlueTooth	typeref:typename:void
 probe_in_progress	src/obd-bluetooth-dbus.h	/^        bool probe_in_progress;$/;"	m	class:BlueTooth	typeref:typename:bool
 probe_progress	src/obd-bluetooth-dbus.h	/^        int probe_progress;$/;"	m	class:BlueTooth	typeref:typename:int
 probe_progress_signal	src/obd-bluetooth-dbus.h	/^        sigc::signal<void,int> probe_progress_signal;$/;"	m	class:BlueTooth	typeref:typename:sigc::signal<void,int>
 probe_remote_devices	src/obd-bluetooth-dbus.cpp	/^void BlueTooth::probe_remote_devices(unsigned int probeTime)$/;"	f	class:BlueTooth	typeref:typename:void
 probe_remote_devices	src/obd-bluetooth.cpp	/^int BlueTooth::probe_remote_devices(unsigned int maxDevices, unsigned int probeTime)$/;"	f	class:BlueTooth	typeref:typename:int
+profileManager	src/obd-bluetooth-dbus.h	/^        Proxy profileManager;$/;"	m	class:BlueTooth	typeref:typename:Proxy
+profile_method	src/obd-bluetooth-dbus.cpp	/^BlueTooth::profile_method(const Glib::RefPtr<Gio::DBus::Connection>&,$/;"	f	class:BlueTooth	typeref:typename:void
+profile_vtable	src/obd-bluetooth-dbus.h	/^        Gio::DBus::InterfaceVTable profile_vtable;$/;"	m	class:BlueTooth	typeref:typename:Gio::DBus::InterfaceVTable
 program_details	missing	/^program_details ()$/;"	f
 program_transform_name	Makefile	/^program_transform_name = s,x,x,$/;"	m
 program_transform_name	Makefile.in	/^program_transform_name = @program_transform_name@$/;"	m
@@ -1253,10 +1289,24 @@ psdir	Makefile	/^psdir = ${docdir}$/;"	m
 psdir	Makefile.in	/^psdir = @psdir@$/;"	m
 psdir	src/Makefile	/^psdir = ${docdir}$/;"	m
 psdir	src/Makefile.in	/^psdir = @psdir@$/;"	m
-ptr	src/resources.c	/^static const SECTION union { const guint8 data[437]; const double alignment; void * const ptr;} /;"	m	union:__anon02acad08010a	typeref:typename:void * const	file:
-ptr	src/resources.c	/^static const SECTION union { const guint8 data[437]; const double alignment; void * const ptr;} /;"	m	union:__anon02acad08020a	typeref:typename:void * const	file:
+ptr	src/resources.c	/^static const SECTION union { const guint8 data[457]; const double alignment; void * const ptr;} /;"	m	union:__anon02acad08010a	typeref:typename:void * const	file:
+ptr	src/resources.c	/^static const SECTION union { const guint8 data[457]; const double alignment; void * const ptr;} /;"	m	union:__anon02acad08020a	typeref:typename:void * const	file:
+register_agent	src/obd-bluetooth-dbus.cpp	/^void BlueTooth::register_agent()$/;"	f	class:BlueTooth	typeref:typename:void
+register_complete	src/obd-bluetooth-dbus.cpp	/^void BlueTooth::register_complete(AsyncResult & result,$/;"	f	class:BlueTooth	typeref:typename:void
+register_object	src/obd-bluetooth-dbus.cpp	/^void BlueTooth::register_object(const char *interface_definition,$/;"	f	class:BlueTooth	typeref:typename:void
+register_profile	src/obd-bluetooth-dbus.cpp	/^void BlueTooth::register_profile()$/;"	f	class:BlueTooth	typeref:typename:void
 remoteDevices	src/obd-bluetooth-dbus.h	/^        ProxyMap remoteDevices;$/;"	m	class:BlueTooth	typeref:typename:ProxyMap
 remoteDevices	src/obd-bluetooth.h	/^        std::vector<inquiry_info> remoteDevices;$/;"	m	class:BlueTooth	typeref:typename:std::vector<inquiry_info>
+remove_all	src/combobox.h	/^        void remove_all()$/;"	f	class:ComboBox	typeref:typename:void
+request_authorization	src/obd-bluetooth-dbus.h	/^        sigc::signal<void, Glib::ustring> request_authorization;$/;"	m	class:BlueTooth	typeref:typename:sigc::signal<void,Glib::ustring>
+request_authorization_invocation	src/obd-bluetooth-dbus.h	/^        Glib::RefPtr<Gio::DBus::MethodInvocation> request_authorization_invocation;$/;"	m	class:BlueTooth	typeref:typename:Glib::RefPtr<Gio::DBus::MethodInvocation>
+request_confirmation	src/obd-bluetooth-dbus.h	/^        sigc::signal<void, Glib::ustring, guint32> request_confirmation;$/;"	m	class:BlueTooth	typeref:typename:sigc::signal<void,Glib::ustring,guint32>
+request_confirmation_invocation	src/obd-bluetooth-dbus.h	/^        Glib::RefPtr<Gio::DBus::MethodInvocation> request_confirmation_invocation;$/;"	m	class:BlueTooth	typeref:typename:Glib::RefPtr<Gio::DBus::MethodInvocation>
+request_pairing_info	src/obd-bluetooth-dbus.cpp	/^BlueTooth::request_pairing_info(const Glib::VariantContainerBase & parameters,$/;"	f	class:BlueTooth	typeref:typename:void
+request_pass_key	src/obd-bluetooth-dbus.h	/^        sigc::signal<void, Glib::ustring> request_pass_key;$/;"	m	class:BlueTooth	typeref:typename:sigc::signal<void,Glib::ustring>
+request_passkey_invocation	src/obd-bluetooth-dbus.h	/^        Glib::RefPtr<Gio::DBus::MethodInvocation> request_passkey_invocation;$/;"	m	class:BlueTooth	typeref:typename:Glib::RefPtr<Gio::DBus::MethodInvocation>
+request_pin_code	src/obd-bluetooth-dbus.h	/^        sigc::signal<void, Glib::ustring> request_pin_code;$/;"	m	class:BlueTooth	typeref:typename:sigc::signal<void,Glib::ustring>
+request_pin_invocation	src/obd-bluetooth-dbus.h	/^        Glib::RefPtr<Gio::DBus::MethodInvocation> request_pin_invocation;$/;"	m	class:BlueTooth	typeref:typename:Glib::RefPtr<Gio::DBus::MethodInvocation>
 resource_destructor	src/resources.c	/^static void resource_destructor (void)$/;"	f	typeref:typename:void	file:
 resources.c	src/Makefile	/^resources.c: app.gresource.xml appstyle.css$/;"	t
 resources.c	src/Makefile.am	/^resources.c: app.gresource.xml appstyle.css$/;"	t
@@ -1275,6 +1325,10 @@ select_controller	src/obd-bluetooth.cpp	/^bool BlueTooth::select_controller(std:
 select_controller	src/obd-bluetooth.cpp	/^void BlueTooth::select_controller(hci_dev_info &controller)$/;"	f	class:BlueTooth	typeref:typename:void
 selected_controller	src/obd-bluetooth-dbus.h	/^        Proxy selected_controller;$/;"	m	class:BlueTooth	typeref:typename:Proxy
 selected_controller	src/obd-bluetooth.h	/^        hci_dev_info *selected_controller;$/;"	m	class:BlueTooth	typeref:typename:hci_dev_info *
+send_authorization	src/obd-bluetooth-dbus.cpp	/^void BlueTooth::send_authorization(bool authorized)$/;"	f	class:BlueTooth	typeref:typename:void
+send_confirmation	src/obd-bluetooth-dbus.cpp	/^void BlueTooth::send_confirmation(bool confirmed)$/;"	f	class:BlueTooth	typeref:typename:void
+send_pass_key	src/obd-bluetooth-dbus.cpp	/^void BlueTooth::send_pass_key(guint32 pass_key)$/;"	f	class:BlueTooth	typeref:typename:void
+send_pin_code	src/obd-bluetooth-dbus.cpp	/^void BlueTooth::send_pin_code(const Glib::ustring &pin_code)$/;"	f	class:BlueTooth	typeref:typename:void
 serialGrid	src/settingsview.h	/^        Gtk::Grid               serialGrid;$/;"	m	class:SettingsView	typeref:typename:Gtk::Grid
 serial_rb	src/settingsview.h	/^                                serial_rb;$/;"	m	class:SettingsView	typeref:typename:Gtk::RadioButton
 set_base_from	depcomp	/^set_base_from ()$/;"	f
@@ -1287,6 +1341,7 @@ sharedstatedir	src/Makefile	/^sharedstatedir = ${prefix}\/com$/;"	m
 sharedstatedir	src/Makefile.in	/^sharedstatedir = @sharedstatedir@$/;"	m
 showView	src/mainwindow.cpp	/^void MainWindow::showView(Gtk::Widget &view)$/;"	f	class:MainWindow	typeref:typename:void
 signal_probe_progress	src/obd-bluetooth-dbus.cpp	/^sigc::signal<void,int> BlueTooth::signal_probe_progress()$/;"	f	class:BlueTooth	typeref:typename:sigc::signal<void,int>
+sock_fd	src/obd-bluetooth-dbus.h	/^        int sock_fd;$/;"	m	class:BlueTooth	typeref:typename:int
 srcdir	Makefile	/^srcdir = .$/;"	m
 srcdir	Makefile.in	/^srcdir = @srcdir@$/;"	m
 srcdir	src/Makefile	/^srcdir = .$/;"	m
@@ -1295,7 +1350,7 @@ stamp-h1	Makefile	/^stamp-h1: $(srcdir)\/config.h.in $(top_builddir)\/config.sta
 stamp-h1	Makefile.in	/^stamp-h1: $(srcdir)\/config.h.in $(top_builddir)\/config.status$/;"	t
 static_resource	src/resources.c	/^static GStaticResource static_resource = { app_resource_data.data, sizeof (app_resource_data.dat/;"	v	typeref:typename:GStaticResource	file:
 stop_probe	src/obd-bluetooth-dbus.cpp	/^void BlueTooth::stop_probe()$/;"	f	class:BlueTooth	typeref:typename:void
-stop_probe_finish	src/obd-bluetooth-dbus.cpp	/^void BlueTooth::stop_probe_finish(Glib::RefPtr<Gio::AsyncResult>& result,$/;"	f	class:BlueTooth	typeref:typename:void
+stop_probe_finish	src/obd-bluetooth-dbus.cpp	/^void BlueTooth::stop_probe_finish(AsyncResult & result,$/;"	f	class:BlueTooth	typeref:typename:void
 subdir	Makefile	/^subdir = .$/;"	m
 subdir	Makefile.in	/^subdir = .$/;"	m
 subdir	src/Makefile	/^subdir = src$/;"	m
@@ -1349,11 +1404,13 @@ uninstall-binPROGRAMS	src/Makefile.in	/^uninstall-binPROGRAMS:$/;"	t
 uninstall-dist_docDATA	Makefile	/^uninstall-dist_docDATA:$/;"	t
 uninstall-dist_docDATA	Makefile.in	/^uninstall-dist_docDATA:$/;"	t
 updateScanProgress	src/settingsview.cpp	/^void SettingsView::updateScanProgress(int percentComplete)$/;"	f	class:SettingsView	typeref:typename:void
+update_default_interface	src/obd-bluetooth-dbus.cpp	/^void BlueTooth::update_default_interface(const DBusObject &obj,$/;"	f	class:BlueTooth	typeref:typename:void
 update_object_list	src/obd-bluetooth-dbus.cpp	/^bool BlueTooth::update_object_list(const DBusObject &obj,$/;"	f	class:BlueTooth	typeref:typename:bool
 update_probe_progress	src/obd-bluetooth-dbus.cpp	/^bool BlueTooth::update_probe_progress()$/;"	f	class:BlueTooth	typeref:typename:bool
 ~BigButton	src/homeview.cpp	/^HomeView::BigButton::~BigButton() {}$/;"	f	class:HomeView::BigButton
 ~BlueTooth	src/obd-bluetooth-dbus.cpp	/^BlueTooth::~BlueTooth()$/;"	f	class:BlueTooth
 ~BlueTooth	src/obd-bluetooth.cpp	/^BlueTooth::~BlueTooth()$/;"	f	class:BlueTooth
+~ComboBox	src/combobox.h	/^        ~ComboBox()$/;"	f	class:ComboBox
 ~HomeView	src/homeview.cpp	/^HomeView::~HomeView() {}$/;"	f	class:HomeView
 ~MainWindow	src/mainwindow.cpp	/^MainWindow::~MainWindow()$/;"	f	class:MainWindow
 ~SettingsView	src/settingsview.cpp	/^SettingsView::~SettingsView() {}$/;"	f	class:SettingsView

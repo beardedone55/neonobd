@@ -18,7 +18,7 @@ class MainWindow : public Gtk::Window
         void connect_view_button(Gtk::Button &button, 
                                  Gtk::Widget *currentView,
                                  Gtk::Widget *nextView);
-        BlueTooth bluetooth;
+        BlueTooth &bluetooth;
         HomeView homeView;
         SettingsView settingsView;
     protected:

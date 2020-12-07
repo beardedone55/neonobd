@@ -29,7 +29,8 @@ void MainWindow::switchView(Gtk::Widget *oldview, Gtk::Widget *newview)
 
 MainWindow::MainWindow() :
     homeView{*this},
-    settingsView{*this}
+    settingsView{*this},
+    bluetooth{BlueTooth::get_instance()}
 {
     set_border_width(10);
 
