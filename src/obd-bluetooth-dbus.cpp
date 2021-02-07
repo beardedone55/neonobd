@@ -2,10 +2,6 @@
 #include <unistd.h>
 #include <iostream>
 
-#ifdef GTK4
-#define BUS_TYPE_SYSTEM SYSTEM
-#endif
-
 BlueTooth::BlueTooth() :
     probe_in_progress{false},
     sock_fd{-1},
@@ -16,7 +12,7 @@ BlueTooth::BlueTooth() :
 {
     //Create BlueTooth Object Manager
     Gio::DBus::ObjectManagerClient::create_for_bus(
-            Gio::DBus::BusType::BUS_TYPE_SYSTEM,
+            Gio::DBus::BusType::SYSTEM,
             "org.bluez", "/", sigc::mem_fun(*this, &BlueTooth::manager_created));
 }
 
@@ -42,11 +38,11 @@ void BlueTooth::manager_created(AsyncResult & result)
     if(manager)
     {
         manager->signal_object_added().connect(
-                sigc::bind<bool>(sigc::mem_fun(*this,&BlueTooth::add_remove_object),
-                                 true));
+                sigc::bind(sigc::mem_fun(*this,&BlueTooth::add_remove_object),
+                           true));
         manager->signal_object_removed().connect(
-                sigc::bind<bool>(sigc::mem_fun(*this,&BlueTooth::add_remove_object),
-                                 false));
+                sigc::bind(sigc::mem_fun(*this,&BlueTooth::add_remove_object),
+                           false));
 
         auto objects = manager->get_objects();
         for(auto &object : objects)
@@ -62,11 +58,7 @@ BlueTooth::Proxy
 BlueTooth::get_interface(const DBusObject &obj,
                          const Glib::ustring &name)
 {
-#ifdef GTK4
     return std::dynamic_pointer_cast<Gio::DBus::Proxy>(obj->get_interface(name));
-#else
-    return Glib::wrap((GDBusProxy *)g_dbus_object_get_interface(obj->gobj(), name.c_str()));
-#endif
 }
 
 bool BlueTooth::update_object_list(const DBusObject &obj,
@@ -174,7 +166,7 @@ void BlueTooth::stop_probe()
     if(selected_controller)
     {
         selected_controller->call("StopDiscovery",
-                                  sigc::bind<Proxy>(
+                                  sigc::bind(
                                       sigc::mem_fun(*this, &BlueTooth::stop_probe_finish),
                                       selected_controller));
     }
@@ -223,10 +215,9 @@ void BlueTooth::probe_remote_devices(unsigned int probeTime)
     {
         probe_in_progress = true;
         selected_controller->call("StartDiscovery",
-                                  sigc::bind<unsigned int, Proxy>(
-                                      sigc::mem_fun(*this, &BlueTooth::probe_finish),
-                                      probeTime,
-                                      selected_controller));
+                                  sigc::bind(sigc::mem_fun(*this, &BlueTooth::probe_finish),
+                                             probeTime,
+                                             selected_controller));
     } 
     else 
     {
@@ -236,7 +227,7 @@ void BlueTooth::probe_remote_devices(unsigned int probeTime)
 
 }
 
-sigc::signal<void,int> BlueTooth::signal_probe_progress()
+sigc::signal<void(int)> BlueTooth::signal_probe_progress()
 {
     return probe_progress_signal;
 }
@@ -294,7 +285,7 @@ void BlueTooth::error(const Glib::ustring &err_msg)
     std::cout << err_msg << std::endl;
 }
 
-constexpr auto OBJECT_PATH = "/org/obd_scanner/serial";
+constexpr auto OBJECT_PATH = "/com/github/beardedone55/bluetooth_serial";
 constexpr auto SERIAL_PORT_UUID = "00001101-0000-1000-8000-00805f9b34fb";
 
 void BlueTooth::register_complete(AsyncResult & result,
@@ -345,9 +336,8 @@ void BlueTooth::register_profile()
     auto parameters = Glib::VariantContainerBase::create_tuple(register_profile_params);
 
     profileManager->call("RegisterProfile",
-                         sigc::bind<Proxy>(
-                            sigc::mem_fun(*this, &BlueTooth::register_complete),
-                            profileManager),
+                         sigc::bind(sigc::mem_fun(*this, &BlueTooth::register_complete),
+                                    profileManager),
                          parameters);
 }
 
@@ -367,9 +357,8 @@ void BlueTooth::register_agent()
             }));
 
     agentManager->call("RegisterAgent",
-                       sigc::bind<Proxy>(
-                           sigc::mem_fun(*this, &BlueTooth::register_complete),
-                           agentManager),
+                       sigc::bind(sigc::mem_fun(*this, &BlueTooth::register_complete),
+                                  agentManager),
                        parameters);
 }
 
@@ -524,7 +513,7 @@ void
 BlueTooth::request_pairing_info(const Glib::VariantContainerBase & parameters,
                                 const MethodInvocation & invocation,
                                 MethodInvocation & saved_invocation,
-                                sigc::signal<void, Glib::ustring> &signal)
+                                sigc::signal<void(Glib::ustring)> &signal)
 {
     //This function does the work for "RequestPinCode", "RequestPasskey",
     //and "RequestAuthorization".  It is not used for "RequestConfirmation"

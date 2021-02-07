@@ -1,17 +1,18 @@
-bin_PROGRAMS = obd-scanner-gtk
-obd_scanner_gtk_SOURCES = \
+bin_PROGRAMS = neonobd
+neonobd_SOURCES = \
 	mainwindow.cpp \
 	homeview.cpp \
 	obd-bluetooth-dbus.cpp \
-	obd-scanner-gtkmain.cpp \
+	neonobd.cpp \
 	settingsview.cpp \
 	resources.c
 
-obd_scanner_gtk_CPPFLAGS = $(GTKMM_CFLAGS) -std=c++17
-obd_scanner_gtk_CFLAGS = $(GTKMM_CFLAGS)
-obd_scanner_gtk_LDFLAGS = $(GTKMM_LIBS)
+neonobd_CXXFLAGS = -std=c++17
+neonobd_CPPFLAGS = $(GTKMM_CFLAGS)
+neonobd_LDFLAGS = $(GTKMM_LIBS)
 
-export PKG_CONFIG_PATH = /usr/local/lib/pkgconfig
+gsettings_SCHEMAS = com.github.beardedone55.neonobd.gschema.xml
+@GSETTINGS_RULES@
 
 resources.c: app.gresource.xml appstyle.css
 	glib-compile-resources --target $@ --generate-source $<

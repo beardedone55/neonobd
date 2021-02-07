@@ -22,9 +22,9 @@ HomeView::HomeView(MainWindow &window) :
 
     main_window.connect_view_button(settings_btn, this, &main_window.settingsView);
 
-    add(settings_btn);
-    add(connect_btn);
-    show_all_children();
+    attach(settings_btn, 0, 0);
+    attach(connect_btn, 1, 0);
+    //show_all_children();
 }
 
 HomeView::~HomeView() {}

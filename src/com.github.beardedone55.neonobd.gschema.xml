@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<schemalist>
+    <enum id="com.github.beardedone55.interface">
+        <value nick="bluetooth" value="0"/>
+        <value nick="serial" value="1"/>
+    </enum>
+    <enum id="com.github.beardedone55.baudrates">
+        <value nick="300" value="300"/>
+        <value nick="600" value="600"/>
+        <value nick="1K" value="1200"/>
+        <value nick="2K" value="2400"/>
+        <value nick="4K" value="4800"/>
+        <value nick="9K" value="9600"/>
+        <value nick="14K" value="14400"/>
+        <value nick="19K" value="19200"/>
+        <value nick="38K" value="38400"/>
+        <value nick="57K" value="57600"/>
+        <value nick="115K" value="115200"/>
+        <value nick="230K" value="230400"/>
+        <value nick="460K" value="460800"/>
+    </enum>
+    <schema path="/com/github/beardedone55/neonobd/" id="com.github.beardedone55.neonobd">
+        <key name="interface-type" enum="com.github.beardedone55.interface">
+            <default>"bluetooth"</default>
+            <summary>OBD-II Interface Type</summary>
+            <description>
+                Selects the OBD-II interface with the
+                computer.  Either bluetooth or serial
+                are supported.
+            </description>
+        </key>
+        <key name="bluetooth-controller" type="s">
+            <default>""</default>
+            <summary>Bluetooth Controller Name</summary>
+            <description>
+                Name of the bluetooth controller that will
+                be used to connect to a remote bluetooth
+                device.  If none are selected, the first
+                controller found on the system will be
+                selected as the default.
+            </description>
+        </key>
+        <key name="selected-device-name" type="s">
+            <default>""</default>
+            <summary>Selected Bluetooth Device Name</summary>
+            <description>
+                Name of selected remote bluetooth device (if any).
+                This is the name of the bluetooth device that
+                is used for communication with vehicle OBD-II
+                port.
+            </description>
+        </key>
+        <key name="selected-device-address" type="s">
+            <default>""</default>
+            <summary>Selected Bluetooth Device Address</summary>
+            <description>
+                Address of the selected remote bluetooth device (if any).
+                This is the bluetooth address of the bluetooth device
+                that is used for communication with vehicle OBD-II
+                port.
+            </description>
+        </key>
+        <key name="serial-port" type="s">
+            <default>""</default>
+            <summary>Selected Serial Port</summary>
+            <description>
+                Serial port on computer that is connected to
+                OBD-II device, if serial port is used instead
+                of bluetooth.
+            </description>
+        </key>
+        <key name="baud-rate" enum="com.github.beardedone55.baudrates">
+            <default>"38K"</default>
+            <summary>Serial Port Baud Rate</summary>
+            <description>
+                Baud rate of selected serial port,
+                if serial port is used to connect
+                computer to OBD-II device.
+            </description>
+        </key>
+    </schema>
+</schemalist>

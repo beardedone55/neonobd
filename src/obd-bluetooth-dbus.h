@@ -40,7 +40,7 @@ class BlueTooth {
         //Signal to connect to that will report progress of
         //device scan.  Parameter is integer that represents
         //percent complete.  At 100, scan is complete.
-        sigc::signal<void,int> signal_probe_progress();
+        sigc::signal<void(int)> signal_probe_progress();
 
         //Initiate scan of remote devices using default
         //bluetooth controller.
@@ -90,20 +90,20 @@ class BlueTooth {
         Proxy agentManager;
         Proxy profileManager;
         ObjectManager manager;
-        sigc::signal<void,int> probe_progress_signal;
+        sigc::signal<void(int)> probe_progress_signal;
         bool probe_in_progress;
         int probe_progress;
         Gio::DBus::InterfaceVTable agent_vtable; 
         Gio::DBus::InterfaceVTable profile_vtable;
         int sock_fd;
         Glib::DBusObjectPathString connected_device_path;
-        sigc::signal<void, Glib::ustring> request_pin_code;
-        sigc::signal<void, Glib::ustring, Glib::ustring> display_pin_code;
-        sigc::signal<void, Glib::ustring> request_pass_key;
-        sigc::signal<void, Glib::ustring, guint32, guint16> display_pass_key;
-        sigc::signal<void, Glib::ustring, guint32> request_confirmation;
-        sigc::signal<void, Glib::ustring> request_authorization;
-        sigc::signal<void> agent_cancel;
+        sigc::signal<void(Glib::ustring)> request_pin_code;
+        sigc::signal<void(Glib::ustring, Glib::ustring)> display_pin_code;
+        sigc::signal<void(Glib::ustring)> request_pass_key;
+        sigc::signal<void(Glib::ustring, guint32, guint16)> display_pass_key;
+        sigc::signal<void(Glib::ustring, guint32)> request_confirmation;
+        sigc::signal<void(Glib::ustring)> request_authorization;
+        sigc::signal<void()> agent_cancel;
         Glib::RefPtr<Gio::DBus::MethodInvocation> request_pin_invocation;
         Glib::RefPtr<Gio::DBus::MethodInvocation> request_passkey_invocation;
         Glib::RefPtr<Gio::DBus::MethodInvocation> request_confirmation_invocation;
@@ -156,7 +156,7 @@ class BlueTooth {
         request_pairing_info(const Glib::VariantContainerBase& parameters,
                              const Glib::RefPtr<Gio::DBus::MethodInvocation>& invocation,
                              Glib::RefPtr<Gio::DBus::MethodInvocation>& saved_invocation,
-                             sigc::signal<void, Glib::ustring> &signal);
+                             sigc::signal<void(Glib::ustring)> &signal);
         void export_agent();
 
         void

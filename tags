@@ -18,6 +18,7 @@ $(am__depfiles_remade)	src/Makefile	/^$(am__depfiles_remade):$/;"	t
 $(am__depfiles_remade)	src/Makefile.in	/^$(am__depfiles_remade):$/;"	t
 $(am__recursive_targets)	Makefile	/^$(am__recursive_targets):$/;"	t
 $(am__recursive_targets)	Makefile.in	/^$(am__recursive_targets):$/;"	t
+$(gsettings__enum_file)	src/Makefile	/^$(gsettings__enum_file): $(gsettings_ENUM_FILES)$/;"	t
 $(srcdir)/Makefile.in	Makefile	/^$(srcdir)\/Makefile.in:  $(srcdir)\/Makefile.am  $(am__configure_deps)$/;"	t
 $(srcdir)/Makefile.in	Makefile.in	/^$(srcdir)\/Makefile.in:  $(srcdir)\/Makefile.am  $(am__configure_deps)$/;"	t
 $(srcdir)/Makefile.in	src/Makefile	/^$(srcdir)\/Makefile.in:  $(srcdir)\/Makefile.am  $(am__configure_deps)$/;"	t
@@ -32,6 +33,7 @@ $(top_srcdir)/configure	Makefile	/^$(top_srcdir)\/configure:  $(am__configure_de
 $(top_srcdir)/configure	Makefile.in	/^$(top_srcdir)\/configure:  $(am__configure_deps)$/;"	t
 $(top_srcdir)/configure	src/Makefile	/^$(top_srcdir)\/configure:  $(am__configure_deps)$/;"	t
 $(top_srcdir)/configure	src/Makefile.in	/^$(top_srcdir)\/configure:  $(am__configure_deps)$/;"	t
+%.gschema.valid	src/Makefile	/^%.gschema.valid: %.gschema.xml $(gsettings__enum_file)$/;"	t
 -g	config.status	/^  alias -g '${1+"$@"}'='"$@"'$/;"	a
 -g	configure	/^  alias -g '${1+"$@"}'='"$@"'$/;"	a
 -g	configure	/^  alias -g '\\${1+\\"\\$@\\"}'='\\"\\$@\\"'$/;"	a
@@ -47,9 +49,9 @@ $(top_srcdir)/configure	src/Makefile.in	/^$(top_srcdir)\/configure:  $(am__confi
 .cpp.o	src/Makefile.in	/^.cpp.o:$/;"	t
 .cpp.obj	src/Makefile	/^.cpp.obj:$/;"	t
 .cpp.obj	src/Makefile.in	/^.cpp.obj:$/;"	t
-ACLOCAL	Makefile	/^ACLOCAL = ${SHELL} \/home\/brian\/obd-scanner\/missing aclocal-1.16$/;"	m
+ACLOCAL	Makefile	/^ACLOCAL = ${SHELL} \/home\/brian\/neonobd\/missing aclocal-1.16$/;"	m
 ACLOCAL	Makefile.in	/^ACLOCAL = @ACLOCAL@$/;"	m
-ACLOCAL	src/Makefile	/^ACLOCAL = ${SHELL} \/home\/brian\/obd-scanner\/missing aclocal-1.16$/;"	m
+ACLOCAL	src/Makefile	/^ACLOCAL = ${SHELL} \/home\/brian\/neonobd\/missing aclocal-1.16$/;"	m
 ACLOCAL	src/Makefile.in	/^ACLOCAL = @ACLOCAL@$/;"	m
 ACLOCAL_M4	Makefile	/^ACLOCAL_M4 = $(top_srcdir)\/aclocal.m4$/;"	m
 ACLOCAL_M4	Makefile.in	/^ACLOCAL_M4 = $(top_srcdir)\/aclocal.m4$/;"	m
@@ -107,17 +109,17 @@ AM_V_at	src/Makefile	/^AM_V_at = $(am__v_at_$(V))$/;"	m
 AM_V_at	src/Makefile.in	/^AM_V_at = $(am__v_at_@AM_V@)$/;"	m
 AM_V_lt	src/Makefile	/^AM_V_lt = $(am__v_lt_$(V))$/;"	m
 AM_V_lt	src/Makefile.in	/^AM_V_lt = $(am__v_lt_@AM_V@)$/;"	m
-AUTOCONF	Makefile	/^AUTOCONF = ${SHELL} \/home\/brian\/obd-scanner\/missing autoconf$/;"	m
+AUTOCONF	Makefile	/^AUTOCONF = ${SHELL} \/home\/brian\/neonobd\/missing autoconf$/;"	m
 AUTOCONF	Makefile.in	/^AUTOCONF = @AUTOCONF@$/;"	m
-AUTOCONF	src/Makefile	/^AUTOCONF = ${SHELL} \/home\/brian\/obd-scanner\/missing autoconf$/;"	m
+AUTOCONF	src/Makefile	/^AUTOCONF = ${SHELL} \/home\/brian\/neonobd\/missing autoconf$/;"	m
 AUTOCONF	src/Makefile.in	/^AUTOCONF = @AUTOCONF@$/;"	m
-AUTOHEADER	Makefile	/^AUTOHEADER = ${SHELL} \/home\/brian\/obd-scanner\/missing autoheader$/;"	m
+AUTOHEADER	Makefile	/^AUTOHEADER = ${SHELL} \/home\/brian\/neonobd\/missing autoheader$/;"	m
 AUTOHEADER	Makefile.in	/^AUTOHEADER = @AUTOHEADER@$/;"	m
-AUTOHEADER	src/Makefile	/^AUTOHEADER = ${SHELL} \/home\/brian\/obd-scanner\/missing autoheader$/;"	m
+AUTOHEADER	src/Makefile	/^AUTOHEADER = ${SHELL} \/home\/brian\/neonobd\/missing autoheader$/;"	m
 AUTOHEADER	src/Makefile.in	/^AUTOHEADER = @AUTOHEADER@$/;"	m
-AUTOMAKE	Makefile	/^AUTOMAKE = ${SHELL} \/home\/brian\/obd-scanner\/missing automake-1.16$/;"	m
+AUTOMAKE	Makefile	/^AUTOMAKE = ${SHELL} \/home\/brian\/neonobd\/missing automake-1.16$/;"	m
 AUTOMAKE	Makefile.in	/^AUTOMAKE = @AUTOMAKE@$/;"	m
-AUTOMAKE	src/Makefile	/^AUTOMAKE = ${SHELL} \/home\/brian\/obd-scanner\/missing automake-1.16$/;"	m
+AUTOMAKE	src/Makefile	/^AUTOMAKE = ${SHELL} \/home\/brian\/neonobd\/missing automake-1.16$/;"	m
 AUTOMAKE	src/Makefile.in	/^AUTOMAKE = @AUTOMAKE@$/;"	m
 AWK	Makefile	/^AWK = gawk$/;"	m
 AWK	Makefile.in	/^AWK = @AWK@$/;"	m
@@ -125,6 +127,7 @@ AWK	src/Makefile	/^AWK = gawk$/;"	m
 AWK	src/Makefile.in	/^AWK = @AWK@$/;"	m
 Agent1_definition	src/obd-bluetooth-dbus.cpp	/^constexpr auto Agent1_definition =$/;"	v	typeref:typename:auto
 AsyncResult	src/obd-bluetooth-dbus.h	/^        using AsyncResult = Glib::RefPtr<Gio::AsyncResult>;$/;"	t	class:BlueTooth	typeref:typename:Glib::RefPtr<Gio::AsyncResult>
+BLUETOOTH_IF	src/settingsview.h	/^            BLUETOOTH_IF = 0,$/;"	e	enum:SettingsView::interfaceType
 BUS_TYPE_SYSTEM	src/obd-bluetooth-dbus.cpp	/^#define BUS_TYPE_SYSTEM /;"	d	file:
 BigButton	src/homeview.cpp	/^HomeView::BigButton::BigButton(const Glib::ustring &label = "") : Gtk::Button{label}$/;"	f	class:HomeView::BigButton
 BigButton	src/homeview.h	/^        class BigButton : public Gtk::Button$/;"	c	class:HomeView
@@ -221,8 +224,8 @@ DIST_COMMON	src/Makefile	/^DIST_COMMON = $(srcdir)\/Makefile.am $(am__DIST_COMMO
 DIST_COMMON	src/Makefile.in	/^DIST_COMMON = $(srcdir)\/Makefile.am $(am__DIST_COMMON)$/;"	m
 DIST_SOURCES	Makefile	/^DIST_SOURCES =$/;"	m
 DIST_SOURCES	Makefile.in	/^DIST_SOURCES =$/;"	m
-DIST_SOURCES	src/Makefile	/^DIST_SOURCES = $(obd_scanner_gtk_SOURCES)$/;"	m
-DIST_SOURCES	src/Makefile.in	/^DIST_SOURCES = $(obd_scanner_gtk_SOURCES)$/;"	m
+DIST_SOURCES	src/Makefile	/^DIST_SOURCES = $(neonobd_SOURCES)$/;"	m
+DIST_SOURCES	src/Makefile.in	/^DIST_SOURCES = $(neonobd_SOURCES)$/;"	m
 DIST_SUBDIRS	Makefile	/^DIST_SUBDIRS = $(SUBDIRS)$/;"	m
 DIST_SUBDIRS	Makefile.in	/^DIST_SUBDIRS = $(SUBDIRS)$/;"	m
 DIST_TARGETS	Makefile	/^DIST_TARGETS = dist-gzip$/;"	m
@@ -250,13 +253,22 @@ EXEEXT	Makefile	/^EXEEXT = $/;"	m
 EXEEXT	Makefile.in	/^EXEEXT = @EXEEXT@$/;"	m
 EXEEXT	src/Makefile	/^EXEEXT = $/;"	m
 EXEEXT	src/Makefile.in	/^EXEEXT = @EXEEXT@$/;"	m
+GLIB_COMPILE_SCHEMAS	Makefile	/^GLIB_COMPILE_SCHEMAS = \/usr\/bin\/glib-compile-schemas$/;"	m
+GLIB_COMPILE_SCHEMAS	Makefile.in	/^GLIB_COMPILE_SCHEMAS = @GLIB_COMPILE_SCHEMAS@$/;"	m
+GLIB_COMPILE_SCHEMAS	src/Makefile	/^GLIB_COMPILE_SCHEMAS = \/usr\/bin\/glib-compile-schemas$/;"	m
+GLIB_COMPILE_SCHEMAS	src/Makefile.in	/^GLIB_COMPILE_SCHEMAS = @GLIB_COMPILE_SCHEMAS@$/;"	m
+GLIB_GSETTINGS	aclocal.m4	/^AC_DEFUN([GLIB_GSETTINGS],$/;"	m
+GSETTINGS_DISABLE_SCHEMAS_COMPILE	Makefile	/^GSETTINGS_DISABLE_SCHEMAS_COMPILE = $/;"	m
+GSETTINGS_DISABLE_SCHEMAS_COMPILE	Makefile.in	/^GSETTINGS_DISABLE_SCHEMAS_COMPILE = @GSETTINGS_DISABLE_SCHEMAS_COMPILE@$/;"	m
+GSETTINGS_DISABLE_SCHEMAS_COMPILE	src/Makefile	/^GSETTINGS_DISABLE_SCHEMAS_COMPILE = $/;"	m
+GSETTINGS_DISABLE_SCHEMAS_COMPILE	src/Makefile.in	/^GSETTINGS_DISABLE_SCHEMAS_COMPILE = @GSETTINGS_DISABLE_SCHEMAS_COMPILE@$/;"	m
 GTAGS	Makefile	/^GTAGS:$/;"	t
 GTAGS	Makefile.in	/^GTAGS:$/;"	t
 GTAGS	src/Makefile	/^GTAGS:$/;"	t
 GTAGS	src/Makefile.in	/^GTAGS:$/;"	t
-GTKMM_CFLAGS	Makefile	/^GTKMM_CFLAGS = -I\/usr\/include\/gtkmm-3.0 -I\/usr\/lib\/gtkmm-3.0\/include -I\/usr\/include\/at/;"	m
+GTKMM_CFLAGS	Makefile	/^GTKMM_CFLAGS = -I\/usr\/include\/gtkmm-4.0 -I\/usr\/lib\/gtkmm-4.0\/include -I\/usr\/include\/gi/;"	m
 GTKMM_CFLAGS	Makefile.in	/^GTKMM_CFLAGS = @GTKMM_CFLAGS@$/;"	m
-GTKMM_CFLAGS	src/Makefile	/^GTKMM_CFLAGS = -I\/usr\/include\/gtkmm-3.0 -I\/usr\/lib\/gtkmm-3.0\/include -I\/usr\/include\/at/;"	m
+GTKMM_CFLAGS	src/Makefile	/^GTKMM_CFLAGS = -I\/usr\/include\/gtkmm-4.0 -I\/usr\/lib\/gtkmm-4.0\/include -I\/usr\/include\/gi/;"	m
 GTKMM_CFLAGS	src/Makefile.in	/^GTKMM_CFLAGS = @GTKMM_CFLAGS@$/;"	m
 GTKMM_LIBS	Makefile.in	/^GTKMM_LIBS = @GTKMM_LIBS@$/;"	m
 GTKMM_LIBS	src/Makefile.in	/^GTKMM_LIBS = @GTKMM_LIBS@$/;"	m
@@ -321,9 +333,9 @@ LTLIBOBJS	Makefile	/^LTLIBOBJS = $/;"	m
 LTLIBOBJS	Makefile.in	/^LTLIBOBJS = @LTLIBOBJS@$/;"	m
 LTLIBOBJS	src/Makefile	/^LTLIBOBJS = $/;"	m
 LTLIBOBJS	src/Makefile.in	/^LTLIBOBJS = @LTLIBOBJS@$/;"	m
-MAKEINFO	Makefile	/^MAKEINFO = ${SHELL} \/home\/brian\/obd-scanner\/missing makeinfo$/;"	m
+MAKEINFO	Makefile	/^MAKEINFO = ${SHELL} \/home\/brian\/neonobd\/missing makeinfo$/;"	m
 MAKEINFO	Makefile.in	/^MAKEINFO = @MAKEINFO@$/;"	m
-MAKEINFO	src/Makefile	/^MAKEINFO = ${SHELL} \/home\/brian\/obd-scanner\/missing makeinfo$/;"	m
+MAKEINFO	src/Makefile	/^MAKEINFO = ${SHELL} \/home\/brian\/neonobd\/missing makeinfo$/;"	m
 MAKEINFO	src/Makefile.in	/^MAKEINFO = @MAKEINFO@$/;"	m
 MKDIR_P	Makefile	/^MKDIR_P = \/usr\/bin\/mkdir -p$/;"	m
 MKDIR_P	Makefile.in	/^MKDIR_P = @MKDIR_P@$/;"	m
@@ -344,36 +356,36 @@ NORMAL_UNINSTALL	Makefile	/^NORMAL_UNINSTALL = :$/;"	m
 NORMAL_UNINSTALL	Makefile.in	/^NORMAL_UNINSTALL = :$/;"	m
 NORMAL_UNINSTALL	src/Makefile	/^NORMAL_UNINSTALL = :$/;"	m
 NORMAL_UNINSTALL	src/Makefile.in	/^NORMAL_UNINSTALL = :$/;"	m
-OBJECT_PATH	src/obd-bluetooth-dbus.cpp	/^constexpr auto OBJECT_PATH = "\/org\/obd_scanner\/serial";$/;"	v	typeref:typename:auto
+OBJECT_PATH	src/obd-bluetooth-dbus.cpp	/^constexpr auto OBJECT_PATH = "\/com\/github\/beardedone55\/bluetooth_serial";$/;"	v	typeref:typename:auto
 OBJEXT	Makefile	/^OBJEXT = o$/;"	m
 OBJEXT	Makefile.in	/^OBJEXT = @OBJEXT@$/;"	m
 OBJEXT	src/Makefile	/^OBJEXT = o$/;"	m
 OBJEXT	src/Makefile.in	/^OBJEXT = @OBJEXT@$/;"	m
 ObjectManager	src/obd-bluetooth-dbus.h	/^        using ObjectManager = Glib::RefPtr<Gio::DBus::ObjectManagerClient>;$/;"	t	class:BlueTooth	typeref:typename:Glib::RefPtr<Gio::DBus::ObjectManagerClient>
-PACKAGE	Makefile	/^PACKAGE = obd-scanner$/;"	m
+PACKAGE	Makefile	/^PACKAGE = neonobd$/;"	m
 PACKAGE	Makefile.in	/^PACKAGE = @PACKAGE@$/;"	m
 PACKAGE	config.h	/^#define PACKAGE /;"	d
-PACKAGE	src/Makefile	/^PACKAGE = obd-scanner$/;"	m
+PACKAGE	src/Makefile	/^PACKAGE = neonobd$/;"	m
 PACKAGE	src/Makefile.in	/^PACKAGE = @PACKAGE@$/;"	m
 PACKAGE_BUGREPORT	Makefile	/^PACKAGE_BUGREPORT = bjlepage22@gmail.com$/;"	m
 PACKAGE_BUGREPORT	Makefile.in	/^PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@$/;"	m
 PACKAGE_BUGREPORT	config.h	/^#define PACKAGE_BUGREPORT /;"	d
 PACKAGE_BUGREPORT	src/Makefile	/^PACKAGE_BUGREPORT = bjlepage22@gmail.com$/;"	m
 PACKAGE_BUGREPORT	src/Makefile.in	/^PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@$/;"	m
-PACKAGE_NAME	Makefile	/^PACKAGE_NAME = obd-scanner$/;"	m
+PACKAGE_NAME	Makefile	/^PACKAGE_NAME = neonobd$/;"	m
 PACKAGE_NAME	Makefile.in	/^PACKAGE_NAME = @PACKAGE_NAME@$/;"	m
 PACKAGE_NAME	config.h	/^#define PACKAGE_NAME /;"	d
-PACKAGE_NAME	src/Makefile	/^PACKAGE_NAME = obd-scanner$/;"	m
+PACKAGE_NAME	src/Makefile	/^PACKAGE_NAME = neonobd$/;"	m
 PACKAGE_NAME	src/Makefile.in	/^PACKAGE_NAME = @PACKAGE_NAME@$/;"	m
-PACKAGE_STRING	Makefile	/^PACKAGE_STRING = obd-scanner 0.1$/;"	m
+PACKAGE_STRING	Makefile	/^PACKAGE_STRING = neonobd 0.1$/;"	m
 PACKAGE_STRING	Makefile.in	/^PACKAGE_STRING = @PACKAGE_STRING@$/;"	m
 PACKAGE_STRING	config.h	/^#define PACKAGE_STRING /;"	d
-PACKAGE_STRING	src/Makefile	/^PACKAGE_STRING = obd-scanner 0.1$/;"	m
+PACKAGE_STRING	src/Makefile	/^PACKAGE_STRING = neonobd 0.1$/;"	m
 PACKAGE_STRING	src/Makefile.in	/^PACKAGE_STRING = @PACKAGE_STRING@$/;"	m
-PACKAGE_TARNAME	Makefile	/^PACKAGE_TARNAME = obd-scanner$/;"	m
+PACKAGE_TARNAME	Makefile	/^PACKAGE_TARNAME = neonobd$/;"	m
 PACKAGE_TARNAME	Makefile.in	/^PACKAGE_TARNAME = @PACKAGE_TARNAME@$/;"	m
 PACKAGE_TARNAME	config.h	/^#define PACKAGE_TARNAME /;"	d
-PACKAGE_TARNAME	src/Makefile	/^PACKAGE_TARNAME = obd-scanner$/;"	m
+PACKAGE_TARNAME	src/Makefile	/^PACKAGE_TARNAME = neonobd$/;"	m
 PACKAGE_TARNAME	src/Makefile.in	/^PACKAGE_TARNAME = @PACKAGE_TARNAME@$/;"	m
 PACKAGE_URL	Makefile	/^PACKAGE_URL = $/;"	m
 PACKAGE_URL	Makefile.in	/^PACKAGE_URL = @PACKAGE_URL@$/;"	m
@@ -404,10 +416,7 @@ PKG_CONFIG_LIBDIR	src/Makefile.in	/^PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@$/;"	
 PKG_CONFIG_PATH	Makefile	/^PKG_CONFIG_PATH = $/;"	m
 PKG_CONFIG_PATH	Makefile.in	/^PKG_CONFIG_PATH = @PKG_CONFIG_PATH@$/;"	m
 PKG_CONFIG_PATH	src/Makefile	/^PKG_CONFIG_PATH = $/;"	m
-PKG_CONFIG_PATH	src/Makefile	/^export PKG_CONFIG_PATH = \/usr\/local\/lib\/pkgconfig$/;"	m
-PKG_CONFIG_PATH	src/Makefile.am	/^export PKG_CONFIG_PATH = \/usr\/local\/lib\/pkgconfig$/;"	m
 PKG_CONFIG_PATH	src/Makefile.in	/^PKG_CONFIG_PATH = @PKG_CONFIG_PATH@$/;"	m
-PKG_CONFIG_PATH	src/Makefile.in	/^export PKG_CONFIG_PATH = \/usr\/local\/lib\/pkgconfig$/;"	m
 PKG_HAVE_DEFINE_WITH_MODULES	aclocal.m4	/^AC_DEFUN([PKG_HAVE_DEFINE_WITH_MODULES],$/;"	m
 PKG_HAVE_WITH_MODULES	aclocal.m4	/^AC_DEFUN([PKG_HAVE_WITH_MODULES],$/;"	m
 PKG_INSTALLDIR	aclocal.m4	/^AC_DEFUN([PKG_INSTALLDIR],$/;"	m
@@ -442,6 +451,7 @@ RECURSIVE_TARGETS	Makefile	/^RECURSIVE_TARGETS = all-recursive check-recursive c
 RECURSIVE_TARGETS	Makefile.in	/^RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \\$/;"	m
 SECTION	src/resources.c	/^# define SECTION /;"	d	file:
 SECTION	src/resources.c	/^# define SECTION$/;"	d	file:
+SERIAL_IF	src/settingsview.h	/^            SERIAL_IF = 1$/;"	e	enum:SettingsView::interfaceType
 SERIAL_PORT_UUID	src/obd-bluetooth-dbus.cpp	/^constexpr auto SERIAL_PORT_UUID = "00001101-0000-1000-8000-00805f9b34fb";$/;"	v	typeref:typename:auto
 SET_MAKE	Makefile	/^SET_MAKE = $/;"	m
 SET_MAKE	Makefile.in	/^SET_MAKE = @SET_MAKE@$/;"	m
@@ -453,8 +463,8 @@ SHELL	src/Makefile	/^SHELL = \/bin\/sh$/;"	m
 SHELL	src/Makefile.in	/^SHELL = @SHELL@$/;"	m
 SOURCES	Makefile	/^SOURCES =$/;"	m
 SOURCES	Makefile.in	/^SOURCES =$/;"	m
-SOURCES	src/Makefile	/^SOURCES = $(obd_scanner_gtk_SOURCES)$/;"	m
-SOURCES	src/Makefile.in	/^SOURCES = $(obd_scanner_gtk_SOURCES)$/;"	m
+SOURCES	src/Makefile	/^SOURCES = $(neonobd_SOURCES)$/;"	m
+SOURCES	src/Makefile.in	/^SOURCES = $(neonobd_SOURCES)$/;"	m
 STRIP	Makefile	/^STRIP = $/;"	m
 STRIP	Makefile.in	/^STRIP = @STRIP@$/;"	m
 STRIP	src/Makefile	/^STRIP = $/;"	m
@@ -463,7 +473,7 @@ SUBDIRS	Makefile	/^SUBDIRS = src$/;"	m
 SUBDIRS	Makefile.am	/^SUBDIRS = src$/;"	m
 SUBDIRS	Makefile.in	/^SUBDIRS = src$/;"	m
 SettingsView	src/settingsview.cpp	/^SettingsView::SettingsView(MainWindow &window) :$/;"	f	class:SettingsView
-SettingsView	src/settingsview.h	/^class SettingsView : public Gtk::VBox {$/;"	c
+SettingsView	src/settingsview.h	/^class SettingsView : public Gtk::Box {$/;"	c
 TAGS	Makefile	/^TAGS: tags$/;"	t
 TAGS	Makefile.in	/^TAGS: tags$/;"	t
 TAGS	src/Makefile	/^TAGS: tags$/;"	t
@@ -505,6 +515,7 @@ _ASBOX	config.status	/^  sed 'h;s\/.\/-\/g;s\/^...\/## \/;s\/...$\/ ##\/;p;x;p;x
 _ASBOX	configure	/^  sed 'h;s\/.\/-\/g;s\/^...\/## \/;s\/...$\/ ##\/;p;x;p;x' <<_ASBOX$/;"	h
 _ASEOF	configure	/^cat >$CONFIG_STATUS <<_ASEOF || as_write_fail=1$/;"	h
 _ASUNAME	configure	/^cat <<_ASUNAME$/;"	h
+_GSETTINGS_SUBST	aclocal.m4	/^AC_DEFUN([_GSETTINGS_SUBST],$/;"	m
 _HOME_VIEW_H_	src/homeview.h	/^#define _HOME_VIEW_H_$/;"	d
 _MAINWINDOW_H_	src/mainwindow.h	/^#define _MAINWINDOW_H_$/;"	d
 _OBD_BLUETOOTH_	src/obd-bluetooth.h	/^#define _OBD_BLUETOOTH_$/;"	d
@@ -515,21 +526,21 @@ __anon02acad08010a	src/resources.c	/^static const SECTION union { const guint8 d
 __anon02acad08020a	src/resources.c	/^static const SECTION union { const guint8 data[457]; const double alignment; void * const ptr;} /;"	u	file:
 __anon98ab62eb0102	src/combobox.h	/^            std::apply([this](auto&&... cols){((column_record.add(cols)), ...);}, columns);$/;"	f	function:ComboBox::ComboBox	file:
 __anon98ab62eb0202	src/combobox.h	/^            std::apply([this](auto&&... cols){((pack_start(cols)), ...);}, columns);$/;"	f	function:ComboBox::ComboBox	file:
-abs_builddir	Makefile	/^abs_builddir = \/home\/brian\/obd-scanner$/;"	m
+abs_builddir	Makefile	/^abs_builddir = \/home\/brian\/neonobd$/;"	m
 abs_builddir	Makefile.in	/^abs_builddir = @abs_builddir@$/;"	m
-abs_builddir	src/Makefile	/^abs_builddir = \/home\/brian\/obd-scanner\/src$/;"	m
+abs_builddir	src/Makefile	/^abs_builddir = \/home\/brian\/neonobd\/src$/;"	m
 abs_builddir	src/Makefile.in	/^abs_builddir = @abs_builddir@$/;"	m
-abs_srcdir	Makefile	/^abs_srcdir = \/home\/brian\/obd-scanner$/;"	m
+abs_srcdir	Makefile	/^abs_srcdir = \/home\/brian\/neonobd$/;"	m
 abs_srcdir	Makefile.in	/^abs_srcdir = @abs_srcdir@$/;"	m
-abs_srcdir	src/Makefile	/^abs_srcdir = \/home\/brian\/obd-scanner\/src$/;"	m
+abs_srcdir	src/Makefile	/^abs_srcdir = \/home\/brian\/neonobd\/src$/;"	m
 abs_srcdir	src/Makefile.in	/^abs_srcdir = @abs_srcdir@$/;"	m
-abs_top_builddir	Makefile	/^abs_top_builddir = \/home\/brian\/obd-scanner$/;"	m
+abs_top_builddir	Makefile	/^abs_top_builddir = \/home\/brian\/neonobd$/;"	m
 abs_top_builddir	Makefile.in	/^abs_top_builddir = @abs_top_builddir@$/;"	m
-abs_top_builddir	src/Makefile	/^abs_top_builddir = \/home\/brian\/obd-scanner$/;"	m
+abs_top_builddir	src/Makefile	/^abs_top_builddir = \/home\/brian\/neonobd$/;"	m
 abs_top_builddir	src/Makefile.in	/^abs_top_builddir = @abs_top_builddir@$/;"	m
-abs_top_srcdir	Makefile	/^abs_top_srcdir = \/home\/brian\/obd-scanner$/;"	m
+abs_top_srcdir	Makefile	/^abs_top_srcdir = \/home\/brian\/neonobd$/;"	m
 abs_top_srcdir	Makefile.in	/^abs_top_srcdir = @abs_top_srcdir@$/;"	m
-abs_top_srcdir	src/Makefile	/^abs_top_srcdir = \/home\/brian\/obd-scanner$/;"	m
+abs_top_srcdir	src/Makefile	/^abs_top_srcdir = \/home\/brian\/neonobd$/;"	m
 abs_top_srcdir	src/Makefile.in	/^abs_top_srcdir = @abs_top_srcdir@$/;"	m
 ac_ct_CC	Makefile	/^ac_ct_CC = gcc$/;"	m
 ac_ct_CC	Makefile.in	/^ac_ct_CC = @ac_ct_CC@$/;"	m
@@ -544,7 +555,7 @@ ac_fn_cxx_try_compile	configure	/^ac_fn_cxx_try_compile ()$/;"	f
 add_object	src/obd-bluetooth-dbus.cpp	/^#define add_object(/;"	d	file:
 add_remove_object	src/obd-bluetooth-dbus.cpp	/^void BlueTooth::add_remove_object(const DBusObject & obj,$/;"	f	class:BlueTooth	typeref:typename:void
 agentManager	src/obd-bluetooth-dbus.h	/^        Proxy agentManager;$/;"	m	class:BlueTooth	typeref:typename:Proxy
-agent_cancel	src/obd-bluetooth-dbus.h	/^        sigc::signal<void> agent_cancel;$/;"	m	class:BlueTooth	typeref:typename:sigc::signal<void>
+agent_cancel	src/obd-bluetooth-dbus.h	/^        sigc::signal<void()> agent_cancel;$/;"	m	class:BlueTooth	typeref:typename:sigc::signal<void ()>
 agent_method	src/obd-bluetooth-dbus.cpp	/^BlueTooth::agent_method(const Glib::RefPtr<Gio::DBus::Connection>&,$/;"	f	class:BlueTooth	typeref:typename:void
 agent_vtable	src/obd-bluetooth-dbus.h	/^        Gio::DBus::InterfaceVTable agent_vtable; $/;"	m	class:BlueTooth	typeref:typename:Gio::DBus::InterfaceVTable
 aix_post_process_depfile	depcomp	/^aix_post_process_depfile ()$/;"	f
@@ -556,6 +567,7 @@ all	src/Makefile	/^all: all-am$/;"	t
 all	src/Makefile.in	/^all: all-am$/;"	t
 all-am	Makefile	/^all-am: Makefile $(DATA) config.h$/;"	t
 all-am	Makefile.in	/^all-am: Makefile $(DATA) config.h$/;"	t
+all-am	src/Makefile	/^all-am: $(gsettings_SCHEMAS:.xml=.valid)$/;"	t
 all-am	src/Makefile	/^all-am: Makefile $(PROGRAMS)$/;"	t
 all-am	src/Makefile.in	/^all-am: Makefile $(PROGRAMS)$/;"	t
 am--depfiles	src/Makefile	/^am--depfiles: $(am__depfiles_remade)$/;"	t
@@ -590,8 +602,8 @@ am__define_uniq_tagged_files	Makefile	/^am__define_uniq_tagged_files = \\$/;"	m
 am__define_uniq_tagged_files	Makefile.in	/^am__define_uniq_tagged_files = \\$/;"	m
 am__define_uniq_tagged_files	src/Makefile	/^am__define_uniq_tagged_files = \\$/;"	m
 am__define_uniq_tagged_files	src/Makefile.in	/^am__define_uniq_tagged_files = \\$/;"	m
-am__depfiles_remade	src/Makefile	/^am__depfiles_remade = .\/$(DEPDIR)\/obd_scanner_gtk-homeview.Po \\$/;"	m
-am__depfiles_remade	src/Makefile.in	/^am__depfiles_remade = .\/$(DEPDIR)\/obd_scanner_gtk-homeview.Po \\$/;"	m
+am__depfiles_remade	src/Makefile	/^am__depfiles_remade = .\/$(DEPDIR)\/neonobd-homeview.Po \\$/;"	m
+am__depfiles_remade	src/Makefile.in	/^am__depfiles_remade = .\/$(DEPDIR)\/neonobd-homeview.Po \\$/;"	m
 am__distuninstallcheck_listfiles	Makefile	/^am__distuninstallcheck_listfiles = $(distuninstallcheck_listfiles) \\$/;"	m
 am__distuninstallcheck_listfiles	Makefile.in	/^am__distuninstallcheck_listfiles = $(distuninstallcheck_listfiles) \\$/;"	m
 am__include	Makefile.in	/^am__include = @am__include@$/;"	m
@@ -735,8 +747,8 @@ am__vpath_adj	Makefile	/^am__vpath_adj = case $$p in \\$/;"	m
 am__vpath_adj	Makefile.in	/^am__vpath_adj = case $$p in \\$/;"	m
 am__vpath_adj_setup	Makefile	/^am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;$/;"	m
 am__vpath_adj_setup	Makefile.in	/^am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;$/;"	m
-am_obd_scanner_gtk_OBJECTS	src/Makefile	/^am_obd_scanner_gtk_OBJECTS = obd_scanner_gtk-mainwindow.$(OBJEXT) \\$/;"	m
-am_obd_scanner_gtk_OBJECTS	src/Makefile.in	/^am_obd_scanner_gtk_OBJECTS = obd_scanner_gtk-mainwindow.$(OBJEXT) \\$/;"	m
+am_neonobd_OBJECTS	src/Makefile	/^am_neonobd_OBJECTS = neonobd-mainwindow.$(OBJEXT) \\$/;"	m
+am_neonobd_OBJECTS	src/Makefile.in	/^am_neonobd_OBJECTS = neonobd-mainwindow.$(OBJEXT) \\$/;"	m
 app_get_resource	src/resources.c	/^GResource *app_get_resource (void)$/;"	f	typeref:typename:GResource *
 app_resource_data	src/resources.c	/^static const SECTION union { const guint8 data[457]; const double alignment; void * const ptr;} /;"	v	typeref:typename:const union __anon02acad08010a
 app_resource_data	src/resources.c	/^static const SECTION union { const guint8 data[457]; const double alignment; void * const ptr;} /;"	v	typeref:typename:const union __anon02acad08020a
@@ -762,15 +774,15 @@ as_fn_success	configure	/^as_fn_success () { as_fn_return 0; }$/;"	f
 as_fn_unset	config.status	/^as_fn_unset ()$/;"	f
 as_fn_unset	configure	/^as_fn_unset ()$/;"	f
 assignValues	src/combobox.h	/^        void assignValues(Gtk::TreeModel::Row &row,$/;"	f	class:ComboBox	typeref:typename:void
-bin_PROGRAMS	src/Makefile	/^bin_PROGRAMS = obd-scanner-gtk$(EXEEXT)$/;"	m
-bin_PROGRAMS	src/Makefile.am	/^bin_PROGRAMS = obd-scanner-gtk$/;"	m
-bin_PROGRAMS	src/Makefile.in	/^bin_PROGRAMS = obd-scanner-gtk$(EXEEXT)$/;"	m
+bin_PROGRAMS	src/Makefile	/^bin_PROGRAMS = neonobd$(EXEEXT)$/;"	m
+bin_PROGRAMS	src/Makefile.am	/^bin_PROGRAMS = neonobd$/;"	m
+bin_PROGRAMS	src/Makefile.in	/^bin_PROGRAMS = neonobd$(EXEEXT)$/;"	m
 bindir	Makefile	/^bindir = ${exec_prefix}\/bin$/;"	m
 bindir	Makefile.in	/^bindir = @bindir@$/;"	m
 bindir	src/Makefile	/^bindir = ${exec_prefix}\/bin$/;"	m
 bindir	src/Makefile.in	/^bindir = @bindir@$/;"	m
 bluetooth	src/mainwindow.h	/^        BlueTooth &bluetooth;$/;"	m	class:MainWindow	typeref:typename:BlueTooth &
-bluetooth_rb	src/settingsview.h	/^        Gtk::RadioButton        bluetooth_rb,$/;"	m	class:SettingsView	typeref:typename:Gtk::RadioButton
+bluetooth_rb	src/settingsview.h	/^        Gtk::CheckButton        bluetooth_rb,$/;"	m	class:SettingsView	typeref:typename:Gtk::CheckButton
 btDeviceCombo	src/settingsview.h	/^        ComboBox<Glib::ustring, Glib::ustring>  btDeviceCombo;$/;"	m	class:SettingsView	typeref:typename:ComboBox<Glib::ustring,Glib::ustring>
 btDeviceLabel	src/settingsview.h	/^        Gtk::Label              btDeviceLabel;$/;"	m	class:SettingsView	typeref:typename:Gtk::Label
 btDeviceScan	src/settingsview.h	/^        Gtk::Button             btDeviceScan;$/;"	m	class:SettingsView	typeref:typename:Gtk::Button
@@ -812,11 +824,15 @@ clean-generic	Makefile	/^clean-generic:$/;"	t
 clean-generic	Makefile.in	/^clean-generic:$/;"	t
 clean-generic	src/Makefile	/^clean-generic:$/;"	t
 clean-generic	src/Makefile.in	/^clean-generic:$/;"	t
+clean-gsettings-schemas	src/Makefile	/^clean-gsettings-schemas:$/;"	t
 clean-local	src/Makefile	/^clean-local:$/;"	t
 clean-local	src/Makefile.am	/^clean-local:$/;"	t
 clean-local	src/Makefile.in	/^clean-local:$/;"	t
 column_record	src/combobox.h	/^        Gtk::TreeModelColumnRecord column_record;$/;"	m	class:ComboBox	typeref:typename:Gtk::TreeModelColumnRecord
 columns	src/combobox.h	/^        std::tuple<Gtk::TreeModelColumn<T>...> columns;$/;"	m	class:ComboBox	typeref:typename:std::tuple<Gtk::TreeModelColumn<T>...>
+com.github.beardedone55.baudrates	src/com.github.beardedone55.neonobd.gschema.xml	/^    <enum id="com.github.beardedone55.baudrates">$/;"	i
+com.github.beardedone55.interface	src/com.github.beardedone55.neonobd.gschema.xml	/^    <enum id="com.github.beardedone55.interface">$/;"	i
+com.github.beardedone55.neonobd	src/com.github.beardedone55.neonobd.gschema.xml	/^    <schema path="\/com\/github\/beardedone55\/neonobd\/" id="com.github.beardedone55.neonobd">$/;"	i
 config.h	Makefile	/^config.h: stamp-h1$/;"	t
 config.h	Makefile.in	/^config.h: stamp-h1$/;"	t
 connect_btn	src/homeview.h	/^        BigButton connect_btn;$/;"	m	class:HomeView	typeref:typename:BigButton
@@ -824,7 +840,6 @@ connect_view_button	src/mainwindow.cpp	/^void MainWindow::connect_view_button(Gt
 connected_device_path	src/obd-bluetooth-dbus.h	/^        Glib::DBusObjectPathString connected_device_path;$/;"	m	class:BlueTooth	typeref:typename:Glib::DBusObjectPathString
 connectionFrame	src/settingsview.h	/^        Gtk::Frame              connectionFrame;$/;"	m	class:SettingsView	typeref:typename:Gtk::Frame
 connectionGrid	src/settingsview.h	/^        Gtk::Grid               connectionGrid;$/;"	m	class:SettingsView	typeref:typename:Gtk::Grid
-connectionTypes	src/settingsview.h	/^        Gtk::RadioButton::Group connectionTypes;$/;"	m	class:SettingsView	typeref:typename:Gtk::RadioButton::Group
 content_area	src/waitidalog.cpp	/^    Gtk::Box *content_area = get_content_area();$/;"	v	typeref:typename:Gtk::Box *
 controller_name	src/obd-bluetooth-dbus.cpp	/^Glib::ustring BlueTooth::controller_name(const Proxy &proxy)$/;"	f	class:BlueTooth	typeref:typename:Glib::ustring
 controllers	src/obd-bluetooth-dbus.h	/^        ProxyMap controllers;$/;"	m	class:BlueTooth	typeref:typename:ProxyMap
@@ -865,8 +880,8 @@ dbus_return	src/obd-bluetooth-dbus.cpp	/^void BlueTooth::dbus_return(MethodInvoc
 depcomp	src/Makefile	/^depcomp = $(SHELL) $(top_srcdir)\/depcomp$/;"	m
 depcomp	src/Makefile.in	/^depcomp = $(SHELL) $(top_srcdir)\/depcomp$/;"	m
 device_name	src/obd-bluetooth-dbus.cpp	/^Glib::ustring BlueTooth::device_name(const Proxy &proxy)$/;"	f	class:BlueTooth	typeref:typename:Glib::ustring
-display_pass_key	src/obd-bluetooth-dbus.h	/^        sigc::signal<void, Glib::ustring, guint32, guint16> display_pass_key;$/;"	m	class:BlueTooth	typeref:typename:sigc::signal<void,Glib::ustring,guint32,guint16>
-display_pin_code	src/obd-bluetooth-dbus.h	/^        sigc::signal<void, Glib::ustring, Glib::ustring> display_pin_code;$/;"	m	class:BlueTooth	typeref:typename:sigc::signal<void,Glib::ustring,Glib::ustring>
+display_pass_key	src/obd-bluetooth-dbus.h	/^        sigc::signal<void(Glib::ustring, guint32, guint16)> display_pass_key;$/;"	m	class:BlueTooth	typeref:typename:sigc::signal<void (Glib::ustring,guint32,guint16)>
+display_pin_code	src/obd-bluetooth-dbus.h	/^        sigc::signal<void(Glib::ustring, Glib::ustring)> display_pin_code;$/;"	m	class:BlueTooth	typeref:typename:sigc::signal<void (Glib::ustring,Glib::ustring)>
 dist	Makefile	/^dist dist-all:$/;"	t
 dist	Makefile.in	/^dist dist-all:$/;"	t
 dist-all	Makefile	/^dist dist-all:$/;"	t
@@ -958,6 +973,8 @@ func_cl_dashL	compile	/^func_cl_dashL ()$/;"	f
 func_cl_dashl	compile	/^func_cl_dashl ()$/;"	f
 func_cl_wrapper	compile	/^func_cl_wrapper ()$/;"	f
 func_file_conv	compile	/^func_file_conv ()$/;"	f
+getValues	src/combobox.h	/^        getValues(Gtk::TreeModel::iterator &it,$/;"	f	class:ComboBox	typeref:typename:std::optional<std::tuple<T...>>
+get_active_values	src/combobox.h	/^        std::optional<std::tuple<T...>> get_active_values()$/;"	f	class:ComboBox	typeref:typename:std::optional<std::tuple<T...>>
 get_controller_names	src/obd-bluetooth-dbus.cpp	/^std::vector<Glib::ustring> BlueTooth::get_controller_names()$/;"	f	class:BlueTooth	typeref:typename:std::vector<Glib::ustring>
 get_controller_names	src/obd-bluetooth.cpp	/^std::vector<std::string> BlueTooth::get_controller_names()$/;"	f	class:BlueTooth	typeref:typename:std::vector<std::string>
 get_controller_numbers	src/obd-bluetooth.cpp	/^std::vector<int> BlueTooth::get_controller_numbers()$/;"	f	class:BlueTooth	typeref:typename:std::vector<int>
@@ -975,6 +992,16 @@ get_interface	src/obd-bluetooth-dbus.cpp	/^BlueTooth::get_interface(const DBusOb
 get_property_value	src/obd-bluetooth-dbus.cpp	/^BlueTooth::get_property_value(const Proxy &proxy,$/;"	f	class:BlueTooth	typeref:typename:Glib::ustring
 get_property_values	src/obd-bluetooth-dbus.cpp	/^BlueTooth::get_property_values($/;"	f	class:BlueTooth	typeref:typename:std::vector<Glib::ustring>
 give_advice	missing	/^give_advice ()$/;"	f
+glow	src/images/test.svg	/^        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">$/;"	d
+glow	src/images/test.svg	/^        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">$/;"	i
+gsettings_SCHEMAS	src/Makefile	/^gsettings_SCHEMAS = com.github.beardedone55.neonobd.gschema.xml$/;"	m
+gsettings_SCHEMAS	src/Makefile.am	/^gsettings_SCHEMAS = com.github.beardedone55.neonobd.gschema.xml$/;"	m
+gsettings_SCHEMAS	src/Makefile.in	/^gsettings_SCHEMAS = com.github.beardedone55.neonobd.gschema.xml$/;"	m
+gsettings__enum_file	src/Makefile	/^gsettings__enum_file = $(addsuffix .enums.xml,$(gsettings_ENUM_NAMESPACE))$/;"	m
+gsettingsschemadir	Makefile	/^gsettingsschemadir = ${datarootdir}\/glib-2.0\/schemas$/;"	m
+gsettingsschemadir	Makefile.in	/^gsettingsschemadir = @gsettingsschemadir@$/;"	m
+gsettingsschemadir	src/Makefile	/^gsettingsschemadir = ${datarootdir}\/glib-2.0\/schemas$/;"	m
+gsettingsschemadir	src/Makefile.in	/^gsettingsschemadir = @gsettingsschemadir@$/;"	m
 hci_sock	src/obd-bluetooth.h	/^        int hci_sock;$/;"	m	class:BlueTooth	typeref:typename:int
 homeButton	src/settingsview.h	/^        Gtk::Button             homeButton;$/;"	m	class:SettingsView	typeref:typename:Gtk::Button
 homeView	src/mainwindow.h	/^        HomeView homeView;$/;"	m	class:MainWindow	typeref:typename:HomeView
@@ -1027,6 +1054,7 @@ install-data	src/Makefile	/^install-data: install-data-am$/;"	t
 install-data	src/Makefile.in	/^install-data: install-data-am$/;"	t
 install-data-am	Makefile	/^install-data-am: install-dist_docDATA$/;"	t
 install-data-am	Makefile.in	/^install-data-am: install-dist_docDATA$/;"	t
+install-data-am	src/Makefile	/^install-data-am: install-gsettings-schemas$/;"	t
 install-data-am	src/Makefile	/^install-data-am:$/;"	t
 install-data-am	src/Makefile.in	/^install-data-am:$/;"	t
 install-dist_docDATA	Makefile	/^install-dist_docDATA: $(dist_doc_DATA)$/;"	t
@@ -1047,6 +1075,7 @@ install-exec-am	Makefile	/^install-exec-am:$/;"	t
 install-exec-am	Makefile.in	/^install-exec-am:$/;"	t
 install-exec-am	src/Makefile	/^install-exec-am: install-binPROGRAMS$/;"	t
 install-exec-am	src/Makefile.in	/^install-exec-am: install-binPROGRAMS$/;"	t
+install-gsettings-schemas	src/Makefile	/^install-gsettings-schemas: $(gsettings_SCHEMAS) $(gsettings__enum_file)$/;"	t
 install-html	Makefile	/^install-html: install-html-recursive$/;"	t
 install-html	Makefile.in	/^install-html: install-html-recursive$/;"	t
 install-html	src/Makefile	/^install-html: install-html-am$/;"	t
@@ -1087,9 +1116,9 @@ install-strip	Makefile	/^install-strip:$/;"	t
 install-strip	Makefile.in	/^install-strip:$/;"	t
 install-strip	src/Makefile	/^install-strip:$/;"	t
 install-strip	src/Makefile.in	/^install-strip:$/;"	t
-install_sh	Makefile	/^install_sh = ${SHELL} \/home\/brian\/obd-scanner\/install-sh$/;"	m
+install_sh	Makefile	/^install_sh = ${SHELL} \/home\/brian\/neonobd\/install-sh$/;"	m
 install_sh	Makefile.in	/^install_sh = @install_sh@$/;"	m
-install_sh	src/Makefile	/^install_sh = ${SHELL} \/home\/brian\/obd-scanner\/install-sh$/;"	m
+install_sh	src/Makefile	/^install_sh = ${SHELL} \/home\/brian\/neonobd\/install-sh$/;"	m
 install_sh	src/Makefile.in	/^install_sh = @install_sh@$/;"	m
 install_sh_DATA	Makefile	/^install_sh_DATA = $(install_sh) -c -m 644$/;"	m
 install_sh_DATA	Makefile.in	/^install_sh_DATA = $(install_sh) -c -m 644$/;"	m
@@ -1117,6 +1146,7 @@ installdirs	src/Makefile	/^installdirs:$/;"	t
 installdirs	src/Makefile.in	/^installdirs:$/;"	t
 installdirs-am	Makefile	/^installdirs-am:$/;"	t
 installdirs-am	Makefile.in	/^installdirs-am:$/;"	t
+interfaceType	src/settingsview.h	/^        enum interfaceType {$/;"	g	class:SettingsView
 libdir	Makefile	/^libdir = ${exec_prefix}\/lib$/;"	m
 libdir	Makefile.in	/^libdir = @libdir@$/;"	m
 libdir	src/Makefile	/^libdir = ${exec_prefix}\/lib$/;"	m
@@ -1134,7 +1164,7 @@ localstatedir	Makefile	/^localstatedir = ${prefix}\/var$/;"	m
 localstatedir	Makefile.in	/^localstatedir = @localstatedir@$/;"	m
 localstatedir	src/Makefile	/^localstatedir = ${prefix}\/var$/;"	m
 localstatedir	src/Makefile.in	/^localstatedir = @localstatedir@$/;"	m
-main	src/obd-scanner-gtkmain.cpp	/^int main(int argc, char *argv[]) {$/;"	f	typeref:typename:int
+main	src/neonobd.cpp	/^int main(int argc, char *argv[]) {$/;"	f	typeref:typename:int
 main_window	src/homeview.h	/^        MainWindow &main_window;$/;"	m	class:HomeView	typeref:typename:MainWindow &
 main_window	src/settingsview.h	/^        MainWindow            & main_window;$/;"	m	class:SettingsView	typeref:typename:MainWindow &
 maintainer-clean	Makefile	/^maintainer-clean: maintainer-clean-recursive$/;"	t
@@ -1171,6 +1201,7 @@ mostlyclean	src/Makefile	/^mostlyclean: mostlyclean-am$/;"	t
 mostlyclean	src/Makefile.in	/^mostlyclean: mostlyclean-am$/;"	t
 mostlyclean-am	Makefile	/^mostlyclean-am: mostlyclean-generic$/;"	t
 mostlyclean-am	Makefile.in	/^mostlyclean-am: mostlyclean-generic$/;"	t
+mostlyclean-am	src/Makefile	/^mostlyclean-am: clean-gsettings-schemas$/;"	t
 mostlyclean-am	src/Makefile	/^mostlyclean-am: mostlyclean-compile mostlyclean-generic$/;"	t
 mostlyclean-am	src/Makefile.in	/^mostlyclean-am: mostlyclean-compile mostlyclean-generic$/;"	t
 mostlyclean-compile	src/Makefile	/^mostlyclean-compile:$/;"	t
@@ -1179,52 +1210,53 @@ mostlyclean-generic	Makefile	/^mostlyclean-generic:$/;"	t
 mostlyclean-generic	Makefile.in	/^mostlyclean-generic:$/;"	t
 mostlyclean-generic	src/Makefile	/^mostlyclean-generic:$/;"	t
 mostlyclean-generic	src/Makefile.in	/^mostlyclean-generic:$/;"	t
-obd-scanner	configure.ac	/^AC_INIT([obd-scanner],[0.1],[bjlepage22@gmail.com])$/;"	p
-obd-scanner-gtk	src/Makefile.am	/^bin_PROGRAMS = obd-scanner-gtk$/;"	P	directory:bin
-obd-scanner-gtk$(EXEEXT)	src/Makefile	/^obd-scanner-gtk$(EXEEXT): $(obd_scanner_gtk_OBJECTS) $(obd_scanner_gtk_DEPENDENCIES) $(EXTRA_obd/;"	t
-obd-scanner-gtk$(EXEEXT)	src/Makefile.in	/^obd-scanner-gtk$(EXEEXT): $(obd_scanner_gtk_OBJECTS) $(obd_scanner_gtk_DEPENDENCIES) $(EXTRA_obd/;"	t
-obd_scanner_gtk-homeview.o	src/Makefile	/^obd_scanner_gtk-homeview.o: homeview.cpp$/;"	t
-obd_scanner_gtk-homeview.o	src/Makefile.in	/^obd_scanner_gtk-homeview.o: homeview.cpp$/;"	t
-obd_scanner_gtk-homeview.obj	src/Makefile	/^obd_scanner_gtk-homeview.obj: homeview.cpp$/;"	t
-obd_scanner_gtk-homeview.obj	src/Makefile.in	/^obd_scanner_gtk-homeview.obj: homeview.cpp$/;"	t
-obd_scanner_gtk-mainwindow.o	src/Makefile	/^obd_scanner_gtk-mainwindow.o: mainwindow.cpp$/;"	t
-obd_scanner_gtk-mainwindow.o	src/Makefile.in	/^obd_scanner_gtk-mainwindow.o: mainwindow.cpp$/;"	t
-obd_scanner_gtk-mainwindow.obj	src/Makefile	/^obd_scanner_gtk-mainwindow.obj: mainwindow.cpp$/;"	t
-obd_scanner_gtk-mainwindow.obj	src/Makefile.in	/^obd_scanner_gtk-mainwindow.obj: mainwindow.cpp$/;"	t
-obd_scanner_gtk-obd-bluetooth-dbus.o	src/Makefile	/^obd_scanner_gtk-obd-bluetooth-dbus.o: obd-bluetooth-dbus.cpp$/;"	t
-obd_scanner_gtk-obd-bluetooth-dbus.o	src/Makefile.in	/^obd_scanner_gtk-obd-bluetooth-dbus.o: obd-bluetooth-dbus.cpp$/;"	t
-obd_scanner_gtk-obd-bluetooth-dbus.obj	src/Makefile	/^obd_scanner_gtk-obd-bluetooth-dbus.obj: obd-bluetooth-dbus.cpp$/;"	t
-obd_scanner_gtk-obd-bluetooth-dbus.obj	src/Makefile.in	/^obd_scanner_gtk-obd-bluetooth-dbus.obj: obd-bluetooth-dbus.cpp$/;"	t
-obd_scanner_gtk-obd-scanner-gtkmain.o	src/Makefile	/^obd_scanner_gtk-obd-scanner-gtkmain.o: obd-scanner-gtkmain.cpp$/;"	t
-obd_scanner_gtk-obd-scanner-gtkmain.o	src/Makefile.in	/^obd_scanner_gtk-obd-scanner-gtkmain.o: obd-scanner-gtkmain.cpp$/;"	t
-obd_scanner_gtk-obd-scanner-gtkmain.obj	src/Makefile	/^obd_scanner_gtk-obd-scanner-gtkmain.obj: obd-scanner-gtkmain.cpp$/;"	t
-obd_scanner_gtk-obd-scanner-gtkmain.obj	src/Makefile.in	/^obd_scanner_gtk-obd-scanner-gtkmain.obj: obd-scanner-gtkmain.cpp$/;"	t
-obd_scanner_gtk-resources.o	src/Makefile	/^obd_scanner_gtk-resources.o: resources.c$/;"	t
-obd_scanner_gtk-resources.o	src/Makefile.in	/^obd_scanner_gtk-resources.o: resources.c$/;"	t
-obd_scanner_gtk-resources.obj	src/Makefile	/^obd_scanner_gtk-resources.obj: resources.c$/;"	t
-obd_scanner_gtk-resources.obj	src/Makefile.in	/^obd_scanner_gtk-resources.obj: resources.c$/;"	t
-obd_scanner_gtk-settingsview.o	src/Makefile	/^obd_scanner_gtk-settingsview.o: settingsview.cpp$/;"	t
-obd_scanner_gtk-settingsview.o	src/Makefile.in	/^obd_scanner_gtk-settingsview.o: settingsview.cpp$/;"	t
-obd_scanner_gtk-settingsview.obj	src/Makefile	/^obd_scanner_gtk-settingsview.obj: settingsview.cpp$/;"	t
-obd_scanner_gtk-settingsview.obj	src/Makefile.in	/^obd_scanner_gtk-settingsview.obj: settingsview.cpp$/;"	t
-obd_scanner_gtk_CFLAGS	src/Makefile	/^obd_scanner_gtk_CFLAGS = $(GTKMM_CFLAGS)$/;"	m
-obd_scanner_gtk_CFLAGS	src/Makefile.am	/^obd_scanner_gtk_CFLAGS = $(GTKMM_CFLAGS)$/;"	m
-obd_scanner_gtk_CFLAGS	src/Makefile.in	/^obd_scanner_gtk_CFLAGS = $(GTKMM_CFLAGS)$/;"	m
-obd_scanner_gtk_CPPFLAGS	src/Makefile	/^obd_scanner_gtk_CPPFLAGS = $(GTKMM_CFLAGS) -std=c++17$/;"	m
-obd_scanner_gtk_CPPFLAGS	src/Makefile.am	/^obd_scanner_gtk_CPPFLAGS = $(GTKMM_CFLAGS) -std=c++17$/;"	m
-obd_scanner_gtk_CPPFLAGS	src/Makefile.in	/^obd_scanner_gtk_CPPFLAGS = $(GTKMM_CFLAGS) -std=c++17$/;"	m
-obd_scanner_gtk_LDADD	src/Makefile	/^obd_scanner_gtk_LDADD = $(LDADD)$/;"	m
-obd_scanner_gtk_LDADD	src/Makefile.in	/^obd_scanner_gtk_LDADD = $(LDADD)$/;"	m
-obd_scanner_gtk_LDFLAGS	src/Makefile	/^obd_scanner_gtk_LDFLAGS = $(GTKMM_LIBS)$/;"	m
-obd_scanner_gtk_LDFLAGS	src/Makefile.am	/^obd_scanner_gtk_LDFLAGS = $(GTKMM_LIBS)$/;"	m
-obd_scanner_gtk_LDFLAGS	src/Makefile.in	/^obd_scanner_gtk_LDFLAGS = $(GTKMM_LIBS)$/;"	m
-obd_scanner_gtk_LINK	src/Makefile	/^obd_scanner_gtk_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \\$/;"	m
-obd_scanner_gtk_LINK	src/Makefile.in	/^obd_scanner_gtk_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \\$/;"	m
-obd_scanner_gtk_OBJECTS	src/Makefile	/^obd_scanner_gtk_OBJECTS = $(am_obd_scanner_gtk_OBJECTS)$/;"	m
-obd_scanner_gtk_OBJECTS	src/Makefile.in	/^obd_scanner_gtk_OBJECTS = $(am_obd_scanner_gtk_OBJECTS)$/;"	m
-obd_scanner_gtk_SOURCES	src/Makefile	/^obd_scanner_gtk_SOURCES = \\$/;"	m
-obd_scanner_gtk_SOURCES	src/Makefile.am	/^obd_scanner_gtk_SOURCES = \\$/;"	m
-obd_scanner_gtk_SOURCES	src/Makefile.in	/^obd_scanner_gtk_SOURCES = \\$/;"	m
+neonobd	configure.ac	/^AC_INIT([neonobd], [0.1], [bjlepage22@gmail.com])$/;"	p
+neonobd	src/Makefile.am	/^bin_PROGRAMS = neonobd$/;"	P	directory:bin
+neonobd$(EXEEXT)	src/Makefile	/^neonobd$(EXEEXT): $(neonobd_OBJECTS) $(neonobd_DEPENDENCIES) $(EXTRA_neonobd_DEPENDENCIES) $/;"	t
+neonobd$(EXEEXT)	src/Makefile.in	/^neonobd$(EXEEXT): $(neonobd_OBJECTS) $(neonobd_DEPENDENCIES) $(EXTRA_neonobd_DEPENDENCIES) $/;"	t
+neonobd-homeview.o	src/Makefile	/^neonobd-homeview.o: homeview.cpp$/;"	t
+neonobd-homeview.o	src/Makefile.in	/^neonobd-homeview.o: homeview.cpp$/;"	t
+neonobd-homeview.obj	src/Makefile	/^neonobd-homeview.obj: homeview.cpp$/;"	t
+neonobd-homeview.obj	src/Makefile.in	/^neonobd-homeview.obj: homeview.cpp$/;"	t
+neonobd-mainwindow.o	src/Makefile	/^neonobd-mainwindow.o: mainwindow.cpp$/;"	t
+neonobd-mainwindow.o	src/Makefile.in	/^neonobd-mainwindow.o: mainwindow.cpp$/;"	t
+neonobd-mainwindow.obj	src/Makefile	/^neonobd-mainwindow.obj: mainwindow.cpp$/;"	t
+neonobd-mainwindow.obj	src/Makefile.in	/^neonobd-mainwindow.obj: mainwindow.cpp$/;"	t
+neonobd-neonobd.o	src/Makefile	/^neonobd-neonobd.o: neonobd.cpp$/;"	t
+neonobd-neonobd.o	src/Makefile.in	/^neonobd-neonobd.o: neonobd.cpp$/;"	t
+neonobd-neonobd.obj	src/Makefile	/^neonobd-neonobd.obj: neonobd.cpp$/;"	t
+neonobd-neonobd.obj	src/Makefile.in	/^neonobd-neonobd.obj: neonobd.cpp$/;"	t
+neonobd-obd-bluetooth-dbus.o	src/Makefile	/^neonobd-obd-bluetooth-dbus.o: obd-bluetooth-dbus.cpp$/;"	t
+neonobd-obd-bluetooth-dbus.o	src/Makefile.in	/^neonobd-obd-bluetooth-dbus.o: obd-bluetooth-dbus.cpp$/;"	t
+neonobd-obd-bluetooth-dbus.obj	src/Makefile	/^neonobd-obd-bluetooth-dbus.obj: obd-bluetooth-dbus.cpp$/;"	t
+neonobd-obd-bluetooth-dbus.obj	src/Makefile.in	/^neonobd-obd-bluetooth-dbus.obj: obd-bluetooth-dbus.cpp$/;"	t
+neonobd-resources.o	src/Makefile	/^neonobd-resources.o: resources.c$/;"	t
+neonobd-resources.o	src/Makefile.in	/^neonobd-resources.o: resources.c$/;"	t
+neonobd-resources.obj	src/Makefile	/^neonobd-resources.obj: resources.c$/;"	t
+neonobd-resources.obj	src/Makefile.in	/^neonobd-resources.obj: resources.c$/;"	t
+neonobd-settingsview.o	src/Makefile	/^neonobd-settingsview.o: settingsview.cpp$/;"	t
+neonobd-settingsview.o	src/Makefile.in	/^neonobd-settingsview.o: settingsview.cpp$/;"	t
+neonobd-settingsview.obj	src/Makefile	/^neonobd-settingsview.obj: settingsview.cpp$/;"	t
+neonobd-settingsview.obj	src/Makefile.in	/^neonobd-settingsview.obj: settingsview.cpp$/;"	t
+neonobd_CPPFLAGS	src/Makefile	/^neonobd_CPPFLAGS = $(GTKMM_CFLAGS)$/;"	m
+neonobd_CPPFLAGS	src/Makefile.am	/^neonobd_CPPFLAGS = $(GTKMM_CFLAGS)$/;"	m
+neonobd_CPPFLAGS	src/Makefile.in	/^neonobd_CPPFLAGS = $(GTKMM_CFLAGS)$/;"	m
+neonobd_CXXFLAGS	src/Makefile	/^neonobd_CXXFLAGS = -std=c++17$/;"	m
+neonobd_CXXFLAGS	src/Makefile.am	/^neonobd_CXXFLAGS = -std=c++17$/;"	m
+neonobd_CXXFLAGS	src/Makefile.in	/^neonobd_CXXFLAGS = -std=c++17$/;"	m
+neonobd_LDADD	src/Makefile	/^neonobd_LDADD = $(LDADD)$/;"	m
+neonobd_LDADD	src/Makefile.in	/^neonobd_LDADD = $(LDADD)$/;"	m
+neonobd_LDFLAGS	src/Makefile	/^neonobd_LDFLAGS = $(GTKMM_LIBS)$/;"	m
+neonobd_LDFLAGS	src/Makefile.am	/^neonobd_LDFLAGS = $(GTKMM_LIBS)$/;"	m
+neonobd_LDFLAGS	src/Makefile.in	/^neonobd_LDFLAGS = $(GTKMM_LIBS)$/;"	m
+neonobd_LINK	src/Makefile	/^neonobd_LINK = $(CXXLD) $(neonobd_CXXFLAGS) $(CXXFLAGS) \\$/;"	m
+neonobd_LINK	src/Makefile.in	/^neonobd_LINK = $(CXXLD) $(neonobd_CXXFLAGS) $(CXXFLAGS) \\$/;"	m
+neonobd_OBJECTS	src/Makefile	/^neonobd_OBJECTS = $(am_neonobd_OBJECTS)$/;"	m
+neonobd_OBJECTS	src/Makefile.in	/^neonobd_OBJECTS = $(am_neonobd_OBJECTS)$/;"	m
+neonobd_SOURCES	src/Makefile	/^neonobd_SOURCES = \\$/;"	m
+neonobd_SOURCES	src/Makefile.am	/^neonobd_SOURCES = \\$/;"	m
+neonobd_SOURCES	src/Makefile.in	/^neonobd_SOURCES = \\$/;"	m
+nsfd6881df0101	src/images/test.svg	/^<svg width="400" height="200" xmlns="http:\/\/www.w3.org\/2000\/svg">$/;"	n	uri:http://www.w3.org/2000/svg
 oldincludedir	Makefile	/^oldincludedir = \/usr\/include$/;"	m
 oldincludedir	Makefile.in	/^oldincludedir = @oldincludedir@$/;"	m
 oldincludedir	src/Makefile	/^oldincludedir = \/usr\/include$/;"	m
@@ -1242,21 +1274,21 @@ pdfdir	Makefile	/^pdfdir = ${docdir}$/;"	m
 pdfdir	Makefile.in	/^pdfdir = @pdfdir@$/;"	m
 pdfdir	src/Makefile	/^pdfdir = ${docdir}$/;"	m
 pdfdir	src/Makefile.in	/^pdfdir = @pdfdir@$/;"	m
-pkgdatadir	Makefile	/^pkgdatadir = $(datadir)\/obd-scanner$/;"	m
+pkgdatadir	Makefile	/^pkgdatadir = $(datadir)\/neonobd$/;"	m
 pkgdatadir	Makefile.in	/^pkgdatadir = $(datadir)\/@PACKAGE@$/;"	m
-pkgdatadir	src/Makefile	/^pkgdatadir = $(datadir)\/obd-scanner$/;"	m
+pkgdatadir	src/Makefile	/^pkgdatadir = $(datadir)\/neonobd$/;"	m
 pkgdatadir	src/Makefile.in	/^pkgdatadir = $(datadir)\/@PACKAGE@$/;"	m
-pkgincludedir	Makefile	/^pkgincludedir = $(includedir)\/obd-scanner$/;"	m
+pkgincludedir	Makefile	/^pkgincludedir = $(includedir)\/neonobd$/;"	m
 pkgincludedir	Makefile.in	/^pkgincludedir = $(includedir)\/@PACKAGE@$/;"	m
-pkgincludedir	src/Makefile	/^pkgincludedir = $(includedir)\/obd-scanner$/;"	m
+pkgincludedir	src/Makefile	/^pkgincludedir = $(includedir)\/neonobd$/;"	m
 pkgincludedir	src/Makefile.in	/^pkgincludedir = $(includedir)\/@PACKAGE@$/;"	m
-pkglibdir	Makefile	/^pkglibdir = $(libdir)\/obd-scanner$/;"	m
+pkglibdir	Makefile	/^pkglibdir = $(libdir)\/neonobd$/;"	m
 pkglibdir	Makefile.in	/^pkglibdir = $(libdir)\/@PACKAGE@$/;"	m
-pkglibdir	src/Makefile	/^pkglibdir = $(libdir)\/obd-scanner$/;"	m
+pkglibdir	src/Makefile	/^pkglibdir = $(libdir)\/neonobd$/;"	m
 pkglibdir	src/Makefile.in	/^pkglibdir = $(libdir)\/@PACKAGE@$/;"	m
-pkglibexecdir	Makefile	/^pkglibexecdir = $(libexecdir)\/obd-scanner$/;"	m
+pkglibexecdir	Makefile	/^pkglibexecdir = $(libexecdir)\/neonobd$/;"	m
 pkglibexecdir	Makefile.in	/^pkglibexecdir = $(libexecdir)\/@PACKAGE@$/;"	m
-pkglibexecdir	src/Makefile	/^pkglibexecdir = $(libexecdir)\/obd-scanner$/;"	m
+pkglibexecdir	src/Makefile	/^pkglibexecdir = $(libexecdir)\/neonobd$/;"	m
 pkglibexecdir	src/Makefile.in	/^pkglibexecdir = $(libexecdir)\/@PACKAGE@$/;"	m
 prefix	Makefile	/^prefix = \/usr\/local$/;"	m
 prefix	Makefile.in	/^prefix = @prefix@$/;"	m
@@ -1265,7 +1297,7 @@ prefix	src/Makefile.in	/^prefix = @prefix@$/;"	m
 probe_finish	src/obd-bluetooth-dbus.cpp	/^void BlueTooth::probe_finish(AsyncResult & result,$/;"	f	class:BlueTooth	typeref:typename:void
 probe_in_progress	src/obd-bluetooth-dbus.h	/^        bool probe_in_progress;$/;"	m	class:BlueTooth	typeref:typename:bool
 probe_progress	src/obd-bluetooth-dbus.h	/^        int probe_progress;$/;"	m	class:BlueTooth	typeref:typename:int
-probe_progress_signal	src/obd-bluetooth-dbus.h	/^        sigc::signal<void,int> probe_progress_signal;$/;"	m	class:BlueTooth	typeref:typename:sigc::signal<void,int>
+probe_progress_signal	src/obd-bluetooth-dbus.h	/^        sigc::signal<void(int)> probe_progress_signal;$/;"	m	class:BlueTooth	typeref:typename:sigc::signal<void (int)>
 probe_remote_devices	src/obd-bluetooth-dbus.cpp	/^void BlueTooth::probe_remote_devices(unsigned int probeTime)$/;"	f	class:BlueTooth	typeref:typename:void
 probe_remote_devices	src/obd-bluetooth.cpp	/^int BlueTooth::probe_remote_devices(unsigned int maxDevices, unsigned int probeTime)$/;"	f	class:BlueTooth	typeref:typename:int
 profileManager	src/obd-bluetooth-dbus.h	/^        Proxy profileManager;$/;"	m	class:BlueTooth	typeref:typename:Proxy
@@ -1298,14 +1330,14 @@ register_profile	src/obd-bluetooth-dbus.cpp	/^void BlueTooth::register_profile()
 remoteDevices	src/obd-bluetooth-dbus.h	/^        ProxyMap remoteDevices;$/;"	m	class:BlueTooth	typeref:typename:ProxyMap
 remoteDevices	src/obd-bluetooth.h	/^        std::vector<inquiry_info> remoteDevices;$/;"	m	class:BlueTooth	typeref:typename:std::vector<inquiry_info>
 remove_all	src/combobox.h	/^        void remove_all()$/;"	f	class:ComboBox	typeref:typename:void
-request_authorization	src/obd-bluetooth-dbus.h	/^        sigc::signal<void, Glib::ustring> request_authorization;$/;"	m	class:BlueTooth	typeref:typename:sigc::signal<void,Glib::ustring>
+request_authorization	src/obd-bluetooth-dbus.h	/^        sigc::signal<void(Glib::ustring)> request_authorization;$/;"	m	class:BlueTooth	typeref:typename:sigc::signal<void (Glib::ustring)>
 request_authorization_invocation	src/obd-bluetooth-dbus.h	/^        Glib::RefPtr<Gio::DBus::MethodInvocation> request_authorization_invocation;$/;"	m	class:BlueTooth	typeref:typename:Glib::RefPtr<Gio::DBus::MethodInvocation>
-request_confirmation	src/obd-bluetooth-dbus.h	/^        sigc::signal<void, Glib::ustring, guint32> request_confirmation;$/;"	m	class:BlueTooth	typeref:typename:sigc::signal<void,Glib::ustring,guint32>
+request_confirmation	src/obd-bluetooth-dbus.h	/^        sigc::signal<void(Glib::ustring, guint32)> request_confirmation;$/;"	m	class:BlueTooth	typeref:typename:sigc::signal<void (Glib::ustring,guint32)>
 request_confirmation_invocation	src/obd-bluetooth-dbus.h	/^        Glib::RefPtr<Gio::DBus::MethodInvocation> request_confirmation_invocation;$/;"	m	class:BlueTooth	typeref:typename:Glib::RefPtr<Gio::DBus::MethodInvocation>
 request_pairing_info	src/obd-bluetooth-dbus.cpp	/^BlueTooth::request_pairing_info(const Glib::VariantContainerBase & parameters,$/;"	f	class:BlueTooth	typeref:typename:void
-request_pass_key	src/obd-bluetooth-dbus.h	/^        sigc::signal<void, Glib::ustring> request_pass_key;$/;"	m	class:BlueTooth	typeref:typename:sigc::signal<void,Glib::ustring>
+request_pass_key	src/obd-bluetooth-dbus.h	/^        sigc::signal<void(Glib::ustring)> request_pass_key;$/;"	m	class:BlueTooth	typeref:typename:sigc::signal<void (Glib::ustring)>
 request_passkey_invocation	src/obd-bluetooth-dbus.h	/^        Glib::RefPtr<Gio::DBus::MethodInvocation> request_passkey_invocation;$/;"	m	class:BlueTooth	typeref:typename:Glib::RefPtr<Gio::DBus::MethodInvocation>
-request_pin_code	src/obd-bluetooth-dbus.h	/^        sigc::signal<void, Glib::ustring> request_pin_code;$/;"	m	class:BlueTooth	typeref:typename:sigc::signal<void,Glib::ustring>
+request_pin_code	src/obd-bluetooth-dbus.h	/^        sigc::signal<void(Glib::ustring)> request_pin_code;$/;"	m	class:BlueTooth	typeref:typename:sigc::signal<void (Glib::ustring)>
 request_pin_invocation	src/obd-bluetooth-dbus.h	/^        Glib::RefPtr<Gio::DBus::MethodInvocation> request_pin_invocation;$/;"	m	class:BlueTooth	typeref:typename:Glib::RefPtr<Gio::DBus::MethodInvocation>
 resource_destructor	src/resources.c	/^static void resource_destructor (void)$/;"	f	typeref:typename:void	file:
 resources.c	src/Makefile	/^resources.c: app.gresource.xml appstyle.css$/;"	t
@@ -1318,6 +1350,8 @@ sbindir	src/Makefile.in	/^sbindir = @sbindir@$/;"	m
 scanBluetooth	src/settingsview.cpp	/^void SettingsView::scanBluetooth()$/;"	f	class:SettingsView	typeref:typename:void
 scanComplete	src/settingsview.cpp	/^void SettingsView::scanComplete()$/;"	f	class:SettingsView	typeref:typename:void
 selectBluetooth	src/settingsview.cpp	/^void SettingsView::selectBluetooth()$/;"	f	class:SettingsView	typeref:typename:void
+selectBluetoothController	src/settingsview.cpp	/^void SettingsView::selectBluetoothController()$/;"	f	class:SettingsView	typeref:typename:void
+selectBluetoothDevice	src/settingsview.cpp	/^void SettingsView::selectBluetoothDevice()$/;"	f	class:SettingsView	typeref:typename:void
 selectSerial	src/settingsview.cpp	/^void SettingsView::selectSerial()$/;"	f	class:SettingsView	typeref:typename:void
 select_controller	src/obd-bluetooth-dbus.cpp	/^bool BlueTooth::select_controller(const Glib::ustring &controller_name)$/;"	f	class:BlueTooth	typeref:typename:bool
 select_controller	src/obd-bluetooth.cpp	/^bool BlueTooth::select_controller(int controller_number)$/;"	f	class:BlueTooth	typeref:typename:bool
@@ -1330,9 +1364,10 @@ send_confirmation	src/obd-bluetooth-dbus.cpp	/^void BlueTooth::send_confirmation
 send_pass_key	src/obd-bluetooth-dbus.cpp	/^void BlueTooth::send_pass_key(guint32 pass_key)$/;"	f	class:BlueTooth	typeref:typename:void
 send_pin_code	src/obd-bluetooth-dbus.cpp	/^void BlueTooth::send_pin_code(const Glib::ustring &pin_code)$/;"	f	class:BlueTooth	typeref:typename:void
 serialGrid	src/settingsview.h	/^        Gtk::Grid               serialGrid;$/;"	m	class:SettingsView	typeref:typename:Gtk::Grid
-serial_rb	src/settingsview.h	/^                                serial_rb;$/;"	m	class:SettingsView	typeref:typename:Gtk::RadioButton
+serial_rb	src/settingsview.h	/^                                serial_rb;$/;"	m	class:SettingsView	typeref:typename:Gtk::CheckButton
 set_base_from	depcomp	/^set_base_from ()$/;"	f
 set_dir_from	depcomp	/^set_dir_from ()$/;"	f
+settings	src/settingsview.h	/^        Glib::RefPtr<Gio::Settings> settings;$/;"	m	class:SettingsView	typeref:typename:Glib::RefPtr<Gio::Settings>
 settingsView	src/mainwindow.h	/^        SettingsView settingsView;$/;"	m	class:MainWindow	typeref:typename:SettingsView
 settings_btn	src/homeview.h	/^        BigButton settings_btn;$/;"	m	class:HomeView	typeref:typename:BigButton
 sharedstatedir	Makefile	/^sharedstatedir = ${prefix}\/com$/;"	m
@@ -1340,7 +1375,7 @@ sharedstatedir	Makefile.in	/^sharedstatedir = @sharedstatedir@$/;"	m
 sharedstatedir	src/Makefile	/^sharedstatedir = ${prefix}\/com$/;"	m
 sharedstatedir	src/Makefile.in	/^sharedstatedir = @sharedstatedir@$/;"	m
 showView	src/mainwindow.cpp	/^void MainWindow::showView(Gtk::Widget &view)$/;"	f	class:MainWindow	typeref:typename:void
-signal_probe_progress	src/obd-bluetooth-dbus.cpp	/^sigc::signal<void,int> BlueTooth::signal_probe_progress()$/;"	f	class:BlueTooth	typeref:typename:sigc::signal<void,int>
+signal_probe_progress	src/obd-bluetooth-dbus.cpp	/^sigc::signal<void(int)> BlueTooth::signal_probe_progress()$/;"	f	class:BlueTooth	typeref:typename:sigc::signal<void (int)>
 sock_fd	src/obd-bluetooth-dbus.h	/^        int sock_fd;$/;"	m	class:BlueTooth	typeref:typename:int
 srcdir	Makefile	/^srcdir = .$/;"	m
 srcdir	Makefile.in	/^srcdir = @srcdir@$/;"	m
@@ -1372,7 +1407,7 @@ target_alias	Makefile	/^target_alias = $/;"	m
 target_alias	Makefile.in	/^target_alias = @target_alias@$/;"	m
 target_alias	src/Makefile	/^target_alias = $/;"	m
 target_alias	src/Makefile.in	/^target_alias = @target_alias@$/;"	m
-topRow	src/settingsview.h	/^        Gtk::ButtonBox          topRow;$/;"	m	class:SettingsView	typeref:typename:Gtk::ButtonBox
+topRow	src/settingsview.h	/^        Gtk::Box                topRow;$/;"	m	class:SettingsView	typeref:typename:Gtk::Box
 top_build_prefix	Makefile	/^top_build_prefix = $/;"	m
 top_build_prefix	Makefile.in	/^top_build_prefix = @top_build_prefix@$/;"	m
 top_build_prefix	src/Makefile	/^top_build_prefix = ..\/$/;"	m
@@ -1398,11 +1433,13 @@ uninstall	src/Makefile.in	/^uninstall: uninstall-am$/;"	t
 uninstall-am	Makefile	/^uninstall-am: uninstall-dist_docDATA$/;"	t
 uninstall-am	Makefile.in	/^uninstall-am: uninstall-dist_docDATA$/;"	t
 uninstall-am	src/Makefile	/^uninstall-am: uninstall-binPROGRAMS$/;"	t
+uninstall-am	src/Makefile	/^uninstall-am: uninstall-gsettings-schemas$/;"	t
 uninstall-am	src/Makefile.in	/^uninstall-am: uninstall-binPROGRAMS$/;"	t
 uninstall-binPROGRAMS	src/Makefile	/^uninstall-binPROGRAMS:$/;"	t
 uninstall-binPROGRAMS	src/Makefile.in	/^uninstall-binPROGRAMS:$/;"	t
 uninstall-dist_docDATA	Makefile	/^uninstall-dist_docDATA:$/;"	t
 uninstall-dist_docDATA	Makefile.in	/^uninstall-dist_docDATA:$/;"	t
+uninstall-gsettings-schemas	src/Makefile	/^uninstall-gsettings-schemas:$/;"	t
 updateScanProgress	src/settingsview.cpp	/^void SettingsView::updateScanProgress(int percentComplete)$/;"	f	class:SettingsView	typeref:typename:void
 update_default_interface	src/obd-bluetooth-dbus.cpp	/^void BlueTooth::update_default_interface(const DBusObject &obj,$/;"	f	class:BlueTooth	typeref:typename:void
 update_object_list	src/obd-bluetooth-dbus.cpp	/^bool BlueTooth::update_object_list(const DBusObject &obj,$/;"	f	class:BlueTooth	typeref:typename:bool

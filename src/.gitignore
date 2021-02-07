@@ -1,4 +1,5 @@
-/obd-scanner-gtk
+/neonobd
+/*.valid
 /resources.c
 /*.o
 /*.in
