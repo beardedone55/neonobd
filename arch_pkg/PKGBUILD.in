@@ -1,0 +1,40 @@
+# Maintainer: Brian LePage <bjlepage22@gmail.com>
+pkgname=@PACKAGE_NAME@
+pkgver=@PACKAGE_VERSION@
+pkgrel=1
+epoch=
+pkgdesc="Open source OBD diagnostic software for use with ELM32x OBD devices."
+arch=('x86_64')
+url=""
+license=('GPL')
+groups=()
+depends=('gtkmm4')
+makedepends=()
+checkdepends=()
+optdepends=('bluez: for bluetooth support')
+provides=()
+conflicts=()
+replaces=()
+backup=()
+options=()
+install=
+changelog=
+source=("$pkgname-$pkgver.tar.gz")
+noextract=()
+validpgpkeys=()
+
+build() {
+	cd "$pkgname-$pkgver"
+	./configure --prefix=/usr --disable-dependency-tracking
+	make
+}
+
+check() {
+	cd "$pkgname-$pkgver"
+	make -k check
+}
+
+package() {
+	cd "$pkgname-$pkgver"
+	make DESTDIR="$pkgdir/" install
+}
