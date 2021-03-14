@@ -6,9 +6,9 @@
 #include <gtkmm/window.h>
 #include <gtkmm/cssprovider.h>
 
-#include "homeview.h"
-#include "settingsview.h"
-#include "obd-bluetooth-dbus.h"
+#include "home.h"
+#include "settings.h"
+#include "bluetooth-serial-port.h"
 
 class MainWindow : public Gtk::Window
 {
@@ -18,9 +18,9 @@ class MainWindow : public Gtk::Window
         void connect_view_button(Gtk::Button &button, 
                                  Gtk::Widget *currentView,
                                  Gtk::Widget *nextView);
-        BlueTooth &bluetooth;
-        HomeView homeView;
-        SettingsView settingsView;
+        BluetoothSerialPort &bluetoothSerialPort;
+        Home home;
+        Settings settings;
     protected:
         Glib::RefPtr<Gtk::CssProvider> css;
         void switchView(Gtk::Widget *oldview, Gtk::Widget *newview);

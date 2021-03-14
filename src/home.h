@@ -5,10 +5,10 @@
 
 class MainWindow;
 
-class HomeView : public Gtk::Grid {
+class Home : public Gtk::Grid {
     public:
-        HomeView(MainWindow &window);
-        virtual ~HomeView();
+        Home(MainWindow &window);
+        virtual ~Home();
     protected:
         class BigButton : public Gtk::Button
         {

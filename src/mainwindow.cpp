@@ -1,8 +1,6 @@
 // vim: ts=4:sw=4:et
 
 #include "mainwindow.h"
-#include "homeview.h"
-#include "settingsview.h"
 #include <iostream>
 
 void MainWindow::showView(Gtk::Widget &view)
@@ -29,9 +27,9 @@ void MainWindow::switchView(Gtk::Widget *oldview, Gtk::Widget *newview)
 }
 
 MainWindow::MainWindow() :
-    homeView{*this},
-    settingsView{*this},
-    bluetooth{BlueTooth::get_instance()}
+    home{*this},
+    settings{*this},
+    bluetoothSerialPort{BluetoothSerialPort::get_instance()}
 {
     css = Gtk::CssProvider::create();
     css->load_from_resource("/stylesheets/appstyle.css");
@@ -40,7 +38,7 @@ MainWindow::MainWindow() :
                                  GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
     
     set_name("mainwindow");
-    showView(homeView);
+    showView(home);
 }
 
 MainWindow::~MainWindow()

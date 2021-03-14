@@ -1,8 +1,6 @@
-#include "settingsview.h"
 #include "mainwindow.h"
-#include <iostream>
 
-SettingsView::SettingsView(MainWindow &window) :
+Settings::Settings(MainWindow &window) :
    Box{Gtk::Orientation::VERTICAL, 0},
    main_window{window},
    homeButton{"🏠⮨"},
@@ -14,11 +12,10 @@ SettingsView::SettingsView(MainWindow &window) :
    btScanLabel{"Searching for Bluetooth Devices: "},
    btDeviceScan{"🔍"}
 {
-    std::cout << "Creating SettingsView." << std::endl;
     set_name("settingsview");
 
     //Top row, return home button
-    main_window.connect_view_button(homeButton, this, &main_window.homeView);
+    main_window.connect_view_button(homeButton, this, &main_window.home);
     append(topRow);
     topRow.append(homeButton);
     //topRow.set_layout(Gtk::BUTTONBOX_START);
@@ -30,8 +27,8 @@ SettingsView::SettingsView(MainWindow &window) :
     serial_rb.set_group(bluetooth_rb);  //link radio buttons together
     connectionGrid.attach(bluetooth_rb,0,0);
     connectionGrid.attach(serial_rb,1,0);
-    bluetooth_rb.signal_toggled().connect(sigc::mem_fun(*this, &SettingsView::selectBluetooth));
-    serial_rb.signal_toggled().connect(sigc::mem_fun(*this, &SettingsView::selectSerial));
+    bluetooth_rb.signal_toggled().connect(sigc::mem_fun(*this, &Settings::selectBluetooth));
+    serial_rb.signal_toggled().connect(sigc::mem_fun(*this, &Settings::selectSerial));
 
     //Bluetooth specific options
     //---------------------------
@@ -40,16 +37,16 @@ SettingsView::SettingsView(MainWindow &window) :
     btGrid.attach(btHostCombo,1,0);
 
     btHostCombo.signal_changed().connect(sigc::mem_fun(*this, 
-                                         &SettingsView::selectBluetoothController));
+                                         &Settings::selectBluetoothController));
 
     //Select remote bluetooth device (OBD device):
     btGrid.attach(btDeviceLabel,0,1);
     btGrid.attach(btDeviceCombo,1,1);
     btGrid.attach(btDeviceScan,2,1);
-    btDeviceScan.signal_clicked().connect(sigc::mem_fun(*this, &SettingsView::scanBluetooth));
+    btDeviceScan.signal_clicked().connect(sigc::mem_fun(*this, &Settings::scanBluetooth));
 
     btDeviceCombo.signal_changed().connect(sigc::mem_fun(*this, 
-                                           &SettingsView::selectBluetoothDevice));
+                                           &Settings::selectBluetoothDevice));
 
     btGrid.attach(btScanLabel,0,3);
     btGrid.attach(btScanProgress,1,3);
@@ -85,9 +82,9 @@ SettingsView::SettingsView(MainWindow &window) :
     }
 }
 
-SettingsView::~SettingsView() {}
+Settings::~Settings() {}
 
-void SettingsView::selectBluetooth()
+void Settings::selectBluetooth()
 {
     serialGrid.hide();
     btGrid.show();
@@ -95,7 +92,7 @@ void SettingsView::selectBluetooth()
         settings->set_enum("interface-type", BLUETOOTH_IF);
 }
 
-void SettingsView::selectSerial()
+void Settings::selectSerial()
 {
     btGrid.hide();
     serialGrid.show();
@@ -103,7 +100,7 @@ void SettingsView::selectSerial()
         settings->set_enum("interface-type", SERIAL_IF);
 }
 
-void SettingsView::selectBluetoothController()
+void Settings::selectBluetoothController()
 {
     auto bluetoothController = settings->get_string("bluetooth-controller");
     auto newBluetoothController = btHostCombo.get_active_text();
@@ -111,10 +108,10 @@ void SettingsView::selectBluetoothController()
     {
         settings->set_string("bluetooth-controller", newBluetoothController);
     }
-    main_window.bluetooth.select_controller(newBluetoothController);
+    main_window.bluetoothSerialPort.select_controller(newBluetoothController);
 }
 
-void SettingsView::selectBluetoothDevice()
+void Settings::selectBluetoothDevice()
 {
     auto defaultAddress = settings->get_string("selected-device-address");
     auto activeDevice = btDeviceCombo.get_active_values();
@@ -126,9 +123,9 @@ void SettingsView::selectBluetoothDevice()
     }
 }
 
-void SettingsView::scanComplete()
+void Settings::scanComplete()
 {
-    BlueTooth &bt = main_window.bluetooth;
+    BluetoothSerialPort &bt = main_window.bluetoothSerialPort;
 
     //Update Combo Box
     auto devices = bt.get_device_names_addresses();
@@ -157,7 +154,7 @@ void SettingsView::scanComplete()
     btDeviceScan.show();
 }
 
-void SettingsView::updateScanProgress(int percentComplete)
+void Settings::updateScanProgress(int percentComplete)
 {
     if(percentComplete == 100)
         scanComplete();
@@ -165,11 +162,11 @@ void SettingsView::updateScanProgress(int percentComplete)
         btScanProgress.set_fraction(percentComplete / 100.0);
 }
 
-void SettingsView::scanBluetooth()
+void Settings::scanBluetooth()
 {
-    BlueTooth &bt = main_window.bluetooth;
+    BluetoothSerialPort &bt = main_window.bluetoothSerialPort;
     btScanConnection = bt.signal_probe_progress().connect(
-                       sigc::mem_fun(*this, &SettingsView::updateScanProgress));
+                       sigc::mem_fun(*this, &Settings::updateScanProgress));
 
     btScanProgress.set_fraction(0.0);
     btScanLabel.show();
@@ -182,10 +179,10 @@ void SettingsView::scanBluetooth()
     bt.probe_remote_devices();
 }
 
-void SettingsView::on_show()
+void Settings::on_show()
 {
     //Populate Combo Box:
-    auto controllers = main_window.bluetooth.get_controller_names();
+    auto controllers = main_window.bluetoothSerialPort.get_controller_names();
     btHostCombo.remove_all();
 
     auto selectedController = settings->get_string("bluetooth-controller");

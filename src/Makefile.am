@@ -1,15 +1,15 @@
 bin_PROGRAMS = neonobd
 neonobd_SOURCES = \
 	mainwindow.cpp \
-	homeview.cpp \
-	obd-bluetooth-dbus.cpp \
+	home.cpp \
+	bluetooth-serial-port.cpp \
 	neonobd.cpp \
-	settingsview.cpp \
+	settings.cpp \
 	combobox.h \
-	homeview.h \
+	home.h \
 	mainwindow.h \
-	obd-bluetooth-dbus.h \
-	settingsview.h \
+	bluetooth-serial-port.h \
+	settings.h \
 	waitdialog.h \
 	app.gresource.xml \
 	appstyle.css \

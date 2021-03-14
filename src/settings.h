@@ -5,10 +5,10 @@
 
 class MainWindow;
 
-class SettingsView : public Gtk::Box {
+class Settings : public Gtk::Box {
     public:
-        SettingsView(MainWindow &window);
-        virtual ~SettingsView();
+        Settings(MainWindow &window);
+        virtual ~Settings();
     protected:
         MainWindow            & main_window;
         Gtk::Box                topRow;

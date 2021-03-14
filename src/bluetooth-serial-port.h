@@ -6,11 +6,11 @@
 #include <map>
 #include <giomm.h>
 
-class BlueTooth {
+class BluetoothSerialPort {
     public:
-        static BlueTooth & get_instance()
+        static BluetoothSerialPort & get_instance()
         {
-            static BlueTooth bt;
+            static BluetoothSerialPort bt;
             return bt;
         }
 
@@ -80,10 +80,10 @@ class BlueTooth {
         using AsyncResult = Glib::RefPtr<Gio::AsyncResult>;
         using MethodInvocation = Glib::RefPtr<Gio::DBus::MethodInvocation>;
 
-        BlueTooth();
-        BlueTooth(const BlueTooth&) = delete;
-        void operator=(const BlueTooth&) = delete;
-        ~BlueTooth();
+        BluetoothSerialPort();
+        BluetoothSerialPort(const BluetoothSerialPort&) = delete;
+        void operator=(const BluetoothSerialPort&) = delete;
+        ~BluetoothSerialPort();
         ProxyMap controllers;
         ProxyMap remoteDevices;
         Proxy selected_controller;
