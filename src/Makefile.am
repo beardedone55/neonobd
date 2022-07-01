@@ -11,6 +11,7 @@ neonobd_SOURCES = \
 	bluetooth-serial-port.h \
 	settings.h \
 	waitdialog.h \
+	hardware-interface.h \
 	app.gresource.xml \
 	appstyle.css \
 	$(gsettings_SCHEMAS)

@@ -1,0 +1,12 @@
+<svg width="400" height="200" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur result="blurOut" in="SourceGraphic" stdDeviation="10" />
+            <feBlend in="SourceGraphic" in2="blurOut" mode="normal"/>
+        </filter>
+    </defs>
+    <rect width="100%" height="100%" fill="black" />
+    <circle cx="100" cy="100" r="50" fill="none" stroke="skyblue" stroke-width="10" filter="url(#glow)"/>
+    <circle cx="300" cy="100" r="50" fill="none" stroke="skyblue" stroke-width="10" />
+
+</svg>

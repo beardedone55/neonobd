@@ -1,6 +1,8 @@
 #include "bluetooth-serial-port.h"
 #include <unistd.h>
 #include <iostream>
+#include <mutex>
+#include <sys/socket.h>
 
 BluetoothSerialPort::BluetoothSerialPort() :
     probe_in_progress{false},
@@ -18,13 +20,67 @@ BluetoothSerialPort::BluetoothSerialPort() :
 
 BluetoothSerialPort::~BluetoothSerialPort()
 {
+    std::unique_lock lock(sock_fd_mutex);
     if(sock_fd >= -1)
         close(sock_fd);
 }
 
+bool BluetoothSerialPort::connect()
+{
+    return false;
+}
+
+std::vector<char>::size_type 
+BluetoothSerialPort::read(std::vector<char> & buf,
+                          std::vector<char>::size_type buf_size,
+                          HardwareInterface::Flags flags)
+{
+    std::shared_lock lock(sock_fd_mutex);
+    if (sock_fd >= 0)
+    {
+        buf.resize(buf_size);
+        return recv(sock_fd, buf.data(), buf_size * sizeof(char), 0);
+    }
+    return 0;
+}
+
+std::vector<char>::size_type BluetoothSerialPort::write(const std::vector<char> & buf)
+{
+    std::shared_lock lock(sock_fd_mutex);
+    if (sock_fd >= 0)
+    {
+        return send(sock_fd, buf.data(), buf.size() * sizeof(char), 0);
+    }
+    return 0;
+}
+
+std::size_t 
+BluetoothSerialPort::read(std::string & buf,
+                          std::size_t buf_size,
+                          HardwareInterface::Flags flags)
+{
+    std::shared_lock lock(sock_fd_mutex);
+    if (sock_fd >= 0)
+    {
+        buf.resize(buf_size);
+        return recv(sock_fd, buf.data(), buf.size(), 0);
+    }
+    return 0;
+}
+
+std::size_t BluetoothSerialPort::write(const std::string & buf)
+{
+    std::shared_lock lock(sock_fd_mutex);
+    if (sock_fd >= 0)
+    {
+        return send(sock_fd, buf.data(), buf.size(), 0);
+    }
+    return 0;
+}
+
 #define add_object(obj) add_remove_object(obj, true)
 
-void BluetoothSerialPort::manager_created(AsyncResult & result)
+void BluetoothSerialPort::manager_created(AsyncResultPtr & result)
 {
     try
     {
@@ -54,17 +110,17 @@ void BluetoothSerialPort::manager_created(AsyncResult & result)
     register_agent();
 }
 
-BluetoothSerialPort::Proxy
-BluetoothSerialPort::get_interface(const DBusObject &obj,
+BluetoothSerialPort::ProxyPtr
+BluetoothSerialPort::get_interface(const DBusObjectPtr &obj,
                          const Glib::ustring &name)
 {
     return std::dynamic_pointer_cast<Gio::DBus::Proxy>(obj->get_interface(name));
 }
 
-bool BluetoothSerialPort::update_object_list(const DBusObject &obj,
+bool BluetoothSerialPort::update_object_list(const DBusObjectPtr &obj,
                                    ProxyMap &proxy_map,
                                    const Glib::ustring &interface_name,
-                                   Glib::ustring(*name_func)(const Proxy&),
+                                   Glib::ustring(*name_func)(const ProxyPtr&),
                                    bool addObject)
 {
     auto interface = get_interface(obj, interface_name);
@@ -79,13 +135,13 @@ bool BluetoothSerialPort::update_object_list(const DBusObject &obj,
     return false;
 }
 
-Glib::ustring BluetoothSerialPort::controller_name(const Proxy &proxy)
+Glib::ustring BluetoothSerialPort::controller_name(const ProxyPtr &proxy)
 {
     //controllers will be identified by the object path for now
     return proxy->get_object_path(); 
 } 
 
-Glib::ustring BluetoothSerialPort::device_name(const Proxy &proxy)
+Glib::ustring BluetoothSerialPort::device_name(const ProxyPtr &proxy)
 {
     //Each device will be identified by its address,
     //since it is guaranteed to be unique.
@@ -94,8 +150,8 @@ Glib::ustring BluetoothSerialPort::device_name(const Proxy &proxy)
     return address.get();
 } 
 
-void BluetoothSerialPort::update_default_interface(const DBusObject &obj,
-                                         Proxy &default_interface,
+void BluetoothSerialPort::update_default_interface(const DBusObjectPtr &obj,
+                                         ProxyPtr &default_interface,
                                          const Glib::ustring & interface_name,
                                          bool addObject)
 {
@@ -109,7 +165,7 @@ void BluetoothSerialPort::update_default_interface(const DBusObject &obj,
     }
 }
 
-void BluetoothSerialPort::add_remove_object(const DBusObject & obj,
+void BluetoothSerialPort::add_remove_object(const DBusObjectPtr & obj,
                                   bool addObject)
 {
     //Object was added or removed.  Check if it is an adapter
@@ -151,8 +207,8 @@ void BluetoothSerialPort::emit_probe_progress(int percentComplete)
     probe_progress_signal.emit(percentComplete);
 }
 
-void BluetoothSerialPort::stop_probe_finish(AsyncResult & result,
-                                  Proxy controller)
+void BluetoothSerialPort::stop_probe_finish(AsyncResultPtr & result,
+                                  ProxyPtr controller)
 {
     try { controller->call_finish(result); }
     catch(Glib::Error e) { error(e.what()); }
@@ -185,9 +241,9 @@ bool BluetoothSerialPort::update_probe_progress()
     return true;
 }
 
-void BluetoothSerialPort::probe_finish(AsyncResult & result,
+void BluetoothSerialPort::probe_finish(AsyncResultPtr & result,
                              unsigned int timeout,
-                             Proxy controller)
+                             ProxyPtr controller)
 {
     //StartDiscovery command issued; now wait for timeout
     try { controller->call_finish(result); }
@@ -244,7 +300,7 @@ BluetoothSerialPort::get_device_names_addresses()
 }
 
 Glib::ustring 
-BluetoothSerialPort::get_property_value(const Proxy &proxy,
+BluetoothSerialPort::get_property_value(const ProxyPtr &proxy,
                               const Glib::ustring &property_name)
 {
     Glib::Variant<Glib::ustring> property;
@@ -286,10 +342,13 @@ void BluetoothSerialPort::error(const Glib::ustring &err_msg)
 }
 
 constexpr auto OBJECT_PATH = "/com/github/beardedone55/bluetooth_serial";
+
+//Bluetooth profile UUID for Serial Port Profile (SPP)
+//See https://www.bluetooth.com/specifications/assigned-numbers/service-discovery/
 constexpr auto SERIAL_PORT_UUID = "00001101-0000-1000-8000-00805f9b34fb";
 
-void BluetoothSerialPort::register_complete(AsyncResult & result,
-                                  Proxy manager)
+void BluetoothSerialPort::register_complete(AsyncResultPtr & result,
+                                  ProxyPtr manager)
 {
     //RegisterAgent and RegisterProfile don't
     //return anything.  This just checks if there were
@@ -310,7 +369,7 @@ void BluetoothSerialPort::register_profile()
     std::vector<Glib::VariantBase> register_profile_params;
 
     //String profile
-    auto profile = Glib::Variant<Glib::DBusObjectPathString>::create(OBJECT_PATH);
+    auto profile = Glib::Variant<Glib::DBusObjectPtrPathString>::create(OBJECT_PATH);
     register_profile_params.push_back(profile);
 
     //String uuid
@@ -352,7 +411,7 @@ void BluetoothSerialPort::register_agent()
         Glib::VariantContainerBase::create_tuple(
             std::vector<Glib::VariantBase>(
             {
-                Glib::Variant<Glib::DBusObjectPathString>::create(OBJECT_PATH),
+                Glib::Variant<Glib::DBusObjectPtrPathString>::create(OBJECT_PATH),
                 Glib::Variant<Glib::ustring>::create("KeyboardDisplay"),
             }));
 
@@ -389,6 +448,7 @@ constexpr auto Agent1_definition =
 "     </method>"
 "     <method name='RequestPasskey'>"
 "        <arg type='o' name='device' direction='in'/>"
+"        <arg type='q' name='device' direction='out'/>"
 "     </method>"
 "     <method name='DisplayPasskey'>"
 "        <arg type='o' name='device' direction='in'/>"
@@ -418,35 +478,40 @@ BluetoothSerialPort::agent_method(const Glib::RefPtr<Gio::DBus::Connection>&,
                         const Glib::ustring & interface_name,
                         const Glib::ustring & method_name,
                         const Glib::VariantContainerBase& parameters,
-                        const MethodInvocation & invocation)
+                        const MethodInvocationPtr & invocation)
 {
     if(method_name == "RequestPinCode")
     {
-        request_pairing_info(parameters, invocation, request_pin_invocation, request_pin_code);
-        //User that connected slot to request_pin_code must call send_pin_code().
+        Glib::Variant<Glib::DBusObjectPtrPathString> device_path;
+        parameters.get_child(device_path, 0);
+        request_from_user("Enter Pin Code for " + device_path + ".", "s", invocation);
         return;
     }
+
     if(method_name == "RequestPasskey")
     {
-        request_pairing_info(parameters, invocation, request_passkey_invocation, request_pass_key);
-        //User that connected slot to request_pass_key must call send_pass_key().
+        Glib::Variant<Glib::DBusObjectPtrPathString> device_path;
+        parameters.get_child(device_path, 0);
+        request_from_user("Enter Passkey (0-9999999) for " + device_path + ".", "q", invocation);
         return;
     }
+
     if(method_name == "DisplayPinCode")
     {
-        Glib::Variant<Glib::DBusObjectPathString> device_path;
+        Glib::Variant<Glib::DBusObjectPtrPathString> device_path;
         parameters.get_child(device_path, 0);
 
         Glib::Variant<Glib::ustring> pin_code;
         parameters.get_child(pin_code, 1);
 
-        display_pin_code.emit(device_path.get(), pin_code.get());
+        request_from_user("Pin Code for " + device_path + " is " + pin_code + ".", "", {});
         invocation->return_value({});
         return;
     }
+
     if(method_name == "DisplayPasskey")
     {
-        Glib::Variant<Glib::DBusObjectPathString> device_path;
+        Glib::Variant<Glib::DBusObjectPtrPathString> device_path;
         parameters.get_child(device_path, 0);
 
         Glib::Variant<guint32> pass_key;
@@ -455,46 +520,31 @@ BluetoothSerialPort::agent_method(const Glib::RefPtr<Gio::DBus::Connection>&,
         Glib::Variant<guint16> entered;
         parameters.get_child(entered, 2);
 
-        display_pass_key.emit(device_path.get(), pass_key.get(), entered.get());
+        request_from_user("Passkey for " + device_path + " is " + Glib::ustring::format(std::setw(6), pass_key) + ".", "", {});
         invocation->return_value({});
         return;
     }
+
     if(method_name == "RequestConfirmation")
     {
-        if(!request_confirmation.empty())
-        {
-            //Grab reference to MethodInvocation.
-            //It will be used when user responds to request.
-            request_confirmation_invocation = invocation;
+        Glib::Variant<Glib::DBusObjectPtrPathString> device_path;
+        parameters.get_child(device_path, 0);
 
-            Glib::Variant<Glib::DBusObjectPathString> device_path;
-            parameters.get_child(device_path, 0);
+        Glib::Variant<guint32> pass_key;
+        parameters.get_child(pass_key, 1);
+        request_from_user("Confirm Passkey for " + device_path + " is " + Glib::ustring::format(std::setw(6), pass_key) + ".", "b", invocation);
 
-            Glib::Variant<guint32> pass_key;
-            parameters.get_child(pass_key, 1);
-
-            request_confirmation.emit(device_path.get(), pass_key.get());
-            //User is responsible for invoking send_confirmation()
-            //to complete operation.
-        }
-        else
-        {
-            //No one has registered with the signal.
-            //Return an error.
-            Gio::DBus::Error error(Gio::DBus::Error::FAILED, "org.bluez.Error.Rejected");
-            invocation->return_error(error);
-        }
         return;
     }
+
     if(method_name == "RequestAuthorization")
     {
-        request_pairing_info(parameters, invocation,
-                             request_authorization_invocation,
-                             request_authorization);
-        //User that connected slot to request_authorization must
-        //call send_authorization()
+        Glib::Variant<Glib::DBusObjectPtrPathString> device_path;
+        parameters.get_child(device_path, 0);
+        request_from_user("Authorize Connection to Device " + device_path + "?", "b", invocation);
         return;
     }
+
     if(method_name == "AuthorizeService")
     {
         //I don't know what this is supposed to do, so we'll just
@@ -502,35 +552,28 @@ BluetoothSerialPort::agent_method(const Glib::RefPtr<Gio::DBus::Connection>&,
         Gio::DBus::Error error(Gio::DBus::Error::FAILED, "org.bluez.Error.Rejected");
         invocation->return_error(error);
     }
+
     if(method_name == "Cancel")
     {
-        agent_cancel.emit();
+        request_from_user("", "", {});
         invocation->return_value({});
     }
 }
 
 void
-BluetoothSerialPort::request_pairing_info(const Glib::VariantContainerBase & parameters,
-                                const MethodInvocation & invocation,
-                                MethodInvocation & saved_invocation,
-                                sigc::signal<void(Glib::ustring)> &signal)
+BluetoothSerialPort::request_from_user(const Glib::ustring & message,
+                                       std::string responseType,
+                                       MethodInvocationPtr & invocation)
 {
-    //This function does the work for "RequestPinCode", "RequestPasskey",
-    //and "RequestAuthorization".  It is not used for "RequestConfirmation"
-    //because that method has to pass a passkey along with the object
-    //path, so the user can verify it.
+    //This message emits a signal that should solicit a response from the
+    //user. It does the work for "RequestPinCode", "RequestPasskey",
+    //"RequestAuthorization", and "RequestConfirmation".
 
-    if(!signal.empty())
+    if(!request_user_input.empty())
     {
-        //Grab reference to MethodInvocation.
-        //It will be used when user responds to request.
-        saved_invocation = invocation;
 
-        Glib::Variant<Glib::DBusObjectPathString> device_path;
-        parameters.get_child(device_path, 0);
-
-        signal.emit(device_path.get());
-        //User is responsible for invoking response method (e.g., send_pin_code)
+        request_user_input.emit(message, Glib::VariantType(responseType), invocation);
+        //User is responsible for invoking respond_from_user()
         //to complete operation.
     }
     else
@@ -542,53 +585,29 @@ BluetoothSerialPort::request_pairing_info(const Glib::VariantContainerBase & par
     }
 }
 
-void BluetoothSerialPort::send_pin_code(const Glib::ustring &pin_code)
+void BluetoothSerialPort::respond_from_user(const Glib::VariantBase & response,
+                                            const Glib::RefPtr<void> &signal_handle)
 {
-    dbus_return(request_pin_invocation, pin_code);
-}
-
-void BluetoothSerialPort::send_pass_key(guint32 pass_key)
-{
-    dbus_return(request_passkey_invocation, pass_key);
-}
-
-void BluetoothSerialPort::dbus_confirm_request(bool confirmed,
-                                     MethodInvocation & invocation)
-{
+    const auto invocation = std::dynamic_pointer_cast<Gio::DBus::MethodInvocation>(signal_handle);
     if(invocation)
     {
-        if(confirmed)
-            invocation->return_value({});
+        if(response && response.is_of_type(Glib::VariantType("b")))
+        {
+            const auto *bool_response = std::dynamic_cast<Glib::Variant<bool>>(&response);
+            if(bool_response && bool_response->get())
+            {
+                invocation->return_value({});
+            }
+            else
+            {
+                Gio::DBus::Error error(Gio::DBus::Error::FAILED, "org.bluez.Error.Rejected");
+                invocation->return_error(error);
+            }
+        }
         else
         {
-            Gio::DBus::Error error(Gio::DBus::Error::FAILED, "org.bluez.Error.Rejected");
-            invocation->return_error(error);
+            invocation->return_value(Glib::VariantContainerBase::create_tuple(response));
         }
-        invocation.reset();
-    }
-}
-
-void BluetoothSerialPort::send_confirmation(bool confirmed)
-{
-    dbus_confirm_request(confirmed, request_confirmation_invocation);
-}
-
-void BluetoothSerialPort::send_authorization(bool authorized)
-{
-    dbus_confirm_request(authorized, request_authorization_invocation);
-}
-
-template <typename T>
-void BluetoothSerialPort::dbus_return(MethodInvocation & invocation,
-                            const T &return_value)
-{
-    if(invocation) //If we are expecting to return something
-    {
-        auto ret = Glib::VariantContainerBase::create_tuple(
-                      Glib::Variant<T>::create(return_value));
-
-        invocation->return_value(ret);
-        invocation.reset(); //Drop reference to MethodInvocation
     }
 }
 
@@ -621,7 +640,7 @@ BluetoothSerialPort::profile_method(const Glib::RefPtr<Gio::DBus::Connection>&,
                           const Glib::ustring & interface_name,
                           const Glib::ustring & method_name,
                           const Glib::VariantContainerBase& parameters,
-                          const MethodInvocation & invocation)
+                          const MethodInvocationPtr & invocation)
 {
 
     if(method_name == "NewConnection")
@@ -632,7 +651,7 @@ BluetoothSerialPort::profile_method(const Glib::RefPtr<Gio::DBus::Connection>&,
         //   fd_properties
 
         //1st parameter is object path
-        Glib::Variant<Glib::DBusObjectPathString> obj_path;
+        Glib::Variant<Glib::DBusObjectPtrPathString> obj_path;
         parameters.get_child(obj_path, 0);
         connected_device_path = obj_path.get();
 
@@ -646,8 +665,10 @@ BluetoothSerialPort::profile_method(const Glib::RefPtr<Gio::DBus::Connection>&,
         {
             //Grab the socket, so we can communicate with
             //device, and return to acknowlege connection.
-            sock_fd = fd_list->get(fd_index.get());
-
+            {
+                std::unique_lock lock(sock_fd_mutex);
+                sock_fd = fd_list->get(fd_index.get());
+            }
             //Returns: void
             invocation->return_value({});
         }
@@ -666,14 +687,16 @@ BluetoothSerialPort::profile_method(const Glib::RefPtr<Gio::DBus::Connection>&,
     {
         //Parameters:
         //  device
-        Glib::Variant<Glib::DBusObjectPathString> obj_path;
+        Glib::Variant<Glib::DBusObjectPtrPathString> obj_path;
         parameters.get_child(obj_path, 0);
 
         if(sock_fd >= 0 && obj_path.get() == connected_device_path)
         {
-            close(sock_fd);
-            sock_fd = -1;
-
+            {
+                std::unique_lock lock(sock_fd_mutex);
+                close(sock_fd);
+                sock_fd = -1;
+            }
             //Returns void
             invocation->return_value({});
         }
