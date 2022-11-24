@@ -1,6 +1,9 @@
+/* Copyright 2022 - Brian LePage */
+
 #pragma once
 #include <vector>
 #include <string>
+#include <giomm.h>
 
 class HardwareInterface {
     public:
@@ -15,7 +18,7 @@ class HardwareInterface {
         virtual bool connect(const sigc::slot<void(bool)> & connect_complete,
                              const sigc::slot<void(Glib::ustring, ResponseType, const void*)> & user_prompt) = 0;
         virtual void respond_from_user(const Glib::VariantBase & response,
-                                       const void* signal_handle) = 0;
+                                       const Glib::RefPtr<Glib::Object>  & signal_handle) = 0;
         virtual std::vector<char>::size_type read(std::vector<char> & buf,
                                                   std::vector<char>::size_type buf_size = 1024,
                                                   Flags flags = FLAGS_NONE) = 0; 

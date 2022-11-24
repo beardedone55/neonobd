@@ -2,10 +2,7 @@
 
 #include "hardware-interface.h"
 #include <cstdint>
-#include <vector>
-#include <string>
 #include <map>
-#include <giomm.h>
 #include <shared_mutex>
 
 class BluetoothSerialPort : public HardwareInterface {
@@ -18,9 +15,9 @@ class BluetoothSerialPort : public HardwareInterface {
 
         //HardwareInterface overrides
         bool connect(const sigc::slot<void(bool)> & connect_complete,
-                     const sigc::slot<void(Glib::ustring, Glib::VariantType, Glib::RefPtr<void> & user_prompt)>) override;
+                     const sigc::slot<void(Glib::ustring, ResponseType, const void*)> & user_prompt) override;
         void respond_from_user(const Glib::VariantBase & response,
-                               const Glib::RefPtr<void> &signal_handle) override;
+                               const Glib::RefPtr<Glib::Object> & signal_handle) override;
         std::vector<char>::size_type read(std::vector<char> & buf, 
                                           std::vector<char>::size_type buf_size = 1024,
                                           HardwareInterface::Flags flags = HardwareInterface::FLAGS_NONE) override;
@@ -187,5 +184,8 @@ class BluetoothSerialPort : public HardwareInterface {
                                   Glib::RefPtr<Gio::DBus::MethodInvocation> & invocation);
 
         void error(const Glib::ustring &err_msg);
+        void request_from_user(const Glib::ustring & message,
+                               std::string responseType,
+                               const MethodInvocationPtr & invocation);
 };
 

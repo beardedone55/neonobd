@@ -2,14 +2,14 @@
 
 #include "waitdialog.h"
 
-WaitDialog::WaitDialog(Glib::ustring &name, Glib::ustring &text) :
+WaitDialog::WaitDialog(const Glib::ustring &name, const Glib::ustring &text) :
     message{text},
     Gtk::Dialog{name, true}
 {
     Gtk::Box *content_area = get_content_area();
     
-    content_area->add(message);
-    content_area->add(progress);    
+    content_area->append(message);
+    content_area->append(progress);    
 }
 
 WaitDialog::~WaitDialog() { }
