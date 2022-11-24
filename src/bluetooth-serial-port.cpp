@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <iostream>
 #include <mutex>
+#include <iomanip>
 #include <sys/socket.h>
 
 BluetoothSerialPort::BluetoothSerialPort() :
@@ -25,7 +26,8 @@ BluetoothSerialPort::~BluetoothSerialPort()
         close(sock_fd);
 }
 
-bool BluetoothSerialPort::connect()
+bool BluetoothSerialPort::connect(const sigc::slot<void(bool)> & connect_complete,
+                                  const sigc::slot<void(Glib::ustring, ResponseType, const void*)> & user_prompt)
 {
     return false;
 }
@@ -369,7 +371,7 @@ void BluetoothSerialPort::register_profile()
     std::vector<Glib::VariantBase> register_profile_params;
 
     //String profile
-    auto profile = Glib::Variant<Glib::DBusObjectPtrPathString>::create(OBJECT_PATH);
+    auto profile = Glib::Variant<Glib::DBusObjectPathString>::create(OBJECT_PATH);
     register_profile_params.push_back(profile);
 
     //String uuid
@@ -411,7 +413,7 @@ void BluetoothSerialPort::register_agent()
         Glib::VariantContainerBase::create_tuple(
             std::vector<Glib::VariantBase>(
             {
-                Glib::Variant<Glib::DBusObjectPtrPathString>::create(OBJECT_PATH),
+                Glib::Variant<Glib::DBusObjectPathString>::create(OBJECT_PATH),
                 Glib::Variant<Glib::ustring>::create("KeyboardDisplay"),
             }));
 
@@ -482,36 +484,36 @@ BluetoothSerialPort::agent_method(const Glib::RefPtr<Gio::DBus::Connection>&,
 {
     if(method_name == "RequestPinCode")
     {
-        Glib::Variant<Glib::DBusObjectPtrPathString> device_path;
+        Glib::Variant<Glib::DBusObjectPathString> device_path;
         parameters.get_child(device_path, 0);
-        request_from_user("Enter Pin Code for " + device_path + ".", "s", invocation);
+        request_from_user("Enter Pin Code for " + device_path.get() + ".", "s", invocation);
         return;
     }
 
     if(method_name == "RequestPasskey")
     {
-        Glib::Variant<Glib::DBusObjectPtrPathString> device_path;
+        Glib::Variant<Glib::DBusObjectPathString> device_path;
         parameters.get_child(device_path, 0);
-        request_from_user("Enter Passkey (0-9999999) for " + device_path + ".", "q", invocation);
+        request_from_user("Enter Passkey (0-9999999) for " + device_path.get() + ".", "q", invocation);
         return;
     }
 
     if(method_name == "DisplayPinCode")
     {
-        Glib::Variant<Glib::DBusObjectPtrPathString> device_path;
+        Glib::Variant<Glib::DBusObjectPathString> device_path;
         parameters.get_child(device_path, 0);
 
         Glib::Variant<Glib::ustring> pin_code;
         parameters.get_child(pin_code, 1);
 
-        request_from_user("Pin Code for " + device_path + " is " + pin_code + ".", "", {});
+        request_from_user("Pin Code for " + device_path.get() + " is " + pin_code.get() + ".", "", {});
         invocation->return_value({});
         return;
     }
 
     if(method_name == "DisplayPasskey")
     {
-        Glib::Variant<Glib::DBusObjectPtrPathString> device_path;
+        Glib::Variant<Glib::DBusObjectPathString> device_path;
         parameters.get_child(device_path, 0);
 
         Glib::Variant<guint32> pass_key;
@@ -520,28 +522,28 @@ BluetoothSerialPort::agent_method(const Glib::RefPtr<Gio::DBus::Connection>&,
         Glib::Variant<guint16> entered;
         parameters.get_child(entered, 2);
 
-        request_from_user("Passkey for " + device_path + " is " + Glib::ustring::format(std::setw(6), pass_key) + ".", "", {});
+        request_from_user("Passkey for " + device_path.get() + " is " + Glib::ustring::format(std::setfill(L'0'),std::setw(6), pass_key.get()) + ".", "", {});
         invocation->return_value({});
         return;
     }
 
     if(method_name == "RequestConfirmation")
     {
-        Glib::Variant<Glib::DBusObjectPtrPathString> device_path;
+        Glib::Variant<Glib::DBusObjectPathString> device_path;
         parameters.get_child(device_path, 0);
 
         Glib::Variant<guint32> pass_key;
         parameters.get_child(pass_key, 1);
-        request_from_user("Confirm Passkey for " + device_path + " is " + Glib::ustring::format(std::setw(6), pass_key) + ".", "b", invocation);
+        request_from_user("Confirm Passkey for " + device_path.get() + " is " + Glib::ustring::format(std::setw(6), pass_key.get()) + ".", "b", invocation);
 
         return;
     }
 
     if(method_name == "RequestAuthorization")
     {
-        Glib::Variant<Glib::DBusObjectPtrPathString> device_path;
+        Glib::Variant<Glib::DBusObjectPathString> device_path;
         parameters.get_child(device_path, 0);
-        request_from_user("Authorize Connection to Device " + device_path + "?", "b", invocation);
+        request_from_user("Authorize Connection to Device " + device_path.get() + "?", "b", invocation);
         return;
     }
 
@@ -563,7 +565,7 @@ BluetoothSerialPort::agent_method(const Glib::RefPtr<Gio::DBus::Connection>&,
 void
 BluetoothSerialPort::request_from_user(const Glib::ustring & message,
                                        std::string responseType,
-                                       MethodInvocationPtr & invocation)
+                                       const MethodInvocationPtr & invocation)
 {
     //This message emits a signal that should solicit a response from the
     //user. It does the work for "RequestPinCode", "RequestPasskey",
@@ -586,15 +588,15 @@ BluetoothSerialPort::request_from_user(const Glib::ustring & message,
 }
 
 void BluetoothSerialPort::respond_from_user(const Glib::VariantBase & response,
-                                            const Glib::RefPtr<void> &signal_handle)
+                                            const Glib::RefPtr<Glib::Object> & signal_handle)
 {
     const auto invocation = std::dynamic_pointer_cast<Gio::DBus::MethodInvocation>(signal_handle);
     if(invocation)
     {
         if(response && response.is_of_type(Glib::VariantType("b")))
         {
-            const auto *bool_response = std::dynamic_cast<Glib::Variant<bool>>(&response);
-            if(bool_response && bool_response->get())
+            auto & bool_response = Glib::VariantBase::cast_dynamic<const Glib::Variant<bool>>(response);
+            if(bool_response && bool_response.get())
             {
                 invocation->return_value({});
             }
@@ -651,7 +653,7 @@ BluetoothSerialPort::profile_method(const Glib::RefPtr<Gio::DBus::Connection>&,
         //   fd_properties
 
         //1st parameter is object path
-        Glib::Variant<Glib::DBusObjectPtrPathString> obj_path;
+        Glib::Variant<Glib::DBusObjectPathString> obj_path;
         parameters.get_child(obj_path, 0);
         connected_device_path = obj_path.get();
 
@@ -687,7 +689,7 @@ BluetoothSerialPort::profile_method(const Glib::RefPtr<Gio::DBus::Connection>&,
     {
         //Parameters:
         //  device
-        Glib::Variant<Glib::DBusObjectPtrPathString> obj_path;
+        Glib::Variant<Glib::DBusObjectPathString> obj_path;
         parameters.get_child(obj_path, 0);
 
         if(sock_fd >= 0 && obj_path.get() == connected_device_path)

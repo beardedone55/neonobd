@@ -11,15 +11,15 @@
 class WaitDialog : Gtk::Dialog
 {
     public:
-        WaitDialog(Glib::ustring &name = "",
-                   Glib::ustring &text = "");
+        WaitDialog(const Glib::ustring &name = "",
+                   const Glib::ustring &text = "");
 
         ~WaitDialog();
 
     private:
         Gtk::Label message;
         Gtk::ProgressBar progress;
-}
+};
 
 
 
