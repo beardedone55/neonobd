@@ -16,6 +16,7 @@
  */
 
 #include "bluetooth-serial-port.h"
+#include "logger.h"
 #include <unistd.h>
 #include <iostream>
 #include <mutex>
@@ -34,6 +35,8 @@ BluetoothSerialPort::BluetoothSerialPort() :
     Gio::DBus::ObjectManagerClient::create_for_bus(
             Gio::DBus::BusType::SYSTEM,
             "org.bluez", "/", sigc::mem_fun(*this, &BluetoothSerialPort::manager_created));
+
+    Logger::debug("Created BluetoothSerialPort.");
 }
 
 BluetoothSerialPort::~BluetoothSerialPort()
@@ -41,6 +44,8 @@ BluetoothSerialPort::~BluetoothSerialPort()
     std::unique_lock lock(sock_fd_mutex);
     if(sock_fd >= -1)
         close(sock_fd);
+
+    Logger::debug("Destroyed BluetoothSerialPort.");
 }
 
 bool BluetoothSerialPort::connect(const sigc::slot<void(bool)> & connect_complete,
@@ -97,8 +102,6 @@ std::size_t BluetoothSerialPort::write(const std::string & buf)
     return 0;
 }
 
-#define add_object(obj) add_remove_object(obj, true)
-
 void BluetoothSerialPort::manager_created(AsyncResultPtr & result)
 {
     try
@@ -107,21 +110,22 @@ void BluetoothSerialPort::manager_created(AsyncResultPtr & result)
     }
     catch(Glib::Error e)
     {
-        error(e.what());
+        Logger::error(e.what());
         return;
     }
     if(manager)
     {
+        Logger::debug("Bluetooth manager created.");
         manager->signal_object_added().connect(
-                sigc::bind(sigc::mem_fun(*this,&BluetoothSerialPort::add_remove_object),
-                           true));
+            sigc::bind(sigc::mem_fun(*this,&BluetoothSerialPort::add_remove_object),
+                        true));
         manager->signal_object_removed().connect(
-                sigc::bind(sigc::mem_fun(*this,&BluetoothSerialPort::add_remove_object),
-                           false));
+               sigc::bind(sigc::mem_fun(*this,&BluetoothSerialPort::add_remove_object),
+                          false));
 
         auto objects = manager->get_objects();
         for(auto &object : objects)
-            add_object(object);
+            add_remove_object(object, true);
     }
     //export_profile();
     //export_agent();
@@ -130,13 +134,13 @@ void BluetoothSerialPort::manager_created(AsyncResultPtr & result)
 }
 
 BluetoothSerialPort::ProxyPtr
-BluetoothSerialPort::get_interface(const DBusObjectPtr &obj,
+BluetoothSerialPort::get_interface(const Glib::RefPtr<Gio::DBus::Object> &obj,
                          const Glib::ustring &name)
 {
     return std::dynamic_pointer_cast<Gio::DBus::Proxy>(obj->get_interface(name));
 }
 
-bool BluetoothSerialPort::update_object_list(const DBusObjectPtr &obj,
+bool BluetoothSerialPort::update_object_list(const Glib::RefPtr<Gio::DBus::Object> &obj,
                                    ProxyMap &proxy_map,
                                    const Glib::ustring &interface_name,
                                    Glib::ustring(*name_func)(const ProxyPtr&),
@@ -145,10 +149,13 @@ bool BluetoothSerialPort::update_object_list(const DBusObjectPtr &obj,
     auto interface = get_interface(obj, interface_name);
     if(interface)
     {
-        if(addObject)
+        if(addObject) {
             proxy_map[name_func(interface)] = interface;
-        else
+            Logger::debug("Bluetooth added " + interface_name + ": " + name_func(interface));
+        } else {
             proxy_map.erase(name_func(interface));
+            Logger::debug("Bluetooth removed " + interface_name + ": " + name_func(interface));
+        }
         return true;
     }
     return false;
@@ -169,7 +176,7 @@ Glib::ustring BluetoothSerialPort::device_name(const ProxyPtr &proxy)
     return address.get();
 } 
 
-void BluetoothSerialPort::update_default_interface(const DBusObjectPtr &obj,
+void BluetoothSerialPort::update_default_interface(const Glib::RefPtr<Gio::DBus::Object> &obj,
                                          ProxyPtr &default_interface,
                                          const Glib::ustring & interface_name,
                                          bool addObject)
@@ -184,7 +191,7 @@ void BluetoothSerialPort::update_default_interface(const DBusObjectPtr &obj,
     }
 }
 
-void BluetoothSerialPort::add_remove_object(const DBusObjectPtr & obj,
+void BluetoothSerialPort::add_remove_object(const Glib::RefPtr<Gio::DBus::Object> & obj,
                                   bool addObject)
 {
     //Object was added or removed.  Check if it is an adapter
@@ -230,7 +237,7 @@ void BluetoothSerialPort::stop_probe_finish(AsyncResultPtr & result,
                                   ProxyPtr controller)
 {
     try { controller->call_finish(result); }
-    catch(Glib::Error e) { error(e.what()); }
+    catch(Glib::Error e) { Logger::error(e.what()); }
 
     emit_probe_progress(100);
 }
@@ -268,7 +275,7 @@ void BluetoothSerialPort::probe_finish(AsyncResultPtr & result,
     try { controller->call_finish(result); }
     catch(Glib::Error e)
     {
-        error(e.what());
+        Logger::error(e.what());
         emit_probe_progress(100);
         return;
     }
@@ -296,7 +303,7 @@ void BluetoothSerialPort::probe_remote_devices(unsigned int probeTime)
     } 
     else 
     {
-        error("No bluetooth controller selected.");
+        Logger::error("No bluetooth controller selected.");
         emit_probe_progress(100);  //Cannot probe devices
     }
 
@@ -355,11 +362,6 @@ std::vector<Glib::ustring> BluetoothSerialPort::get_device_addresses()
     return get_property_values(remoteDevices, "Address");
 }
 
-void BluetoothSerialPort::error(const Glib::ustring &err_msg)
-{
-    std::cout << err_msg << std::endl;
-}
-
 constexpr auto OBJECT_PATH = "/com/github/beardedone55/bluetooth_serial";
 
 //Bluetooth profile UUID for Serial Port Profile (SPP)
@@ -373,7 +375,7 @@ void BluetoothSerialPort::register_complete(AsyncResultPtr & result,
     //return anything.  This just checks if there were
     //errors.
     try {manager->call_finish(result);}
-    catch(Glib::Error e) {error(e.what());}
+    catch(Glib::Error e) {Logger::error(e.what());}
 }
 
 void BluetoothSerialPort::register_profile()

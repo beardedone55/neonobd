@@ -24,14 +24,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 find_package(PkgConfig)
 pkg_check_modules(GTKMM REQUIRED gtkmm-4.0)
 
-add_executable(neonobd neonobd.cpp bluetooth-serial-port.cpp home.cpp mainwindow.cpp settings.cpp waitdialog.cpp resources.c)
+add_executable(neonobd neonobd.cpp bluetooth-serial-port.cpp home.cpp mainwindow.cpp settings.cpp waitdialog.cpp logger.cpp resources.c)
 
 add_custom_command(
     OUTPUT resources.c 
     COMMAND glib-compile-resources --target ${CMAKE_CURRENT_BINARY_DIR}/resources.c --generate-source app.gresource.xml 
     DEPENDS app.gresource.xml appstyle.css
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-   
 
 target_include_directories(neonobd PRIVATE "${PROJECT_SOURCE_DIR}" ${GTKMM_INCLUDE_DIRS})
 

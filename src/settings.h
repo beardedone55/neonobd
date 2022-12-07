@@ -27,7 +27,7 @@ class Settings : public Gtk::Box {
         Settings(MainWindow &window);
         virtual ~Settings();
     protected:
-        MainWindow            & main_window;
+        MainWindow&             main_window;
         Gtk::Box                topRow;
         Gtk::Button             homeButton;
         Gtk::Frame              connectionFrame;
