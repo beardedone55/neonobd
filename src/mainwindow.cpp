@@ -16,10 +16,12 @@
  */
 
 #include "mainwindow.h"
+#include "logger.h"
 #include <iostream>
 
 void MainWindow::showView(Gtk::Widget &view)
 {
+    Logger::debug("MainWindow showing view " + Glib::ustring::format(&view));
     unset_child();
     set_child(view);
     view.set_margin(10);

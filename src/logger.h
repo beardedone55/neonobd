@@ -15,15 +15,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "mainwindow.h"
-#include "logger.h"
-#include <gtkmm/application.h>
+#include <glibmm/ustring.h>
 
-int main(int argc, char *argv[]) {
+class Logger {
+	public:
+		enum LogLevel {DEBUG, WARN, ERR, NONE};
+		static void setLogLevel(LogLevel);
+		static void debug(const Glib::ustring& msg);
+		static void warning(const Glib::ustring& msg);
+		static void error(const Glib::ustring& msg);
+	
+	private:
+		static LogLevel logLevel;
+};
 
-    Logger::setLogLevel(Logger::DEBUG);
-
-    auto app = Gtk::Application::create("com.github.beardedone55.neonobd");
-
-    return app->make_window_and_run<MainWindow>(argc, argv);
-}

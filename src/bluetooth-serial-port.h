@@ -106,7 +106,6 @@ class BluetoothSerialPort : public HardwareInterface {
         using ProxyMap = std::map<Glib::ustring, Glib::RefPtr<Gio::DBus::Proxy>>;
         using ProxyPtr = Glib::RefPtr<Gio::DBus::Proxy>;
         using ObjectManagerPtr = Glib::RefPtr<Gio::DBus::ObjectManagerClient>;
-        using DBusObjectPtr = Glib::RefPtr<Gio::DBus::Object>;
         using AsyncResultPtr = Glib::RefPtr<Gio::AsyncResult>;
         using MethodInvocationPtr = Glib::RefPtr<Gio::DBus::MethodInvocation>;
 
@@ -136,7 +135,7 @@ class BluetoothSerialPort : public HardwareInterface {
         Glib::RefPtr<Gio::DBus::MethodInvocation> request_authorization_invocation;
         //Private Methods
         void manager_created(Glib::RefPtr<Gio::AsyncResult> &result);
-        void add_remove_object(const DBusObjectPtr & obj,
+        void add_remove_object(const Glib::RefPtr<Gio::DBus::Object> & obj,
                                bool addObject);
         void probe_finish(Glib::RefPtr<Gio::AsyncResult>& result, 
                           unsigned int timeout,
@@ -152,13 +151,13 @@ class BluetoothSerialPort : public HardwareInterface {
         Glib::ustring get_property_value(
                           const ProxyPtr &proxy,
                           const Glib::ustring &property_name);
-        ProxyPtr get_interface(const DBusObjectPtr &obj, const Glib::ustring &name);
-        bool update_object_list(const DBusObjectPtr &obj,
+        ProxyPtr get_interface(const Glib::RefPtr<Gio::DBus::Object> &obj, const Glib::ustring &name);
+        bool update_object_list(const Glib::RefPtr<Gio::DBus::Object> &obj,
                                 ProxyMap &proxy_map,
                                 const Glib::ustring &interface_name,
                                 Glib::ustring(*name_func)(const ProxyPtr&),
                                 bool addObject);
-        void update_default_interface(const DBusObjectPtr &obj,
+        void update_default_interface(const Glib::RefPtr<Gio::DBus::Object> &obj,
                                       ProxyPtr &default_interface,
                                       const Glib::ustring & interface_name,
                                       bool addObject);
@@ -200,7 +199,6 @@ class BluetoothSerialPort : public HardwareInterface {
         void dbus_confirm_request(bool confirmed,
                                   Glib::RefPtr<Gio::DBus::MethodInvocation> & invocation);
 
-        void error(const Glib::ustring &err_msg);
         void request_from_user(const Glib::ustring & message,
                                std::string responseType,
                                const MethodInvocationPtr & invocation);

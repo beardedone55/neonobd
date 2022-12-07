@@ -15,15 +15,29 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "mainwindow.h"
+#include <iostream>
 #include "logger.h"
-#include <gtkmm/application.h>
 
-int main(int argc, char *argv[]) {
+Logger::LogLevel Logger::logLevel = Logger::DEBUG;
 
-    Logger::setLogLevel(Logger::DEBUG);
+void Logger::setLogLevel(Logger::LogLevel lvl) {
+	logLevel = lvl;
+}
 
-    auto app = Gtk::Application::create("com.github.beardedone55.neonobd");
+void Logger::debug(const Glib::ustring& msg) {
+	if(logLevel <= DEBUG) {
+		std::clog << "DEBUG: " << msg << '\n';
+	}
+}
 
-    return app->make_window_and_run<MainWindow>(argc, argv);
+void Logger::warning(const Glib::ustring& msg) {
+	if(logLevel <= WARN) {
+		std::clog << "WARNING: " << msg << '\n';
+	}
+}
+
+void Logger::error(const Glib::ustring& msg) {
+	if(logLevel <= ERR) {
+		std::cerr << "ERROR: " << msg << '\n';
+	}
 }
