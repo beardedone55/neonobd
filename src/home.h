@@ -21,21 +21,13 @@
 
 class MainWindow;
 
-class Home : public Gtk::Grid {
+class Home {
     public:
-        Home(MainWindow &window);
-        virtual ~Home();
+        Home(const Glib::RefPtr<Gtk::Builder>& ui, Gtk::Stack* viewStack);
     protected:
-        class BigButton : public Gtk::Button
-        {
-            public:
-                BigButton(const Glib::ustring &);
-                ~BigButton();
-
-        };
-        MainWindow &main_window;
-        BigButton settings_btn;
-        BigButton connect_btn;
+        Gtk::Stack* viewStack;
+        Gtk::Button* settings_btn;
+        Gtk::Button* connect_btn;
 
 };
 

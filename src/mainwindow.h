@@ -19,6 +19,7 @@
 
 #include <gtkmm/window.h>
 #include <gtkmm/cssprovider.h>
+#include <memory>
 
 #include "home.h"
 #include "settings.h"
@@ -28,16 +29,15 @@ class MainWindow : public Gtk::Window
 {
     public:
         MainWindow();
-        virtual ~MainWindow();
-        void connect_view_button(Gtk::Button &button, 
-                                 Gtk::Widget *currentView,
-                                 Gtk::Widget *nextView);
-        BluetoothSerialPort &bluetoothSerialPort;
-        Home home;
-        Settings settings;
+        MainWindow(const MainWindow&) = delete;
+        MainWindow& operator=(const MainWindow&) = delete;
+        virtual ~MainWindow() = default;
+        std::unique_ptr<BluetoothSerialPort> bluetoothSerialPort;
+        std::unique_ptr<Home> home;
+        std::unique_ptr<Settings> settings;
     protected:
         Glib::RefPtr<Gtk::CssProvider> css;
-        void switchView(Gtk::Widget *oldview, Gtk::Widget *newview);
-        void showView(Gtk::Widget &view);
+        Glib::RefPtr<Gtk::Builder> ui;
+        Gtk::Stack *viewStack;
 };
 

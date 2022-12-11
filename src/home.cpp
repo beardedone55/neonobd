@@ -17,28 +17,14 @@
 
 #include "mainwindow.h"
 
-Home::BigButton::BigButton(const Glib::ustring &label = "") : Gtk::Button{label}
+Home::Home(const Glib::RefPtr<Gtk::Builder>& ui, Gtk::Stack* viewStack) : 
+    viewStack{viewStack}
 {
-    get_style_context()->add_class("bigbutton");
+    //Settings button
+    settings_btn = ui->get_widget<Gtk::Button>("settings_button");
+    auto settings_clicked = [this](){this->viewStack->set_visible_child("settings_view");};
+    settings_btn->signal_clicked().connect(settings_clicked);
+
+    //Connect button
+    connect_btn = ui->get_widget<Gtk::Button>("connect_button");
 }
-
-Home::BigButton::~BigButton() {}
-
-Home::Home(MainWindow &window) :
-   settings_btn {"⚙️️"},
-   connect_btn {"🔃"},
-   main_window{window}
-{
-    set_name("homeview");
-    set_row_homogeneous();
-    set_column_homogeneous(true);
-    set_column_spacing(10);
-
-    main_window.connect_view_button(settings_btn, this, &main_window.settings);
-
-    attach(settings_btn, 0, 0);
-    attach(connect_btn, 1, 0);
-    //show_all_children();
-}
-
-Home::~Home() {}
