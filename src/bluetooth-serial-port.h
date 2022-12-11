@@ -104,7 +104,6 @@ class BluetoothSerialPort : public HardwareInterface {
     private:
         using ProxyMap = std::map<Glib::ustring, Glib::RefPtr<Gio::DBus::Proxy>>;
         using ObjectManagerPtr = Glib::RefPtr<Gio::DBus::ObjectManagerClient>;
-        using AsyncResultPtr = Glib::RefPtr<Gio::AsyncResult>;
         using MethodInvocationPtr = Glib::RefPtr<Gio::DBus::MethodInvocation>;
 
         ProxyMap controllers;
@@ -129,11 +128,11 @@ class BluetoothSerialPort : public HardwareInterface {
         Glib::RefPtr<Gio::DBus::MethodInvocation> request_authorization_invocation;
         //Private Methods
         void manager_created(Glib::RefPtr<Gio::AsyncResult>& result);
-        void add_remove_object(const Glib::RefPtr<Gio::DBus::Object>&  obj,
-                               bool addObject);
+        void update_object_state(const Glib::RefPtr<Gio::DBus::Object>&  obj,
+                                 bool addObject);
         void probe_finish(Glib::RefPtr<Gio::AsyncResult>& result, 
                           unsigned int timeout,
-                          Glib::RefPtr<Gio::DBus::Proxy>& controller);
+                          const Glib::RefPtr<Gio::DBus::Proxy>& controller);
         bool update_probe_progress();
         void stop_probe();
         void stop_probe_finish(Glib::RefPtr<Gio::AsyncResult>& result,
@@ -146,11 +145,11 @@ class BluetoothSerialPort : public HardwareInterface {
                           const Glib::RefPtr<Gio::DBus::Proxy>& proxy,
                           const Glib::ustring & property_name);
         Glib::RefPtr<Gio::DBus::Proxy> get_interface(const Glib::RefPtr<Gio::DBus::Object> & obj, const Glib::ustring & name);
-        bool update_object_list(const Glib::RefPtr<Gio::DBus::Object>& obj,
+        /*bool update_object_list(const Glib::RefPtr<Gio::DBus::Object>& obj,
                                 ProxyMap& proxy_map,
                                 const Glib::ustring& interface_name,
                                 Glib::ustring(*name_func)(const Glib::RefPtr<Gio::DBus::Proxy>&),
-                                bool addObject);
+                                bool addObject);*/
         void update_default_interface(const Glib::RefPtr<Gio::DBus::Object>& obj,
                                       Glib::RefPtr<Gio::DBus::Proxy>& default_interface,
                                       const Glib::ustring&  interface_name,

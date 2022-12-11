@@ -66,7 +66,8 @@ Settings::Settings(const Glib::RefPtr<Gtk::Builder>& ui, Gtk::Stack* viewStack,
 
     //Load Settings
     settings = Gio::Settings::create("com.github.beardedone55.neonobd");
-    if(settings->get_enum("interface-type") == BLUETOOTH_IF)
+    iftype = static_cast<InterfaceType>(settings->get_enum("interface-type"));
+    if(iftype)
         bluetooth_rb->set_active();
     else
         serial_rb->set_active();
@@ -87,10 +88,15 @@ Settings::Settings(const Glib::RefPtr<Gtk::Builder>& ui, Gtk::Stack* viewStack,
     }
 }
 
+Settings::InterfaceType Settings::getInterfaceType() {
+    return iftype;
+}
+
 void Settings::selectBluetooth()
 {
     serialGrid->hide();
     btGrid->show();
+    iftype = BLUETOOTH_IF;
     if(settings->get_enum("interface-type") != BLUETOOTH_IF)
         settings->set_enum("interface-type", BLUETOOTH_IF);
 }
@@ -99,6 +105,7 @@ void Settings::selectSerial()
 {
     btGrid->hide();
     serialGrid->show();
+    iftype = SERIAL_IF;
     if(settings->get_enum("interface-type") != SERIAL_IF)
         settings->set_enum("interface-type", SERIAL_IF);
 }
