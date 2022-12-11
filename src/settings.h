@@ -28,7 +28,15 @@ class Settings {
         Settings(const Settings&) = delete;
         Settings& operator=(const Settings&) = delete;
         ~Settings() = default;
-    protected:
+
+        enum InterfaceType {
+            BLUETOOTH_IF = 0,
+            SERIAL_IF = 1
+        };
+
+        InterfaceType getInterfaceType();
+
+    private:
         Glib::RefPtr<Gtk::Builder> ui;
         Gtk::Stack* viewStack;
         Glib::PropertyProxy<Glib::ustring> visibleView;
@@ -47,10 +55,7 @@ class Settings {
         Gtk::Grid* serialGrid;
         sigc::connection btScanConnection;
         Glib::RefPtr<Gio::Settings> settings;
-        enum interfaceType {
-            BLUETOOTH_IF = 0,
-            SERIAL_IF = 1
-        };
+        InterfaceType iftype;
         void on_show();
         void selectSerial();
         void selectBluetooth();
