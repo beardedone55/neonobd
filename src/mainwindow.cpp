@@ -28,7 +28,7 @@ MainWindow::MainWindow() :
                                  css, 
                                  GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
     
-    ui = Gtk::Builder::create_from_file("/usr/local/share/neonobd/ui/neonobd.glade");
+    ui = Gtk::Builder::create_from_resource("/ui/neonobd_ui.xml");
 
     viewStack = ui->get_widget<Gtk::Stack>("view_stack");
 

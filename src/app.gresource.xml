@@ -22,4 +22,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     <gresource prefix="/stylesheets">
         <file>appstyle.css</file>
     </gresource>
+    <gresource prefix="/ui">
+        <file>neonobd_ui.xml</file>
+    </gresource>
 </gresources>

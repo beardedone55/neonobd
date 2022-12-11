@@ -28,8 +28,8 @@ add_executable(neonobd neonobd.cpp bluetooth-serial-port.cpp home.cpp mainwindow
 
 add_custom_command(
     OUTPUT resources.c 
-    COMMAND glib-compile-resources --target ${CMAKE_CURRENT_BINARY_DIR}/resources.c --generate-source app.gresource.xml 
-    DEPENDS app.gresource.xml appstyle.css
+    COMMAND glib-compile-resources --target ${CMAKE_CURRENT_BINARY_DIR}/resources.c --generate-source app.gresource.xml
+    DEPENDS app.gresource.xml appstyle.css neonobd_ui.xml
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_include_directories(neonobd PRIVATE "${PROJECT_SOURCE_DIR}" ${GTKMM_INCLUDE_DIRS})
@@ -39,7 +39,6 @@ target_link_libraries(neonobd PRIVATE ${GTKMM_LIBRARIES})
 install(TARGETS neonobd RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 install(FILES com.github.beardedone55.neonobd.gschema.xml DESTINATION ${CMAKE_INSTALL_PREFIX}/share/glib-2.0/schemas)
-install(FILES neonobd.glade DESTINATION ${CMAKE_INSTALL_PREFIX}/share/neonobd/ui)
 
 find_program(GLIB_COMPILE_SCHEMAS glib-compile-schemas)
 
