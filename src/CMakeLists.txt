@@ -39,6 +39,7 @@ target_link_libraries(neonobd PRIVATE ${GTKMM_LIBRARIES})
 install(TARGETS neonobd RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 install(FILES com.github.beardedone55.neonobd.gschema.xml DESTINATION ${CMAKE_INSTALL_PREFIX}/share/glib-2.0/schemas)
+install(FILES neonobd.glade DESTINATION ${CMAKE_INSTALL_PREFIX}/share/neonobd/ui)
 
 find_program(GLIB_COMPILE_SCHEMAS glib-compile-schemas)
 

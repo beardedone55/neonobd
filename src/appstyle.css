@@ -36,3 +36,9 @@
 .combobox {
     
 }
+
+
+progressbar trough, progressbar trough progress {
+    min-height: 20px;
+}
+

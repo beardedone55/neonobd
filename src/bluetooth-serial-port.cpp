@@ -48,14 +48,14 @@ BluetoothSerialPort::~BluetoothSerialPort()
     Logger::debug("Destroyed BluetoothSerialPort.");
 }
 
-bool BluetoothSerialPort::connect(const sigc::slot<void(bool)> & connect_complete,
-                                  const sigc::slot<void(Glib::ustring, ResponseType, const void*)> & user_prompt)
+bool BluetoothSerialPort::connect(const sigc::slot<void(bool)>& connect_complete,
+                                  const sigc::slot<void(Glib::ustring, ResponseType, const void*)>& user_prompt)
 {
     return false;
 }
 
 std::vector<char>::size_type 
-BluetoothSerialPort::read(std::vector<char> & buf,
+BluetoothSerialPort::read(std::vector<char>& buf,
                           std::vector<char>::size_type buf_size,
                           HardwareInterface::Flags flags)
 {
@@ -68,7 +68,7 @@ BluetoothSerialPort::read(std::vector<char> & buf,
     return 0;
 }
 
-std::vector<char>::size_type BluetoothSerialPort::write(const std::vector<char> & buf)
+std::vector<char>::size_type BluetoothSerialPort::write(const std::vector<char>& buf)
 {
     std::shared_lock lock(sock_fd_mutex);
     if (sock_fd >= 0)
@@ -79,7 +79,7 @@ std::vector<char>::size_type BluetoothSerialPort::write(const std::vector<char> 
 }
 
 std::size_t 
-BluetoothSerialPort::read(std::string & buf,
+BluetoothSerialPort::read(std::string& buf,
                           std::size_t buf_size,
                           HardwareInterface::Flags flags)
 {
@@ -92,7 +92,7 @@ BluetoothSerialPort::read(std::string & buf,
     return 0;
 }
 
-std::size_t BluetoothSerialPort::write(const std::string & buf)
+std::size_t BluetoothSerialPort::write(const std::string& buf)
 {
     std::shared_lock lock(sock_fd_mutex);
     if (sock_fd >= 0)
@@ -102,7 +102,7 @@ std::size_t BluetoothSerialPort::write(const std::string & buf)
     return 0;
 }
 
-void BluetoothSerialPort::manager_created(AsyncResultPtr & result)
+void BluetoothSerialPort::manager_created(AsyncResultPtr& result)
 {
     try
     {
@@ -133,18 +133,18 @@ void BluetoothSerialPort::manager_created(AsyncResultPtr & result)
     register_agent();
 }
 
-BluetoothSerialPort::ProxyPtr
-BluetoothSerialPort::get_interface(const Glib::RefPtr<Gio::DBus::Object> &obj,
-                         const Glib::ustring &name)
+Glib::RefPtr<Gio::DBus::Proxy>
+BluetoothSerialPort::get_interface(const Glib::RefPtr<Gio::DBus::Object>& obj,
+                         const Glib::ustring& name)
 {
     return std::dynamic_pointer_cast<Gio::DBus::Proxy>(obj->get_interface(name));
 }
 
-bool BluetoothSerialPort::update_object_list(const Glib::RefPtr<Gio::DBus::Object> &obj,
-                                   ProxyMap &proxy_map,
-                                   const Glib::ustring &interface_name,
-                                   Glib::ustring(*name_func)(const ProxyPtr&),
-                                   bool addObject)
+bool BluetoothSerialPort::update_object_list(const Glib::RefPtr<Gio::DBus::Object>& obj,
+                                             ProxyMap& proxy_map,
+                                             const Glib::ustring& interface_name,
+                                             Glib::ustring(*name_func)(const Glib::RefPtr<Gio::DBus::Proxy>&),
+                                             bool addObject)
 {
     auto interface = get_interface(obj, interface_name);
     if(interface)
@@ -161,13 +161,13 @@ bool BluetoothSerialPort::update_object_list(const Glib::RefPtr<Gio::DBus::Objec
     return false;
 }
 
-Glib::ustring BluetoothSerialPort::controller_name(const ProxyPtr &proxy)
+Glib::ustring BluetoothSerialPort::controller_name(const Glib::RefPtr<Gio::DBus::Proxy>& proxy)
 {
     //controllers will be identified by the object path for now
     return proxy->get_object_path(); 
 } 
 
-Glib::ustring BluetoothSerialPort::device_name(const ProxyPtr &proxy)
+Glib::ustring BluetoothSerialPort::device_name(const Glib::RefPtr<Gio::DBus::Proxy>& proxy)
 {
     //Each device will be identified by its address,
     //since it is guaranteed to be unique.
@@ -176,10 +176,10 @@ Glib::ustring BluetoothSerialPort::device_name(const ProxyPtr &proxy)
     return address.get();
 } 
 
-void BluetoothSerialPort::update_default_interface(const Glib::RefPtr<Gio::DBus::Object> &obj,
-                                         ProxyPtr &default_interface,
-                                         const Glib::ustring & interface_name,
-                                         bool addObject)
+void BluetoothSerialPort::update_default_interface(const Glib::RefPtr<Gio::DBus::Object>& obj,
+                                                   Glib::RefPtr<Gio::DBus::Proxy>& default_interface,
+                                                   const Glib::ustring& interface_name,
+                                                   bool addObject)
 {
     auto interface = get_interface(obj, interface_name);
     if(get_interface(obj, interface_name))
@@ -191,8 +191,8 @@ void BluetoothSerialPort::update_default_interface(const Glib::RefPtr<Gio::DBus:
     }
 }
 
-void BluetoothSerialPort::add_remove_object(const Glib::RefPtr<Gio::DBus::Object> & obj,
-                                  bool addObject)
+void BluetoothSerialPort::add_remove_object(const Glib::RefPtr<Gio::DBus::Object>& obj,
+                                            bool addObject)
 {
     //Object was added or removed.  Check if it is an adapter
     //or device and modify the appropriate set.
@@ -204,7 +204,7 @@ void BluetoothSerialPort::add_remove_object(const Glib::RefPtr<Gio::DBus::Object
     update_default_interface(obj, profileManager, "org.bluez.ProfileManager1", addObject);
 }
 
-bool BluetoothSerialPort::select_controller(const Glib::ustring &controller_name)
+bool BluetoothSerialPort::select_controller(const Glib::ustring& controller_name)
 {
     if(controllers.count(controller_name))
     {
@@ -233,8 +233,8 @@ void BluetoothSerialPort::emit_probe_progress(int percentComplete)
     probe_progress_signal.emit(percentComplete);
 }
 
-void BluetoothSerialPort::stop_probe_finish(AsyncResultPtr & result,
-                                  ProxyPtr controller)
+void BluetoothSerialPort::stop_probe_finish(AsyncResultPtr& result,
+                                            Glib::RefPtr<Gio::DBus::Proxy>& controller)
 {
     try { controller->call_finish(result); }
     catch(Glib::Error e) { Logger::error(e.what()); }
@@ -267,9 +267,9 @@ bool BluetoothSerialPort::update_probe_progress()
     return true;
 }
 
-void BluetoothSerialPort::probe_finish(AsyncResultPtr & result,
-                             unsigned int timeout,
-                             ProxyPtr controller)
+void BluetoothSerialPort::probe_finish(AsyncResultPtr& result,
+                                       unsigned int timeout,
+                                       Glib::RefPtr<Gio::DBus::Proxy>& controller)
 {
     //StartDiscovery command issued; now wait for timeout
     try { controller->call_finish(result); }
@@ -326,8 +326,8 @@ BluetoothSerialPort::get_device_names_addresses()
 }
 
 Glib::ustring 
-BluetoothSerialPort::get_property_value(const ProxyPtr &proxy,
-                              const Glib::ustring &property_name)
+BluetoothSerialPort::get_property_value(const Glib::RefPtr<Gio::DBus::Proxy>& proxy,
+                                        const Glib::ustring& property_name)
 {
     Glib::Variant<Glib::ustring> property;
 
@@ -337,9 +337,8 @@ BluetoothSerialPort::get_property_value(const ProxyPtr &proxy,
 }
 
 std::vector<Glib::ustring> 
-BluetoothSerialPort::get_property_values(
-            const ProxyMap &proxy_list,
-            const Glib::ustring &property_name)
+BluetoothSerialPort::get_property_values(const ProxyMap& proxy_list,
+                                         const Glib::ustring& property_name)
 {
     std::vector<Glib::ustring> ret;
 
@@ -368,8 +367,8 @@ constexpr auto OBJECT_PATH = "/com/github/beardedone55/bluetooth_serial";
 //See https://www.bluetooth.com/specifications/assigned-numbers/service-discovery/
 constexpr auto SERIAL_PORT_UUID = "00001101-0000-1000-8000-00805f9b34fb";
 
-void BluetoothSerialPort::register_complete(AsyncResultPtr & result,
-                                  ProxyPtr manager)
+void BluetoothSerialPort::register_complete(AsyncResultPtr& result,
+                                            Glib::RefPtr<Gio::DBus::Proxy>& manager)
 {
     //RegisterAgent and RegisterProfile don't
     //return anything.  This just checks if there were
@@ -442,8 +441,8 @@ void BluetoothSerialPort::register_agent()
                        parameters);
 }
 
-void BluetoothSerialPort::register_object(const char *interface_definition,
-                                const Gio::DBus::InterfaceVTable &vtable)
+void BluetoothSerialPort::register_object(const char* interface_definition,
+                                          const Gio::DBus::InterfaceVTable& vtable)
 {
     if(manager)
     {
@@ -494,12 +493,12 @@ constexpr auto Agent1_definition =
 
 void
 BluetoothSerialPort::agent_method(const Glib::RefPtr<Gio::DBus::Connection>&,
-                        const Glib::ustring & sender,
-                        const Glib::ustring & object_path,
-                        const Glib::ustring & interface_name,
-                        const Glib::ustring & method_name,
-                        const Glib::VariantContainerBase& parameters,
-                        const MethodInvocationPtr & invocation)
+                                  const Glib::ustring& sender,
+                                  const Glib::ustring& object_path,
+                                  const Glib::ustring& interface_name,
+                                  const Glib::ustring& method_name,
+                                  const Glib::VariantContainerBase& parameters,
+                                  const MethodInvocationPtr& invocation)
 {
     if(method_name == "RequestPinCode")
     {
@@ -582,9 +581,9 @@ BluetoothSerialPort::agent_method(const Glib::RefPtr<Gio::DBus::Connection>&,
 }
 
 void
-BluetoothSerialPort::request_from_user(const Glib::ustring & message,
-                                       std::string responseType,
-                                       const MethodInvocationPtr & invocation)
+BluetoothSerialPort::request_from_user(const Glib::ustring& message,
+                                       const std::string& responseType,
+                                       const MethodInvocationPtr& invocation)
 {
     //This message emits a signal that should solicit a response from the
     //user. It does the work for "RequestPinCode", "RequestPasskey",
@@ -606,8 +605,8 @@ BluetoothSerialPort::request_from_user(const Glib::ustring & message,
     }
 }
 
-void BluetoothSerialPort::respond_from_user(const Glib::VariantBase & response,
-                                            const Glib::RefPtr<Glib::Object> & signal_handle)
+void BluetoothSerialPort::respond_from_user(const Glib::VariantBase& response,
+                                            const Glib::RefPtr<Glib::Object>& signal_handle)
 {
     const auto invocation = std::dynamic_pointer_cast<Gio::DBus::MethodInvocation>(signal_handle);
     if(invocation)
@@ -656,12 +655,12 @@ constexpr auto Profile1_definition =
 
 void
 BluetoothSerialPort::profile_method(const Glib::RefPtr<Gio::DBus::Connection>&,
-                          const Glib::ustring & sender,
-                          const Glib::ustring & object_path,
-                          const Glib::ustring & interface_name,
-                          const Glib::ustring & method_name,
-                          const Glib::VariantContainerBase& parameters,
-                          const MethodInvocationPtr & invocation)
+                                    const Glib::ustring& sender,
+                                    const Glib::ustring& object_path,
+                                    const Glib::ustring& interface_name,
+                                    const Glib::ustring& method_name,
+                                    const Glib::VariantContainerBase& parameters,
+                                    const MethodInvocationPtr& invocation)
 {
 
     if(method_name == "NewConnection")

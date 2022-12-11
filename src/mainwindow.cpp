@@ -19,34 +19,8 @@
 #include "logger.h"
 #include <iostream>
 
-void MainWindow::showView(Gtk::Widget &view)
-{
-    Logger::debug("MainWindow showing view " + Glib::ustring::format(&view));
-    unset_child();
-    set_child(view);
-    view.set_margin(10);
-    view.show();
-}
-
-void MainWindow::connect_view_button(Gtk::Button &button,
-                                     Gtk::Widget *currentView,
-                                     Gtk::Widget *nextView)
-{
-    button.signal_clicked().connect(sigc::bind(
-                                    sigc::mem_fun(*this, &MainWindow::switchView),
-                                    currentView, nextView));
-}
-
-void MainWindow::switchView(Gtk::Widget *oldview, Gtk::Widget *newview)
-{
-    showView(*newview);
-    oldview->hide();
-}
-
 MainWindow::MainWindow() :
-    home{*this},
-    settings{*this},
-    bluetoothSerialPort{BluetoothSerialPort::get_instance()}
+    bluetoothSerialPort{new BluetoothSerialPort}
 {
     css = Gtk::CssProvider::create();
     css->load_from_resource("/stylesheets/appstyle.css");
@@ -54,11 +28,19 @@ MainWindow::MainWindow() :
                                  css, 
                                  GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
     
+    ui = Gtk::Builder::create_from_file("/usr/local/share/neonobd/ui/neonobd.glade");
+
+    viewStack = ui->get_widget<Gtk::Stack>("view_stack");
+
+    if(!viewStack) {
+        Logger::error("Could not instantiate view_stack.");
+        return;
+    }
+
+    set_child(*viewStack);
+
+    home = std::make_unique<Home>(ui, viewStack);
+    settings = std::make_unique<Settings>(ui, viewStack, bluetoothSerialPort.get());
+
     set_name("mainwindow");
-    showView(home);
 }
-
-MainWindow::~MainWindow()
-{
-}
-

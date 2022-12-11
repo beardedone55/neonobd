@@ -24,7 +24,8 @@ template<class... T>
 class ComboBox : public Gtk::ComboBox
 {
     public:
-        ComboBox()
+        ComboBox(BaseObjectType* cobj, const Glib::RefPtr<Gtk::Builder>& ui) :
+            Gtk::ComboBox(cobj)
         {
             std::apply([this](auto&&... cols){((column_record.add(cols)), ...);}, columns);
 
@@ -32,10 +33,9 @@ class ComboBox : public Gtk::ComboBox
             set_model(list_store);
             std::apply([this](auto&&... cols){((pack_start(cols)), ...);}, columns);
         }
-
-        ~ComboBox()
-        {
-        }
+        ComboBox(const ComboBox&) = delete;
+        ComboBox& operator=(const ComboBox&) = delete;
+        ~ComboBox() = default;
 
         void append(const T&... args)
         {

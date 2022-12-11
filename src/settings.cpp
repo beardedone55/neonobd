@@ -15,132 +15,115 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "mainwindow.h"
+#include "settings.h"
 #include "logger.h"
 
-Settings::Settings(MainWindow &window) :
-   Box{Gtk::Orientation::VERTICAL, 0},
-   main_window{window},
-   homeButton{"🏠⮨"},
-   connectionFrame{"OBD Connection Settings"},
-   bluetooth_rb{"Bluetooth"},
-   serial_rb{"Serial Port/USB"},
-   btHostLabel{"Bluetooth Host Controller"},
-   btDeviceLabel{"Bluetooth OBD Device: "},
-   btScanLabel{"Searching for Bluetooth Devices: "},
-   btDeviceScan{"🔍"}
+Settings::Settings(const Glib::RefPtr<Gtk::Builder>& ui, Gtk::Stack* viewStack, 
+                   BluetoothSerialPort* btHardwareInterface) :
+   ui{ui},
+   viewStack{viewStack},
+   visibleView{viewStack->property_visible_child_name()},
+   btHardwareInterface{btHardwareInterface}
 {
-    set_name("settingsview");
+    //Detect if view has changed.
+    visibleView.signal_changed().connect([this](){this->on_show();});
 
-    //Top row, return home button
-    main_window.connect_view_button(homeButton, this, &main_window.home);
-    append(topRow);
-    topRow.append(homeButton);
-    //topRow.set_layout(Gtk::BUTTONBOX_START);
+    //Assign action to home button
+    homeButton = ui->get_widget<Gtk::Button>("settings_home_button");
+    auto homeClicked = [this](){this->viewStack->set_visible_child("home_view");};
+    homeButton->signal_clicked().connect(homeClicked);
 
     //Connection Settings
-    append(connectionFrame);
-    connectionFrame.set_child(connectionGrid);
-    //Radio Buttons to select Bluetooth vs. serial
-    serial_rb.set_group(bluetooth_rb);  //link radio buttons together
-    connectionGrid.attach(bluetooth_rb,0,0);
-    connectionGrid.attach(serial_rb,1,0);
-    connectionGrid.set_margin(10);
-    bluetooth_rb.signal_toggled().connect(sigc::mem_fun(*this, &Settings::selectBluetooth));
-    serial_rb.signal_toggled().connect(sigc::mem_fun(*this, &Settings::selectSerial));
+    //Assign actions to radio buttons
+    bluetooth_rb = ui->get_widget<Gtk::CheckButton>("bluetooth_radio_button");
+    serial_rb = ui->get_widget<Gtk::CheckButton>("serial_radio_button");
+    bluetooth_rb->signal_toggled().connect([this](){this->selectBluetooth();});
+    serial_rb->signal_toggled().connect([this](){this->selectSerial();});
+    serial_rb->set_group(*bluetooth_rb);  //link radio buttons together
 
     //Bluetooth specific options
     //---------------------------
-    //Select host bluetooth device:
-    btGrid.attach(btHostLabel,0,0);
-    btGrid.attach(btHostCombo,1,0);
-    btGrid.set_margin(10);
-
-    btHostCombo.signal_changed().connect(sigc::mem_fun(*this, 
-                                         &Settings::selectBluetoothController));
+    //Select host bluetooth adapter:
+    
+    btGrid = ui->get_widget<Gtk::Grid>("bluetooth_settings");
+    btHostLabel = ui->get_widget<Gtk::Label>("host_label");
+    btHostCombo = ui->get_widget<Gtk::ComboBoxText>("host_combo");
+    btHostCombo->signal_changed().connect([this](){this->selectBluetoothController();});
 
     //Select remote bluetooth device (OBD device):
-    btGrid.attach(btDeviceLabel,0,1);
-    btGrid.attach(btDeviceCombo,1,1);
-    btGrid.attach(btDeviceScan,2,1);
-    btDeviceScan.signal_clicked().connect(sigc::mem_fun(*this, &Settings::scanBluetooth));
+    btDeviceLabel = ui->get_widget<Gtk::Label>("bluetooth_device_label");
+    btDeviceCombo = Gtk::Builder::get_widget_derived<ComboBox<Glib::ustring, Glib::ustring>>(ui, "bluetooth_device_combo");
+    btDeviceCombo->signal_changed().connect([this](){this->selectBluetoothDevice();});
 
-    btDeviceCombo.signal_changed().connect(sigc::mem_fun(*this, 
-                                           &Settings::selectBluetoothDevice));
+    btScanLabel = ui->get_widget<Gtk::Label>("bluetooth_scan_label");
+    btScanProgress = ui->get_widget<Gtk::ProgressBar>("bluetooth_scan_progress");
+    btDeviceScan = ui->get_widget<Gtk::Button>("scan_bluetooth");
+    btDeviceScan->signal_clicked().connect([this](){this->scanBluetooth();});
 
-    btGrid.attach(btScanLabel,0,3);
-    btGrid.attach(btScanProgress,1,3);
-    btScanProgress.set_valign(Gtk::Align::CENTER);
-
-    connectionGrid.attach(btGrid,0,4,2);
-
-    btScanLabel.hide();
-    btScanProgress.hide();
+    
+    //Serial port specific options
+    serialGrid = ui->get_widget<Gtk::Grid>("serial_port_settings");
 
     //Load Settings
     settings = Gio::Settings::create("com.github.beardedone55.neonobd");
     if(settings->get_enum("interface-type") == BLUETOOTH_IF)
-        bluetooth_rb.set_active();
+        bluetooth_rb->set_active();
     else
-        serial_rb.set_active();
+        serial_rb->set_active();
 
     auto controllerName = settings->get_string("bluetooth-controller");
     if(controllerName != "")
     {
-        btHostCombo.append(controllerName);
-        btHostCombo.set_active(0);
+        btHostCombo->append(controllerName);
+        btHostCombo->set_active(0);
     }
 
     auto deviceAddress = settings->get_string("selected-device-address");
     if(deviceAddress != "")
     {
         auto deviceName = settings->get_string("selected-device-name");
-        btDeviceCombo.append(deviceAddress, deviceName);
-        btDeviceCombo.set_active(0);
+        btDeviceCombo->append(deviceAddress, deviceName);
+        btDeviceCombo->set_active(0);
     }
-
-    hide();
 }
-
-Settings::~Settings() {}
 
 void Settings::selectBluetooth()
 {
-    serialGrid.hide();
-    btGrid.show();
+    serialGrid->hide();
+    btGrid->show();
     if(settings->get_enum("interface-type") != BLUETOOTH_IF)
         settings->set_enum("interface-type", BLUETOOTH_IF);
 }
 
 void Settings::selectSerial()
 {
-    btGrid.hide();
-    serialGrid.show();
+    btGrid->hide();
+    serialGrid->show();
     if(settings->get_enum("interface-type") != SERIAL_IF)
         settings->set_enum("interface-type", SERIAL_IF);
 }
 
 void Settings::selectBluetoothController()
 {
-    if(btHostCombo.get_active_row_number() == -1)
+    if(btHostCombo->get_active_row_number() == -1)
         return;
 
     Logger::debug("Selecting new bluetooth controller.");
     auto bluetoothController = settings->get_string("bluetooth-controller");
     Logger::debug("Previous controller: " + bluetoothController);
-    auto newBluetoothController = btHostCombo.get_active_text();
+    auto newBluetoothController = btHostCombo->get_active_text();
     Logger::debug("Settings: selected bluetooth controller " + newBluetoothController);
     if(newBluetoothController != bluetoothController)
     {
         settings->set_string("bluetooth-controller", newBluetoothController);
     }
-    main_window.bluetoothSerialPort.select_controller(newBluetoothController);
+    btHardwareInterface->select_controller(newBluetoothController);
 }
 
 void Settings::selectBluetoothDevice()
 {
     auto defaultAddress = settings->get_string("selected-device-address");
-    auto activeDevice = btDeviceCombo.get_active_values();
+    auto activeDevice = btDeviceCombo->get_active_values();
     if(activeDevice)
     {
         auto [ address, name ] = *activeDevice;
@@ -152,33 +135,33 @@ void Settings::selectBluetoothDevice()
 
 void Settings::scanComplete()
 {
-    BluetoothSerialPort &bt = main_window.bluetoothSerialPort;
+    BluetoothSerialPort* bt = btHardwareInterface;
 
     //Update Combo Box
-    auto devices = bt.get_device_names_addresses();
-    btDeviceCombo.remove_all();
+    auto devices = bt->get_device_names_addresses();
+    btDeviceCombo->remove_all();
 
     auto defaultAddress = settings->get_string("selected-device-address");
     auto defaultName = settings->get_string("selected-device-name");
     if (defaultAddress != "")
-        btDeviceCombo.append(defaultAddress, defaultName);
+        btDeviceCombo->append(defaultAddress, defaultName);
 
     for (auto &[address, name] : devices)
         if(address != defaultAddress)
-            btDeviceCombo.append(address, "<" + name + ">");
+            btDeviceCombo->append(address, "<" + name + ">");
 
-    btDeviceCombo.set_active(0);
+    btDeviceCombo->set_active(0);
 
     btScanConnection.disconnect();
     
     //Hide Progress Bar
-    btScanProgress.hide();
-    btScanLabel.hide();
+    btScanProgress->hide();
+    btScanLabel->hide();
 
     //Show Device List
-    btDeviceLabel.show();
-    btDeviceCombo.show();
-    btDeviceScan.show();
+    btDeviceLabel->show();
+    btDeviceCombo->show();
+    btDeviceScan->show();
 }
 
 void Settings::updateScanProgress(int percentComplete)
@@ -186,32 +169,34 @@ void Settings::updateScanProgress(int percentComplete)
     if(percentComplete == 100)
         scanComplete();
     else
-        btScanProgress.set_fraction(percentComplete / 100.0);
+        btScanProgress->set_fraction(percentComplete / 100.0);
 }
 
 void Settings::scanBluetooth()
 {
-    BluetoothSerialPort &bt = main_window.bluetoothSerialPort;
-    btScanConnection = bt.signal_probe_progress().connect(
-                       sigc::mem_fun(*this, &Settings::updateScanProgress));
+    BluetoothSerialPort* bt = btHardwareInterface;
+    btScanConnection = bt->signal_probe_progress().connect([this](int a){this->updateScanProgress(a);});
 
-    btScanProgress.set_fraction(0.0);
-    btScanLabel.show();
-    btScanProgress.show();
+    btScanProgress->set_fraction(0.0);
+    btScanLabel->show();
+    btScanProgress->show();
     
-    btDeviceLabel.hide();
-    btDeviceCombo.hide();
-    btDeviceScan.hide();
+    btDeviceLabel->hide();
+    btDeviceCombo->hide();
+    btDeviceScan->hide();
 
-    bt.probe_remote_devices();
+    bt->probe_remote_devices();
 }
 
 void Settings::on_show()
 {
+    if(visibleView.get_value() != "settings_view")
+        return;
+
     Logger::debug("Showing settings dialog.");
     //Populate Combo Box:
-    auto controllers = main_window.bluetoothSerialPort.get_controller_names();
-    btHostCombo.remove_all();
+    auto controllers = btHardwareInterface->get_controller_names();
+    btHostCombo->remove_all();
 
     auto selectedController = settings->get_string("bluetooth-controller");
 
@@ -219,35 +204,29 @@ void Settings::on_show()
 
     for(int i=0; i < controllers.size(); i++)
     {
-        btHostCombo.append(controllers[i]);
+        btHostCombo->append(controllers[i]);
         if(controllers[i] == selectedController) {
             Logger::debug("Setting active controller to " + selectedController);
-            btHostCombo.set_active(i);
+            btHostCombo->set_active(i);
         }
     }
     //If we only have one controller, asking user to select one is silly.
-    if(controllers.size() == 1)
-    {
+    if(controllers.size() == 1) {
         Logger::debug("Only one bluetooth controller found, hiding dropdown.");
-        btHostCombo.set_active(0);
-        btHostLabel.hide();
-        btHostCombo.hide();
-    }
-    else
-    {
+        btHostCombo->set_active(0);
+        btHostLabel->hide();
+        btHostCombo->hide();
+    } else {
         Logger::debug("Showing bluetooth controller dropdown, " + Glib::ustring::format(controllers.size()) + "found.");
-        btHostLabel.show();
-        btHostCombo.show();
+        btHostLabel->show();
+        btHostCombo->show();
     }
 
     //No bluetooth available...
-    if(controllers.size() == 0)
-    {
-        serial_rb.set_active();
-        bluetooth_rb.set_sensitive(false); //Disable Bluetooth
+    if(controllers.size() == 0) {
+        serial_rb->set_active();
+        bluetooth_rb->set_sensitive(false); //Disable Bluetooth
+    } else {
+        bluetooth_rb->set_sensitive(true); //Enable Bluetooth
     }
-    else
-        bluetooth_rb.set_sensitive(true); //Enalbe Bluetooth
-
-    Gtk::Box::on_show();
 }
