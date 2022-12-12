@@ -23,8 +23,7 @@
 
 class Settings {
     public:
-        Settings(const Glib::RefPtr<Gtk::Builder>& ui, Gtk::Stack* viewStack, 
-                 BluetoothSerialPort* btHardwareInterface);
+        Settings(const Glib::RefPtr<Gtk::Builder>& ui, Gtk::Stack* viewStack);
         Settings(const Settings&) = delete;
         Settings& operator=(const Settings&) = delete;
         ~Settings() = default;
@@ -40,7 +39,7 @@ class Settings {
         Glib::RefPtr<Gtk::Builder> ui;
         Gtk::Stack* viewStack;
         Glib::PropertyProxy<Glib::ustring> visibleView;
-        BluetoothSerialPort* btHardwareInterface;
+        std::shared_ptr<BluetoothSerialPort> btHardwareInterface;
         Gtk::Button* homeButton;
         Gtk::CheckButton* bluetooth_rb;
         Gtk::CheckButton* serial_rb;
