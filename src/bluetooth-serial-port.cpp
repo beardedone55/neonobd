@@ -25,7 +25,7 @@
 
 
 std::mutex BluetoothSerialPort::construction_lock;
-std::shared_ptr<BluetoothSerialPort> BluetoothSerialPort::bluetoothSerialPort;
+std::weak_ptr<BluetoothSerialPort> BluetoothSerialPort::bluetoothSerialPort;
 Gio::DBus::InterfaceVTable BluetoothSerialPort::profile_vtable {&BluetoothSerialPort::profile_method};
 Gio::DBus::InterfaceVTable BluetoothSerialPort::agent_vtable {&BluetoothSerialPort::agent_method};
 
@@ -46,8 +46,6 @@ BluetoothSerialPort::~BluetoothSerialPort()
     std::unique_lock lock(sock_fd_mutex);
     if(sock_fd >= -1)
         close(sock_fd);
-
-    bluetoothSerialPort.reset();
 
     Logger::debug("Destroyed BluetoothSerialPort.");
 }
@@ -108,10 +106,13 @@ std::size_t BluetoothSerialPort::write(const std::string& buf)
 
 std::shared_ptr<BluetoothSerialPort> BluetoothSerialPort::getBluetoothSerialPort() {
     std::lock_guard<std::mutex> lock(construction_lock);
-    if(!bluetoothSerialPort) {
-        bluetoothSerialPort.reset(new BluetoothSerialPort);
+    std::shared_ptr<BluetoothSerialPort> bt = bluetoothSerialPort.lock();
+    if(!bt) {
+        bt.reset(new BluetoothSerialPort);
+        bluetoothSerialPort = bt;
     }
-    return bluetoothSerialPort;
+
+    return bt;
 }
 
 void BluetoothSerialPort::manager_created(Glib::RefPtr<Gio::AsyncResult>& result)
@@ -466,7 +467,7 @@ BluetoothSerialPort::agent_method(const Glib::RefPtr<Gio::DBus::Connection>&,
                                   const Glib::VariantContainerBase& parameters,
                                   const MethodInvocationPtr& invocation)
 {
-    auto bt = bluetoothSerialPort;
+    auto bt = bluetoothSerialPort.lock();
 
     if(!bt)
         return;
@@ -612,7 +613,7 @@ BluetoothSerialPort::profile_method(const Glib::RefPtr<Gio::DBus::Connection>&,
                                     const MethodInvocationPtr& invocation)
 {
 
-    auto bt = bluetoothSerialPort;
+    auto bt = bluetoothSerialPort.lock();
 
     if(!bt)
         return;
