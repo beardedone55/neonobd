@@ -110,7 +110,7 @@ class BluetoothSerialPort : public HardwareInterface {
 
         BluetoothSerialPort();
         static std::mutex construction_lock;
-        static std::shared_ptr<BluetoothSerialPort> bluetoothSerialPort; 
+        static std::weak_ptr<BluetoothSerialPort> bluetoothSerialPort; 
         ProxyMap controllers;
         ProxyMap remoteDevices;
         Glib::RefPtr<Gio::DBus::Proxy> selected_controller;
