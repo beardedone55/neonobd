@@ -18,13 +18,13 @@
 #include "settings.h"
 #include "logger.h"
 
-Settings::Settings(const Glib::RefPtr<Gtk::Builder>& ui, Gtk::Stack* viewStack, 
-                   BluetoothSerialPort* btHardwareInterface) :
+Settings::Settings(const Glib::RefPtr<Gtk::Builder>& ui, Gtk::Stack* viewStack) :
    ui{ui},
    viewStack{viewStack},
-   visibleView{viewStack->property_visible_child_name()},
-   btHardwareInterface{btHardwareInterface}
+   visibleView{viewStack->property_visible_child_name()}
 {
+    btHardwareInterface = BluetoothSerialPort::getBluetoothSerialPort();
+
     //Detect if view has changed.
     visibleView.signal_changed().connect([this](){this->on_show();});
 
@@ -67,7 +67,7 @@ Settings::Settings(const Glib::RefPtr<Gtk::Builder>& ui, Gtk::Stack* viewStack,
     //Load Settings
     settings = Gio::Settings::create("com.github.beardedone55.neonobd");
     iftype = static_cast<InterfaceType>(settings->get_enum("interface-type"));
-    if(iftype)
+    if(iftype == BLUETOOTH_IF)
         bluetooth_rb->set_active();
     else
         serial_rb->set_active();
@@ -142,7 +142,7 @@ void Settings::selectBluetoothDevice()
 
 void Settings::scanComplete()
 {
-    BluetoothSerialPort* bt = btHardwareInterface;
+    auto& bt = btHardwareInterface;
 
     //Update Combo Box
     auto devices = bt->get_device_names_addresses();
@@ -181,7 +181,7 @@ void Settings::updateScanProgress(int percentComplete)
 
 void Settings::scanBluetooth()
 {
-    BluetoothSerialPort* bt = btHardwareInterface;
+    auto& bt = btHardwareInterface;
     btScanConnection = bt->signal_probe_progress().connect([this](int a){this->updateScanProgress(a);});
 
     btScanProgress->set_fraction(0.0);

@@ -20,7 +20,7 @@
 #include <iostream>
 
 MainWindow::MainWindow() :
-    bluetoothSerialPort{new BluetoothSerialPort}
+    bluetoothSerialPort{BluetoothSerialPort::getBluetoothSerialPort()}
 {
     css = Gtk::CssProvider::create();
     css->load_from_resource("/stylesheets/appstyle.css");
@@ -39,8 +39,8 @@ MainWindow::MainWindow() :
 
     set_child(*viewStack);
 
-    home = std::make_unique<Home>(ui, viewStack);
-    settings = std::make_unique<Settings>(ui, viewStack, bluetoothSerialPort.get());
+    home = std::make_shared<Home>(ui, viewStack);
+    settings = std::make_shared<Settings>(ui, viewStack);
 
     set_name("mainwindow");
 }

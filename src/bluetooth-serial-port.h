@@ -19,12 +19,12 @@
 
 #include "hardware-interface.h"
 #include <cstdint>
-#include <map>
+#include <unordered_map>
 #include <shared_mutex>
+#include <memory>
 
 class BluetoothSerialPort : public HardwareInterface {
     public:
-        BluetoothSerialPort();
         BluetoothSerialPort(const BluetoothSerialPort&) = delete;
         void operator=(const BluetoothSerialPort&) = delete;
         virtual ~BluetoothSerialPort();
@@ -42,6 +42,8 @@ class BluetoothSerialPort : public HardwareInterface {
                          std::size_t buf_size = 1024,
                          HardwareInterface::Flags flags = HardwareInterface::FLAGS_NONE) override;
         std::size_t write(const std::string&  buf) override;
+
+        static std::shared_ptr<BluetoothSerialPort> getBluetoothSerialPort();
 
         //Host Controller Access Methods
         //--------------------------------------------------------
@@ -102,10 +104,13 @@ class BluetoothSerialPort : public HardwareInterface {
         //to request_authorization signal.
         void send_authorization(bool authorized);
     private:
-        using ProxyMap = std::map<Glib::ustring, Glib::RefPtr<Gio::DBus::Proxy>>;
+        using ProxyMap = std::unordered_map<std::string, Glib::RefPtr<Gio::DBus::Proxy>>;
         using ObjectManagerPtr = Glib::RefPtr<Gio::DBus::ObjectManagerClient>;
         using MethodInvocationPtr = Glib::RefPtr<Gio::DBus::MethodInvocation>;
 
+        BluetoothSerialPort();
+        static std::mutex construction_lock;
+        static std::shared_ptr<BluetoothSerialPort> bluetoothSerialPort; 
         ProxyMap controllers;
         ProxyMap remoteDevices;
         Glib::RefPtr<Gio::DBus::Proxy> selected_controller;
@@ -115,8 +120,8 @@ class BluetoothSerialPort : public HardwareInterface {
         sigc::signal<void(int)> probe_progress_signal;
         bool probe_in_progress;
         int probe_progress;
-        Gio::DBus::InterfaceVTable agent_vtable; 
-        Gio::DBus::InterfaceVTable profile_vtable;
+        static Gio::DBus::InterfaceVTable agent_vtable; 
+        static Gio::DBus::InterfaceVTable profile_vtable;
         int sock_fd;
         std::shared_mutex sock_fd_mutex;
         Glib::DBusObjectPathString connected_device_path;
@@ -130,13 +135,15 @@ class BluetoothSerialPort : public HardwareInterface {
         void manager_created(Glib::RefPtr<Gio::AsyncResult>& result);
         void update_object_state(const Glib::RefPtr<Gio::DBus::Object>&  obj,
                                  bool addObject);
+        void add_object(const Glib::RefPtr<Gio::DBus::Object>& obj);
+        void remove_object(const Glib::RefPtr<Gio::DBus::Object>& obj);
         void probe_finish(Glib::RefPtr<Gio::AsyncResult>& result, 
                           unsigned int timeout,
                           const Glib::RefPtr<Gio::DBus::Proxy>& controller);
         bool update_probe_progress();
         void stop_probe();
-        void stop_probe_finish(Glib::RefPtr<Gio::AsyncResult>& result,
-                               Glib::RefPtr<Gio::DBus::Proxy>& controller);
+        void stop_probe_finish(const Glib::RefPtr<Gio::AsyncResult>& result,
+                               const Glib::RefPtr<Gio::DBus::Proxy>& controller);
         void emit_probe_progress(int percentComplete);
         std::vector<Glib::ustring> get_property_values(
                           const ProxyMap& proxy_list,
@@ -144,48 +151,32 @@ class BluetoothSerialPort : public HardwareInterface {
         Glib::ustring get_property_value(
                           const Glib::RefPtr<Gio::DBus::Proxy>& proxy,
                           const Glib::ustring & property_name);
-        Glib::RefPtr<Gio::DBus::Proxy> get_interface(const Glib::RefPtr<Gio::DBus::Object> & obj, const Glib::ustring & name);
-        /*bool update_object_list(const Glib::RefPtr<Gio::DBus::Object>& obj,
-                                ProxyMap& proxy_map,
-                                const Glib::ustring& interface_name,
-                                Glib::ustring(*name_func)(const Glib::RefPtr<Gio::DBus::Proxy>&),
-                                bool addObject);*/
-        void update_default_interface(const Glib::RefPtr<Gio::DBus::Object>& obj,
-                                      Glib::RefPtr<Gio::DBus::Proxy>& default_interface,
-                                      const Glib::ustring&  interface_name,
-                                      bool addObject);
         static Glib::ustring controller_name(const Glib::RefPtr<Gio::DBus::Proxy>& proxy);
         static Glib::ustring device_name(const Glib::RefPtr<Gio::DBus::Proxy>& proxy);
         void register_profile();
         void register_agent();
-        void register_complete(Glib::RefPtr<Gio::AsyncResult>& result,
-                               Glib::RefPtr<Gio::DBus::Proxy>& manager);
-        void register_object(const char *interface_definition,
-                             const Gio::DBus::InterfaceVTable & vtable);
-        void
-        agent_method(const Glib::RefPtr<Gio::DBus::Connection>&,
-                     const Glib::ustring&  sender,
-                     const Glib::ustring&  object_path,
-                     const Glib::ustring&  interface_name,
-                     const Glib::ustring&  method_name,
-                     const Glib::VariantContainerBase& parameters,
-                     const Glib::RefPtr<Gio::DBus::MethodInvocation>& invocation);
+        void register_complete(const Glib::RefPtr<Gio::AsyncResult>& result,
+                               const Glib::RefPtr<Gio::DBus::Proxy>& manager);
+        static void agent_method(const Glib::RefPtr<Gio::DBus::Connection>&,
+                                 const Glib::ustring&  sender,
+                                 const Glib::ustring&  object_path,
+                                 const Glib::ustring&  interface_name,
+                                 const Glib::ustring&  method_name,
+                                 const Glib::VariantContainerBase& parameters,
+                                 const Glib::RefPtr<Gio::DBus::MethodInvocation>& invocation);
         void
         request_pairing_info(const Glib::VariantContainerBase& parameters,
                              const Glib::RefPtr<Gio::DBus::MethodInvocation>& invocation,
                              Glib::RefPtr<Gio::DBus::MethodInvocation>& saved_invocation,
                              sigc::signal<void(Glib::ustring)> & signal);
-        void export_agent();
 
-        void
-        profile_method(const Glib::RefPtr<Gio::DBus::Connection>&,
-                       const Glib::ustring&  sender,
-                       const Glib::ustring&  object_path,
-                       const Glib::ustring&  interface_name,
-                       const Glib::ustring&  method_name,
-                       const Glib::VariantContainerBase& parameters,
-                       const Glib::RefPtr<Gio::DBus::MethodInvocation>& invocation);
-        void export_profile();
+        static void profile_method(const Glib::RefPtr<Gio::DBus::Connection>&,
+                                   const Glib::ustring&  sender,
+                                   const Glib::ustring&  object_path,
+                                   const Glib::ustring&  interface_name,
+                                   const Glib::ustring&  method_name,
+                                   const Glib::VariantContainerBase& parameters,
+                                   const Glib::RefPtr<Gio::DBus::MethodInvocation>& invocation);
         template <typename T>
         void dbus_return(Glib::RefPtr<Gio::DBus::MethodInvocation>& invocation,
                          const T& return_value);
