@@ -105,23 +105,21 @@ class BluetoothSerialPort : public HardwareInterface {
         void send_authorization(bool authorized);
     private:
         using ProxyMap = std::unordered_map<std::string, Glib::RefPtr<Gio::DBus::Proxy>>;
-        using ObjectManagerPtr = Glib::RefPtr<Gio::DBus::ObjectManagerClient>;
-        using MethodInvocationPtr = Glib::RefPtr<Gio::DBus::MethodInvocation>;
 
-        BluetoothSerialPort();
         static std::mutex construction_lock;
         static std::weak_ptr<BluetoothSerialPort> bluetoothSerialPort; 
+        static Gio::DBus::InterfaceVTable agent_vtable; 
+        static Gio::DBus::InterfaceVTable profile_vtable;
+
         ProxyMap controllers;
         ProxyMap remoteDevices;
         Glib::RefPtr<Gio::DBus::Proxy> selected_controller;
         Glib::RefPtr<Gio::DBus::Proxy> agentManager;
         Glib::RefPtr<Gio::DBus::Proxy> profileManager;
-        ObjectManagerPtr manager;
+        Glib::RefPtr<Gio::DBus::ObjectManagerClient> manager;
         sigc::signal<void(int)> probe_progress_signal;
         bool probe_in_progress;
         int probe_progress;
-        static Gio::DBus::InterfaceVTable agent_vtable; 
-        static Gio::DBus::InterfaceVTable profile_vtable;
         int sock_fd;
         std::shared_mutex sock_fd_mutex;
         Glib::DBusObjectPathString connected_device_path;
@@ -131,7 +129,9 @@ class BluetoothSerialPort : public HardwareInterface {
         Glib::RefPtr<Gio::DBus::MethodInvocation> request_passkey_invocation;
         Glib::RefPtr<Gio::DBus::MethodInvocation> request_confirmation_invocation;
         Glib::RefPtr<Gio::DBus::MethodInvocation> request_authorization_invocation;
+
         //Private Methods
+        BluetoothSerialPort();
         void manager_created(Glib::RefPtr<Gio::AsyncResult>& result);
         void update_object_state(const Glib::RefPtr<Gio::DBus::Object>&  obj,
                                  bool addObject);
@@ -151,8 +151,6 @@ class BluetoothSerialPort : public HardwareInterface {
         Glib::ustring get_property_value(
                           const Glib::RefPtr<Gio::DBus::Proxy>& proxy,
                           const Glib::ustring & property_name);
-        static Glib::ustring controller_name(const Glib::RefPtr<Gio::DBus::Proxy>& proxy);
-        static Glib::ustring device_name(const Glib::RefPtr<Gio::DBus::Proxy>& proxy);
         void register_profile();
         void register_agent();
         void register_complete(const Glib::RefPtr<Gio::AsyncResult>& result,
@@ -185,6 +183,6 @@ class BluetoothSerialPort : public HardwareInterface {
 
         void request_from_user(const Glib::ustring& message,
                                const std::string& responseType,
-                               const MethodInvocationPtr& invocation);
+                               const Glib::RefPtr<Gio::DBus::MethodInvocation>& invocation);
 };
 

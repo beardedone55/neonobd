@@ -141,13 +141,13 @@ void BluetoothSerialPort::manager_created(Glib::RefPtr<Gio::AsyncResult>& result
     register_agent();
 }
 
-Glib::ustring BluetoothSerialPort::controller_name(const Glib::RefPtr<Gio::DBus::Proxy>& proxy)
+static Glib::ustring controller_name(const Glib::RefPtr<Gio::DBus::Proxy>& proxy)
 {
     //controllers will be identified by the object path for now
     return proxy->get_object_path(); 
 } 
 
-Glib::ustring BluetoothSerialPort::device_name(const Glib::RefPtr<Gio::DBus::Proxy>& proxy)
+static Glib::ustring device_name(const Glib::RefPtr<Gio::DBus::Proxy>& proxy)
 {
     //Each device will be identified by its address,
     //since it is guaranteed to be unique.
@@ -227,7 +227,7 @@ void BluetoothSerialPort::update_object_state(const Glib::RefPtr<Gio::DBus::Obje
 
 bool BluetoothSerialPort::select_controller(const Glib::ustring& controller_name)
 {
-    if(controllers.count(controller_name))
+    if(controllers.contains(controller_name))
     {
         selected_controller = controllers[controller_name];
         return true;
@@ -465,7 +465,7 @@ BluetoothSerialPort::agent_method(const Glib::RefPtr<Gio::DBus::Connection>&,
                                   const Glib::ustring& interface_name,
                                   const Glib::ustring& method_name,
                                   const Glib::VariantContainerBase& parameters,
-                                  const MethodInvocationPtr& invocation)
+                                  const Glib::RefPtr<Gio::DBus::MethodInvocation>& invocation)
 {
     auto bt = bluetoothSerialPort.lock();
 
@@ -555,7 +555,7 @@ BluetoothSerialPort::agent_method(const Glib::RefPtr<Gio::DBus::Connection>&,
 void
 BluetoothSerialPort::request_from_user(const Glib::ustring& message,
                                        const std::string& responseType,
-                                       const MethodInvocationPtr& invocation)
+                                       const Glib::RefPtr<Gio::DBus::MethodInvocation>& invocation)
 {
     //This message emits a signal that should solicit a response from the
     //user. It does the work for "RequestPinCode", "RequestPasskey",
@@ -610,7 +610,7 @@ BluetoothSerialPort::profile_method(const Glib::RefPtr<Gio::DBus::Connection>&,
                                     const Glib::ustring& interface_name,
                                     const Glib::ustring& method_name,
                                     const Glib::VariantContainerBase& parameters,
-                                    const MethodInvocationPtr& invocation)
+                                    const Glib::RefPtr<Gio::DBus::MethodInvocation>& invocation)
 {
 
     auto bt = bluetoothSerialPort.lock();
