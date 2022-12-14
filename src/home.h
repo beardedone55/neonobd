@@ -21,13 +21,15 @@
 
 class MainWindow;
 
-class Home {
+class Home : public sigc::trackable {
     public:
         Home(const Glib::RefPtr<Gtk::Builder>& ui, Gtk::Stack* viewStack);
-    protected:
+    private:
         Gtk::Stack* viewStack;
         Gtk::Button* settings_btn;
         Gtk::Button* connect_btn;
+
+        void settings_clicked();
 
 };
 

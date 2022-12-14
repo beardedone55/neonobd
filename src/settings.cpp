@@ -26,19 +26,18 @@ Settings::Settings(const Glib::RefPtr<Gtk::Builder>& ui, Gtk::Stack* viewStack) 
     btHardwareInterface = BluetoothSerialPort::getBluetoothSerialPort();
 
     //Detect if view has changed.
-    visibleView.signal_changed().connect([this](){this->on_show();});
+    visibleView.signal_changed().connect(sigc::mem_fun(*this, &Settings::on_show));
 
     //Assign action to home button
     homeButton = ui->get_widget<Gtk::Button>("settings_home_button");
-    auto homeClicked = [this](){this->viewStack->set_visible_child("home_view");};
-    homeButton->signal_clicked().connect(homeClicked);
+    homeButton->signal_clicked().connect(sigc::mem_fun(*this, &Settings::homeClicked));
 
     //Connection Settings
     //Assign actions to radio buttons
     bluetooth_rb = ui->get_widget<Gtk::CheckButton>("bluetooth_radio_button");
     serial_rb = ui->get_widget<Gtk::CheckButton>("serial_radio_button");
-    bluetooth_rb->signal_toggled().connect([this](){this->selectBluetooth();});
-    serial_rb->signal_toggled().connect([this](){this->selectSerial();});
+    bluetooth_rb->signal_toggled().connect(sigc::mem_fun(*this, &Settings::selectBluetooth));
+    serial_rb->signal_toggled().connect(sigc::mem_fun(*this,&Settings::selectSerial));
     serial_rb->set_group(*bluetooth_rb);  //link radio buttons together
 
     //Bluetooth specific options
@@ -48,17 +47,17 @@ Settings::Settings(const Glib::RefPtr<Gtk::Builder>& ui, Gtk::Stack* viewStack) 
     btGrid = ui->get_widget<Gtk::Grid>("bluetooth_settings");
     btHostLabel = ui->get_widget<Gtk::Label>("host_label");
     btHostCombo = ui->get_widget<Gtk::ComboBoxText>("host_combo");
-    btHostCombo->signal_changed().connect([this](){this->selectBluetoothController();});
+    btHostCombo->signal_changed().connect(sigc::mem_fun(*this,&Settings::selectBluetoothController));
 
     //Select remote bluetooth device (OBD device):
     btDeviceLabel = ui->get_widget<Gtk::Label>("bluetooth_device_label");
     btDeviceCombo = Gtk::Builder::get_widget_derived<ComboBox<Glib::ustring, Glib::ustring>>(ui, "bluetooth_device_combo");
-    btDeviceCombo->signal_changed().connect([this](){this->selectBluetoothDevice();});
+    btDeviceCombo->signal_changed().connect(sigc::mem_fun(*this,&Settings::selectBluetoothDevice));
 
     btScanLabel = ui->get_widget<Gtk::Label>("bluetooth_scan_label");
     btScanProgress = ui->get_widget<Gtk::ProgressBar>("bluetooth_scan_progress");
     btDeviceScan = ui->get_widget<Gtk::Button>("scan_bluetooth");
-    btDeviceScan->signal_clicked().connect([this](){this->scanBluetooth();});
+    btDeviceScan->signal_clicked().connect(sigc::mem_fun(*this,&Settings::scanBluetooth));
 
     
     //Serial port specific options
@@ -86,10 +85,20 @@ Settings::Settings(const Glib::RefPtr<Gtk::Builder>& ui, Gtk::Stack* viewStack) 
         btDeviceCombo->append(deviceAddress, deviceName);
         btDeviceCombo->set_active(0);
     }
+    Logger::debug("Created Settings object.");
 }
+
+Settings::~Settings() {
+    Logger::debug("Settings object destroyed.");
+}
+
 
 Settings::InterfaceType Settings::getInterfaceType() {
     return iftype;
+}
+
+void Settings::homeClicked() {
+    viewStack->set_visible_child("home_view");
 }
 
 void Settings::selectBluetooth()
@@ -182,7 +191,7 @@ void Settings::updateScanProgress(int percentComplete)
 void Settings::scanBluetooth()
 {
     auto& bt = btHardwareInterface;
-    btScanConnection = bt->signal_probe_progress().connect([this](int a){this->updateScanProgress(a);});
+    btScanConnection = bt->signal_probe_progress().connect(sigc::mem_fun(*this,&Settings::updateScanProgress));
 
     btScanProgress->set_fraction(0.0);
     btScanLabel->show();

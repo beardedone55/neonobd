@@ -23,7 +23,9 @@
 #include <shared_mutex>
 #include <memory>
 
-class BluetoothSerialPort : public HardwareInterface {
+class BluetoothSerialPort : public HardwareInterface, 
+                            public sigc::trackable
+{
     public:
         BluetoothSerialPort(const BluetoothSerialPort&) = delete;
         void operator=(const BluetoothSerialPort&) = delete;

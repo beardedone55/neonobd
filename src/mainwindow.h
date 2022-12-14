@@ -33,8 +33,8 @@ class MainWindow : public Gtk::Window
         MainWindow& operator=(const MainWindow&) = delete;
         virtual ~MainWindow() = default;
         std::shared_ptr<BluetoothSerialPort> bluetoothSerialPort;
-        std::shared_ptr<Home> home;
-        std::shared_ptr<Settings> settings;
+        std::unique_ptr<Home> home;
+        std::unique_ptr<Settings> settings;
     protected:
         Glib::RefPtr<Gtk::CssProvider> css;
         Glib::RefPtr<Gtk::Builder> ui;
