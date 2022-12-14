@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.40.0 
-
+<!--
 Copyright (C) 2022 Brian LePage
 
 This file is part of neonobd.
@@ -19,15 +18,9 @@ You should have received a copy of the GNU General Public License
 along with neonobd.  If not, see <http://www.gnu.org/licenses/>.
 
     Author: Brian LePage
-
 -->
 <interface>
     <requires lib="gtk" version="4.0"/>
-    <!-- interface-css-provider-path appstyle.css -->
-    <!-- interface-license-type gplv3 -->
-    <!-- interface-name neonobd -->
-    <!-- interface-copyright 2022 Brian LePage -->
-    <!-- interface-authors Brian LePage -->
     <object class="GtkStack" id="view_stack">
         <property name="name">view_stack</property>
         <property name="visible">True</property>
