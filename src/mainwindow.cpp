@@ -39,8 +39,8 @@ MainWindow::MainWindow() :
 
     set_child(*viewStack);
 
-    home = std::make_shared<Home>(ui, viewStack);
-    settings = std::make_shared<Settings>(ui, viewStack);
+    home = std::make_unique<Home>(ui, viewStack);
+    settings = std::make_unique<Settings>(ui, viewStack);
 
     set_name("mainwindow");
 }

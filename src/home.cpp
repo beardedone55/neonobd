@@ -22,9 +22,13 @@ Home::Home(const Glib::RefPtr<Gtk::Builder>& ui, Gtk::Stack* viewStack) :
 {
     //Settings button
     settings_btn = ui->get_widget<Gtk::Button>("settings_button");
-    auto settings_clicked = [this](){this->viewStack->set_visible_child("settings_view");};
-    settings_btn->signal_clicked().connect(settings_clicked);
+    settings_btn->signal_clicked().connect(
+        sigc::mem_fun(*this, &Home::settings_clicked));
 
     //Connect button
     connect_btn = ui->get_widget<Gtk::Button>("connect_button");
+}
+
+void Home::settings_clicked() {
+    viewStack->set_visible_child("settings_view");
 }

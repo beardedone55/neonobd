@@ -21,12 +21,12 @@
 #include "bluetooth-serial-port.h"
 #include "combobox.h"
 
-class Settings {
+class Settings : public sigc::trackable {
     public:
         Settings(const Glib::RefPtr<Gtk::Builder>& ui, Gtk::Stack* viewStack);
         Settings(const Settings&) = delete;
         Settings& operator=(const Settings&) = delete;
-        ~Settings() = default;
+        ~Settings();
 
         enum InterfaceType {
             BLUETOOTH_IF = 0,
@@ -55,6 +55,7 @@ class Settings {
         sigc::connection btScanConnection;
         Glib::RefPtr<Gio::Settings> settings;
         InterfaceType iftype;
+        void homeClicked();
         void on_show();
         void selectSerial();
         void selectBluetooth();

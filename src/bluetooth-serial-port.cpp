@@ -33,11 +33,6 @@ BluetoothSerialPort::BluetoothSerialPort() :
     probe_in_progress{false},
     sock_fd{-1}
 {
-    //Create BluetoothSerialPort Object Manager
-    Gio::DBus::ObjectManagerClient::create_for_bus(
-            Gio::DBus::BusType::SYSTEM,
-            "org.bluez", "/", [this](auto& res){this->manager_created(res);});
-
     Logger::debug("Created BluetoothSerialPort.");
 }
 
@@ -110,6 +105,10 @@ std::shared_ptr<BluetoothSerialPort> BluetoothSerialPort::getBluetoothSerialPort
     if(!bt) {
         bt.reset(new BluetoothSerialPort);
         bluetoothSerialPort = bt;
+        //Create BluetoothSerialPort Object Manager
+        Gio::DBus::ObjectManagerClient::create_for_bus(
+                Gio::DBus::BusType::SYSTEM,
+                "org.bluez", "/", [bt](auto& res){bt->manager_created(res);});
     }
 
     return bt;
@@ -130,8 +129,10 @@ void BluetoothSerialPort::manager_created(Glib::RefPtr<Gio::AsyncResult>& result
     if(manager)
     {
         Logger::debug("Bluetooth manager created.");
-        manager->signal_object_added().connect([this](auto& obj){this->add_object(obj);});
-        manager->signal_object_removed().connect([this](auto& obj){this->remove_object(obj);});
+        manager->signal_object_added().connect(
+                sigc::mem_fun(*this, &BluetoothSerialPort::add_object));
+        manager->signal_object_removed().connect(
+                sigc::mem_fun(*this, &BluetoothSerialPort::remove_object));
 
         auto objects = manager->get_objects();
         for(auto &object : objects)
@@ -268,8 +269,9 @@ void BluetoothSerialPort::stop_probe()
     //Timeout occurred; stop probing devices.
     if(selected_controller) {
         auto ctlr = selected_controller;
-        ctlr->call("StopDiscovery", [this,ctlr](auto& res){
-                                        this->stop_probe_finish(res, ctlr);});
+        auto bt = bluetoothSerialPort.lock();
+        ctlr->call("StopDiscovery", [bt,ctlr](auto& res){
+                                        bt->stop_probe_finish(res, ctlr);});
     } else {
         emit_probe_progress(100);
     }
@@ -301,8 +303,9 @@ void BluetoothSerialPort::probe_finish(Glib::RefPtr<Gio::AsyncResult>& result,
     //Convert timeout to milliseconds, and interrupt every time
     //we are 100th the way to completion, hence the *1000/100
     probe_progress = 0;
-    Glib::signal_timeout().connect([this](){return this->update_probe_progress();},
-                                   timeout * 1000/100);
+    Glib::signal_timeout().connect(
+        sigc::mem_fun(*this, &BluetoothSerialPort::update_probe_progress), 
+        timeout * 1000/100);
 }
 
 void BluetoothSerialPort::probe_remote_devices(unsigned int time)
@@ -314,9 +317,10 @@ void BluetoothSerialPort::probe_remote_devices(unsigned int time)
     {
         probe_in_progress = true;
         auto ctlr = selected_controller;
-        ctlr->call("StartDiscovery", [this, time, ctlr]
+        auto bt = bluetoothSerialPort.lock();
+        ctlr->call("StartDiscovery", [bt, time, ctlr]
                                      (Glib::RefPtr<Gio::AsyncResult>& res)
-                                     {this->probe_finish(res, time, ctlr);});
+                                     {bt->probe_finish(res, time, ctlr);});
     } 
     else 
     {
@@ -392,6 +396,7 @@ void BluetoothSerialPort::register_complete(const Glib::RefPtr<Gio::AsyncResult>
     //errors.
     try {manager->call_finish(result);}
     catch(Glib::Error e) {Logger::error(e.what());}
+    Logger::debug("Bluetooth agent registration complete.");
 }
 
 void BluetoothSerialPort::register_profile()
@@ -432,9 +437,12 @@ void BluetoothSerialPort::register_profile()
     auto parameters = Glib::VariantContainerBase::create_tuple(register_profile_params);
 
     auto profman = profileManager;
-    profileManager->call("RegisterProfile",[this, profman](auto& res)
-                                           {this->register_complete(res, profman);}, 
+    auto bt = bluetoothSerialPort.lock();
+    profileManager->call("RegisterProfile",[bt, profman](auto& res)
+                                           {bt->register_complete(res, profman);}, 
                                            parameters); 
+
+    Logger::debug("Registering bluetooth profile manager.");
 }
 
 void BluetoothSerialPort::register_agent()
@@ -453,9 +461,12 @@ void BluetoothSerialPort::register_agent()
             }));
 
     auto agentman = agentManager;
-    agentman->call("RegisterAgent",[this,agentman](auto& res)
-                       {this->register_complete(res, agentman);},
+    auto bt = bluetoothSerialPort.lock();
+    agentman->call("RegisterAgent",[bt,agentman](auto& res)
+                       {bt->register_complete(res, agentman);},
                        parameters);
+
+    Logger::debug("Registering bluetooth agent manager.");
 }
 
 void
