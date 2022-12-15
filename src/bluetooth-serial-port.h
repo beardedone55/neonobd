@@ -115,6 +115,8 @@ class BluetoothSerialPort : public HardwareInterface,
 
         ProxyMap controllers;
         ProxyMap remoteDevices;
+        guint agent_id = 0;
+        guint profile_id = 0;
         Glib::RefPtr<Gio::DBus::Proxy> selected_controller;
         Glib::RefPtr<Gio::DBus::Proxy> agentManager;
         Glib::RefPtr<Gio::DBus::Proxy> profileManager;
@@ -153,6 +155,8 @@ class BluetoothSerialPort : public HardwareInterface,
         Glib::ustring get_property_value(
                           const Glib::RefPtr<Gio::DBus::Proxy>& proxy,
                           const Glib::ustring & property_name);
+        guint register_object(const std::string& interface_path,
+                             const Gio::DBus::InterfaceVTable& vtable);
         void register_profile();
         void register_agent();
         void register_complete(const Glib::RefPtr<Gio::AsyncResult>& result,

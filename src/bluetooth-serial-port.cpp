@@ -42,6 +42,15 @@ BluetoothSerialPort::~BluetoothSerialPort()
     if(sock_fd >= -1)
         close(sock_fd);
 
+    if(manager) {
+        if(agent_id) {
+            manager->get_connection()->unregister_object(agent_id);
+        }
+        if(profile_id) {
+            manager->get_connection()->unregister_object(profile_id);
+        }
+    }
+
     Logger::debug("Destroyed BluetoothSerialPort.");
 }
 
@@ -399,10 +408,34 @@ void BluetoothSerialPort::register_complete(const Glib::RefPtr<Gio::AsyncResult>
     Logger::debug("Bluetooth agent registration complete.");
 }
 
+guint BluetoothSerialPort::register_object(const std::string& interface_path,
+                                          const Gio::DBus::InterfaceVTable& vtable)
+{
+    if(manager)
+    {
+        Logger::debug("Acquiring interface definition " + interface_path);
+
+        gsize sz;
+        auto interface_definition = Glib::ustring(static_cast<const char*>(
+            Gio::Resource::lookup_data_global(interface_path)->get_data(sz)));
+
+        auto node = Gio::DBus::NodeInfo::create_for_xml(interface_definition);
+
+        Logger::debug("Registering object " + interface_path);
+
+        return manager->get_connection()->register_object(OBJECT_PATH,
+                   node->lookup_interface(), vtable);
+    }
+
+    return 0;
+}
+
 void BluetoothSerialPort::register_profile()
 {
     if(!profileManager)
         return;
+
+    profile_id = register_object("/dbus/bluez-profile1.xml", profile_vtable);
 
     //RegisterProfile parameters:
     //   String profile
@@ -449,6 +482,9 @@ void BluetoothSerialPort::register_agent()
 {
     if(!agentManager)
         return;
+
+    agent_id = register_object("/dbus/bluez-agent1.xml", agent_vtable);
+
     //RegisterAgent parameters:
     //   String agent
     //   String capabilities
