@@ -19,7 +19,7 @@ add_library(resources OBJECT resources.c)
 add_custom_command(
     OUTPUT resources.c 
     COMMAND glib-compile-resources --target ${CMAKE_CURRENT_BINARY_DIR}/resources.c --generate-source app.gresource.xml
-    DEPENDS app.gresource.xml appstyle.css neonobd_ui.xml
+    DEPENDS app.gresource.xml appstyle.css neonobd_ui.xml bluez-agent1.xml bluez-profile1.xml
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_include_directories(resources PRIVATE ${GTKMM_INCLUDE_DIRS})

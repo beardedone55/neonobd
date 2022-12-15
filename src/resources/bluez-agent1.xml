@@ -1,5 +1,3 @@
-<!-- vim: ts=4:sw=4:et 
--->
 <!--
 This file is part of neonobd - OBD diagnostic software.
 Copyright (C) 2022  Brian LePage
@@ -17,18 +15,20 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
  -->
-<?xml version="1.0" encoding="UTF-8"?>
-<gresources>
-    <gresource prefix="/stylesheets">
-        <file>appstyle.css</file>
-    </gresource>
-    <gresource prefix="/ui">
-        <file>neonobd_ui.xml</file>
-    </gresource>
-    <gresource prefix="/dbus">
-        <file>bluez-agent1.xml</file>
-    </gresource>
-    <gresource prefix="/dbus">
-        <file>bluez-profile1.xml</file>
-    </gresource>
-</gresources>
+
+<node>
+  <interface name='org.bluez.Profile1'>
+    <method name='Release'>
+    </method>
+    <method name='NewConnection'>
+      <arg type='o' name='device' direction='in'/>
+      <arg type='h' name='fd' direction='in'/>
+      <arg type='a{sv}' name='fd_properties' direction='in'/>
+    </method>
+    <method name='RequestDisconnection'>
+      <arg type='o' name='device' direction='in'/>
+    </method>
+  </interface>
+</node>
+
+
