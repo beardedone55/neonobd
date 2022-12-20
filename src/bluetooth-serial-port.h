@@ -32,8 +32,9 @@ class BluetoothSerialPort : public HardwareInterface,
         virtual ~BluetoothSerialPort();
 
         //HardwareInterface overrides
-        bool connect(const sigc::slot<void(bool)>&  connect_complete,
-                     const sigc::slot<void(Glib::ustring, ResponseType, const void*)>&  user_prompt) override;
+        bool connect(const Glib::ustring& device_name,
+                     const sigc::slot<void(bool)>&  connect_complete,
+                     const sigc::slot<void(Glib::ustring, ResponseType, Glib::RefPtr<void>)>&  user_prompt) override;
         void respond_from_user(const Glib::VariantBase&  response,
                                const Glib::RefPtr<Glib::Object>&  signal_handle) override;
         std::vector<char>::size_type read(std::vector<char>&  buf, 
@@ -108,7 +109,6 @@ class BluetoothSerialPort : public HardwareInterface,
     private:
         using ProxyMap = std::unordered_map<std::string, Glib::RefPtr<Gio::DBus::Proxy>>;
 
-        static std::mutex construction_lock;
         static std::weak_ptr<BluetoothSerialPort> bluetoothSerialPort; 
         static Gio::DBus::InterfaceVTable agent_vtable; 
         static Gio::DBus::InterfaceVTable profile_vtable;
@@ -127,7 +127,6 @@ class BluetoothSerialPort : public HardwareInterface,
         int sock_fd;
         std::shared_mutex sock_fd_mutex;
         Glib::DBusObjectPathString connected_device_path;
-        sigc::signal<void(Glib::ustring, Glib::VariantType, Glib::RefPtr<void>)> request_user_input;
         sigc::signal<void()> agent_cancel;
         Glib::RefPtr<Gio::DBus::MethodInvocation> request_pin_invocation;
         Glib::RefPtr<Gio::DBus::MethodInvocation> request_passkey_invocation;
@@ -144,6 +143,8 @@ class BluetoothSerialPort : public HardwareInterface,
         void probe_finish(Glib::RefPtr<Gio::AsyncResult>& result, 
                           unsigned int timeout,
                           const Glib::RefPtr<Gio::DBus::Proxy>& controller);
+        void initiate_connection(const Glib::RefPtr<Gio::DBus::Proxy>& device);
+        void finish_connection(Glib::RefPtr<Gio::AsyncResult>& result);
         bool update_probe_progress();
         void stop_probe();
         void stop_probe_finish(const Glib::RefPtr<Gio::AsyncResult>& result,
@@ -188,7 +189,7 @@ class BluetoothSerialPort : public HardwareInterface,
                                   Glib::RefPtr<Gio::DBus::MethodInvocation>& invocation);
 
         void request_from_user(const Glib::ustring& message,
-                               const std::string& responseType,
+                               const ResponseType responseType,
                                const Glib::RefPtr<Gio::DBus::MethodInvocation>& invocation);
 };
 

@@ -35,9 +35,9 @@ class MainWindow : public Gtk::Window
         std::shared_ptr<BluetoothSerialPort> bluetoothSerialPort;
         std::unique_ptr<Home> home;
         std::unique_ptr<Settings> settings;
+        Gtk::Stack *viewStack;
     protected:
         Glib::RefPtr<Gtk::CssProvider> css;
         Glib::RefPtr<Gtk::Builder> ui;
-        Gtk::Stack *viewStack;
 };
 

@@ -34,6 +34,7 @@ class Settings : public sigc::trackable {
         };
 
         InterfaceType getInterfaceType();
+        Glib::ustring getSelectedDevice();
 
     private:
         Glib::RefPtr<Gtk::Builder> ui;
