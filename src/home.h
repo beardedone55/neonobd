@@ -18,18 +18,25 @@
 #pragma once
 
 #include <gtkmm.h>
+#include "mainwindow.h"
+#include "hardware-interface.h"
 
 class MainWindow;
 
 class Home : public sigc::trackable {
     public:
-        Home(const Glib::RefPtr<Gtk::Builder>& ui, Gtk::Stack* viewStack);
+        Home(const Glib::RefPtr<Gtk::Builder>& ui, MainWindow* window);
     private:
-        Gtk::Stack* viewStack;
+        MainWindow* window;
         Gtk::Button* settings_btn;
         Gtk::Button* connect_btn;
 
         void settings_clicked();
+        void connect_clicked();
+        void connect_complete(bool result);
+        void user_prompt(Glib::ustring prompt,
+                         HardwareInterface::ResponseType responseType,
+                         Glib::RefPtr<void>);
 
 };
 

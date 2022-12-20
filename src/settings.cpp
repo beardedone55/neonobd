@@ -97,6 +97,9 @@ Settings::InterfaceType Settings::getInterfaceType() {
     return iftype;
 }
 
+Glib::ustring Settings::getSelectedDevice() {
+    return settings->get_string("selected-device-address");
+}
 void Settings::homeClicked() {
     viewStack->set_visible_child("home_view");
 }

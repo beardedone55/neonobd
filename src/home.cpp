@@ -16,9 +16,11 @@
  */
 
 #include "mainwindow.h"
+#include "settings.h"
+#include "logger.h"
 
-Home::Home(const Glib::RefPtr<Gtk::Builder>& ui, Gtk::Stack* viewStack) : 
-    viewStack{viewStack}
+Home::Home(const Glib::RefPtr<Gtk::Builder>& ui, MainWindow* window) : 
+    window{window}
 {
     //Settings button
     settings_btn = ui->get_widget<Gtk::Button>("settings_button");
@@ -27,8 +29,32 @@ Home::Home(const Glib::RefPtr<Gtk::Builder>& ui, Gtk::Stack* viewStack) :
 
     //Connect button
     connect_btn = ui->get_widget<Gtk::Button>("connect_button");
+    connect_btn->signal_clicked().connect(
+        sigc::mem_fun(*this, &Home::connect_clicked));
 }
 
 void Home::settings_clicked() {
-    viewStack->set_visible_child("settings_view");
+    window->viewStack->set_visible_child("settings_view");
 }
+
+void Home::connect_clicked() {
+    Logger::debug("Connect button clicked.");
+    window->bluetoothSerialPort->connect(window->settings->getSelectedDevice(),
+                                         sigc::mem_fun(*this,&Home::connect_complete),
+                                         sigc::mem_fun(*this,&Home::user_prompt));
+}
+
+void Home::connect_complete(bool result) {
+    if(result) {
+        Logger::debug("Connection to device was successful!");
+    } else {
+        Logger::debug("Connection to device failed!");
+    }
+}
+
+void Home::user_prompt(Glib::ustring prompt,
+                       HardwareInterface::ResponseType responseType,
+                       Glib::RefPtr<void>) {
+    Logger::debug("Received prompt: " + prompt);
+}
+

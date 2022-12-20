@@ -39,7 +39,7 @@ MainWindow::MainWindow() :
 
     set_child(*viewStack);
 
-    home = std::make_unique<Home>(ui, viewStack);
+    home = std::make_unique<Home>(ui, this);
     settings = std::make_unique<Settings>(ui, viewStack);
 
     set_name("mainwindow");

@@ -30,9 +30,14 @@ class HardwareInterface {
             USER_INT,
             USER_NONE
         };
-        virtual ~HardwareInterface() { };
-        virtual bool connect(const sigc::slot<void(bool)> & connect_complete,
-                             const sigc::slot<void(Glib::ustring, ResponseType, const void*)> & user_prompt) = 0;
+        virtual bool connect(const Glib::ustring& device_name,
+                             const sigc::slot<void(bool)> & connect_complete,
+                             const sigc::slot<void(Glib::ustring, ResponseType, 
+                                                   Glib::RefPtr<void>)> & user_prompt) {
+            complete_connection.connect(connect_complete);
+            request_user_input.connect(user_prompt);
+            return true;
+        }
         virtual void respond_from_user(const Glib::VariantBase & response,
                                        const Glib::RefPtr<Glib::Object>  & signal_handle) = 0;
         virtual std::vector<char>::size_type read(std::vector<char> & buf,
@@ -43,4 +48,9 @@ class HardwareInterface {
                                  std::size_t buf_size = 1024,
                                  Flags flags = FLAGS_NONE) = 0; 
         virtual std::size_t write(const std::string & buf) = 0;
+
+    protected:
+        sigc::signal<void(bool)> complete_connection;
+        sigc::signal<void(Glib::ustring, ResponseType, Glib::RefPtr<void>)> request_user_input;
+
 };
