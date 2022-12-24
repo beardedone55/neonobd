@@ -22,6 +22,9 @@
 #include <unordered_map>
 #include <shared_mutex>
 #include <memory>
+#include "neonobd_types.h"
+
+using neon::ResponseType;
 
 class BluetoothSerialPort : public HardwareInterface, 
                             public sigc::trackable
@@ -32,11 +35,9 @@ class BluetoothSerialPort : public HardwareInterface,
         virtual ~BluetoothSerialPort();
 
         //HardwareInterface overrides
-        bool connect(const Glib::ustring& device_name,
-                     const sigc::slot<void(bool)>&  connect_complete,
-                     const sigc::slot<void(Glib::ustring, ResponseType, Glib::RefPtr<void>)>&  user_prompt) override;
+        bool connect(const Glib::ustring& device_name) override;
         void respond_from_user(const Glib::VariantBase&  response,
-                               const Glib::RefPtr<Glib::Object>&  signal_handle) override;
+                               const Glib::RefPtr<void>&  signal_handle) override;
         std::vector<char>::size_type read(std::vector<char>&  buf, 
                                           std::vector<char>::size_type buf_size = 1024,
                                           HardwareInterface::Flags flags = HardwareInterface::FLAGS_NONE) override;

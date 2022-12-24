@@ -17,12 +17,13 @@
 
 #include "settings.h"
 #include "logger.h"
+#include "mainwindow.h"
 
-Settings::Settings(const Glib::RefPtr<Gtk::Builder>& ui, Gtk::Stack* viewStack) :
-   ui{ui},
-   viewStack{viewStack},
-   visibleView{viewStack->property_visible_child_name()}
+Settings::Settings(MainWindow* window) :
+   window{window},
+   visibleView{window->viewStack->property_visible_child_name()}
 {
+    auto ui = window->ui;
     btHardwareInterface = BluetoothSerialPort::getBluetoothSerialPort();
 
     //Detect if view has changed.
@@ -66,10 +67,12 @@ Settings::Settings(const Glib::RefPtr<Gtk::Builder>& ui, Gtk::Stack* viewStack) 
     //Load Settings
     settings = Gio::Settings::create("com.github.beardedone55.neonobd");
     iftype = static_cast<InterfaceType>(settings->get_enum("interface-type"));
-    if(iftype == BLUETOOTH_IF)
+    window->setHardwareInterface(iftype);
+    if(iftype == neon::BLUETOOTH_IF) {
         bluetooth_rb->set_active();
-    else
+    } else {
         serial_rb->set_active();
+    }
 
     auto controllerName = settings->get_string("bluetooth-controller");
     if(controllerName != "")
@@ -93,7 +96,7 @@ Settings::~Settings() {
 }
 
 
-Settings::InterfaceType Settings::getInterfaceType() {
+InterfaceType Settings::getInterfaceType() {
     return iftype;
 }
 
@@ -101,25 +104,29 @@ Glib::ustring Settings::getSelectedDevice() {
     return settings->get_string("selected-device-address");
 }
 void Settings::homeClicked() {
-    viewStack->set_visible_child("home_view");
+    window->viewStack->set_visible_child("home_view");
 }
 
 void Settings::selectBluetooth()
 {
     serialGrid->hide();
     btGrid->show();
-    iftype = BLUETOOTH_IF;
-    if(settings->get_enum("interface-type") != BLUETOOTH_IF)
-        settings->set_enum("interface-type", BLUETOOTH_IF);
+    iftype = neon::BLUETOOTH_IF;
+    if(settings->get_enum("interface-type") != neon::BLUETOOTH_IF)
+        settings->set_enum("interface-type", neon::BLUETOOTH_IF);
+
+    window->setHardwareInterface(neon::BLUETOOTH_IF);
 }
 
 void Settings::selectSerial()
 {
     btGrid->hide();
     serialGrid->show();
-    iftype = SERIAL_IF;
-    if(settings->get_enum("interface-type") != SERIAL_IF)
-        settings->set_enum("interface-type", SERIAL_IF);
+    iftype = neon::SERIAL_IF;
+    if(settings->get_enum("interface-type") != neon::SERIAL_IF)
+        settings->set_enum("interface-type", neon::SERIAL_IF);
+
+    window->setHardwareInterface(neon::SERIAL_IF);
 }
 
 void Settings::selectBluetoothController()
