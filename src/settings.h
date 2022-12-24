@@ -20,25 +20,24 @@
 #include <gtkmm.h>
 #include "bluetooth-serial-port.h"
 #include "combobox.h"
+#include "neonobd_types.h"
+
+class MainWindow;
+
+using neon::InterfaceType;
 
 class Settings : public sigc::trackable {
     public:
-        Settings(const Glib::RefPtr<Gtk::Builder>& ui, Gtk::Stack* viewStack);
+        Settings(MainWindow* window);
         Settings(const Settings&) = delete;
         Settings& operator=(const Settings&) = delete;
         ~Settings();
-
-        enum InterfaceType {
-            BLUETOOTH_IF = 0,
-            SERIAL_IF = 1
-        };
 
         InterfaceType getInterfaceType();
         Glib::ustring getSelectedDevice();
 
     private:
-        Glib::RefPtr<Gtk::Builder> ui;
-        Gtk::Stack* viewStack;
+        MainWindow* window;
         Glib::PropertyProxy<Glib::ustring> visibleView;
         std::shared_ptr<BluetoothSerialPort> btHardwareInterface;
         Gtk::Button* homeButton;

@@ -18,25 +18,36 @@
 #pragma once
 
 #include <gtkmm.h>
-#include "mainwindow.h"
 #include "hardware-interface.h"
+#include "neonobd_types.h"
 
 class MainWindow;
 
+using neon::ResponseType;
+
 class Home : public sigc::trackable {
     public:
-        Home(const Glib::RefPtr<Gtk::Builder>& ui, MainWindow* window);
+        Home(MainWindow* window);
     private:
         MainWindow* window;
         Gtk::Button* settings_btn;
         Gtk::Button* connect_btn;
+        sigc::connection user_prompt_connection;
+        sigc::connection connect_complete_connection;
+        Glib::RefPtr<void> user_prompt_handle;
 
         void settings_clicked();
         void connect_clicked();
         void connect_complete(bool result);
         void user_prompt(Glib::ustring prompt,
-                         HardwareInterface::ResponseType responseType,
+                         ResponseType responseType,
                          Glib::RefPtr<void>);
+
+        void user_yes_no_response(int responseCode);
+        void user_string_response(int responseCode);
+        void user_number_response(int responseCode);
+        void user_none_response(int responseCode);
+        void send_cancel();
 
 };
 

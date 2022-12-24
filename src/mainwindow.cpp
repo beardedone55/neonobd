@@ -39,8 +39,67 @@ MainWindow::MainWindow() :
 
     set_child(*viewStack);
 
-    home = std::make_unique<Home>(ui, this);
-    settings = std::make_unique<Settings>(ui, viewStack);
+    home = std::make_unique<Home>(this);
+    settings = std::make_unique<Settings>(this);
+    yes_no_dialog.reset(ui->get_widget<Gtk::MessageDialog>("yes_no_dialog"));
+    text_input_dialog.reset(ui->get_widget<Gtk::MessageDialog>("text_input_dialog"));
+    number_input_dialog.reset(ui->get_widget<Gtk::MessageDialog>("number_input_dialog"));
 
     set_name("mainwindow");
+}
+
+MainWindow::~MainWindow() {
+    Logger::debug("Destroying MainWindow.");
+}
+
+void MainWindow::setHardwareInterface(InterfaceType ifType) {
+    switch(ifType) {
+      case neon::BLUETOOTH_IF:
+        hardwareInterface = bluetoothSerialPort;
+        break;
+      case neon::SERIAL_IF:
+        hardwareInterface.reset();
+        //hardwareInterface = serialPort; ????
+        break;
+    }    
+}
+
+void MainWindow::showPopup(const std::string& message,
+                           ResponseType type,
+                           const sigc::slot<void(int)>& response) {
+    
+    Logger::debug("Showing popup dialog.");
+
+    if(popup_shown) {
+        hidePopup();
+    }
+
+    switch(type) {
+      case neon::USER_YN:
+        popup = yes_no_dialog.get();
+        break;
+      case neon::USER_STRING:
+        popup = text_input_dialog.get();
+        break;
+      case neon::USER_INT:
+        popup = number_input_dialog.get();
+        break;
+      default:
+        return;
+    }
+
+    popup_shown = true;
+    popup_response_connection = popup->signal_response().connect(response);
+    popup->set_transient_for(*this);
+    popup->set_message(message);
+    popup->show();
+}
+
+void MainWindow::hidePopup() {
+    if(!popup_shown)
+        return;
+
+    popup->hide();
+    popup_response_connection.disconnect();
+    popup_shown = false;
 }

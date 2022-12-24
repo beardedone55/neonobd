@@ -24,6 +24,11 @@
 #include "home.h"
 #include "settings.h"
 #include "bluetooth-serial-port.h"
+#include "hardware-interface.h"
+#include "neonobd_types.h"
+
+using neon::ResponseType;
+using neon::InterfaceType;
 
 class MainWindow : public Gtk::Window
 {
@@ -31,13 +36,27 @@ class MainWindow : public Gtk::Window
         MainWindow();
         MainWindow(const MainWindow&) = delete;
         MainWindow& operator=(const MainWindow&) = delete;
-        virtual ~MainWindow() = default;
+        virtual ~MainWindow();
         std::shared_ptr<BluetoothSerialPort> bluetoothSerialPort;
+        std::shared_ptr<HardwareInterface> hardwareInterface;
         std::unique_ptr<Home> home;
         std::unique_ptr<Settings> settings;
         Gtk::Stack *viewStack;
-    protected:
-        Glib::RefPtr<Gtk::CssProvider> css;
         Glib::RefPtr<Gtk::Builder> ui;
+
+        void setHardwareInterface(InterfaceType ifType);
+        void showPopup(const std::string& message,
+                       ResponseType type,
+                       const sigc::slot<void(int)>& response);
+        void hidePopup();
+
+    protected:
+        Gtk::MessageDialog* popup;
+        sigc::connection popup_response_connection;
+        bool popup_shown = false;
+        std::unique_ptr<Gtk::MessageDialog> yes_no_dialog;
+        std::unique_ptr<Gtk::MessageDialog> text_input_dialog;
+        std::unique_ptr<Gtk::MessageDialog> number_input_dialog;
+        Glib::RefPtr<Gtk::CssProvider> css;
 };
 

@@ -246,4 +246,34 @@ along with neonobd.  If not, see <http://www.gnu.org/licenses/>.
             </object>
         </child>
     </object>
+    <object class="GtkMessageDialog" id="yes_no_dialog">
+        <property name="message-type">GTK_MESSAGE_QUESTION</property>
+        <property name="buttons">GTK_BUTTONS_YES_NO</property>
+    </object>
+    <object class="GtkMessageDialog" id="number_input_dialog">
+        <property name="message-type">GTK_MESSAGE_QUESTION</property>
+        <property name="buttons">GTK_BUTTONS_OK_CANCEL</property>
+        <child internal-child="message_area">
+            <object class="GtkBox">
+                <child>
+                    <object class="GtkEntry" id="number_user_input">
+                        <property name="input-purpose">GTK_INPUT_PURPOSE_NUMBER</property>
+                    </object>
+                </child>
+            </object>
+        </child>
+    </object>
+    <object class="GtkMessageDialog" id="text_input_dialog">
+        <property name="message-type">GTK_MESSAGE_QUESTION</property>
+        <property name="buttons">GTK_BUTTONS_OK_CANCEL</property>
+        <child internal-child="message_area">
+            <object class="GtkBox">
+                <child>
+                    <object class="GtkEntry" id="text_user_input">
+                        <property name="input-purpose">GTK_INPUT_PURPOSE_FREEFORM</property>
+                    </object>
+                </child>
+            </object>
+        </child>
+    </object>
 </interface>
