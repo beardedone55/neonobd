@@ -18,23 +18,33 @@
 #pragma once
 
 #include <gtkmm.h>
-#include "connect-button.h"
-#include "hardware-interface.h"
 #include "neonobd_types.h"
 
 class MainWindow;
 
 using neon::ResponseType;
 
-class Home : public sigc::trackable {
+class ConnectButton : public sigc::trackable {
     public:
-        Home(MainWindow* window);
+        ConnectButton(MainWindow* window);
     private:
         MainWindow* window;
-        Gtk::Button* settings_btn;
-        ConnectButton connect_btn;
+        Gtk::Button* button;
+        sigc::connection user_prompt_connection;
+        sigc::connection connect_complete_connection;
+        Glib::RefPtr<void> user_prompt_handle;
 
-        void settings_clicked();
+        void clicked();
+        void connect_complete(bool result);
+        void user_prompt(Glib::ustring prompt,
+                         ResponseType responseType,
+                         Glib::RefPtr<void>);
 
+        void user_yes_no_response(int responseCode);
+        
+        Glib::ustring get_user_input(int responseCode, const char* widget);
+        void user_text_response(int responseCode);
+        void user_number_response(int responseCode);
+        void user_none_response(int responseCode);
+        void send_cancel();
 };
-

@@ -249,10 +249,12 @@ along with neonobd.  If not, see <http://www.gnu.org/licenses/>.
     <object class="GtkMessageDialog" id="yes_no_dialog">
         <property name="message-type">GTK_MESSAGE_QUESTION</property>
         <property name="buttons">GTK_BUTTONS_YES_NO</property>
+        <property name="modal">True</property>
     </object>
     <object class="GtkMessageDialog" id="number_input_dialog">
         <property name="message-type">GTK_MESSAGE_QUESTION</property>
         <property name="buttons">GTK_BUTTONS_OK_CANCEL</property>
+        <property name="modal">True</property>
         <child internal-child="message_area">
             <object class="GtkBox">
                 <child>
@@ -266,6 +268,7 @@ along with neonobd.  If not, see <http://www.gnu.org/licenses/>.
     <object class="GtkMessageDialog" id="text_input_dialog">
         <property name="message-type">GTK_MESSAGE_QUESTION</property>
         <property name="buttons">GTK_BUTTONS_OK_CANCEL</property>
+        <property name="modal">True</property>
         <child internal-child="message_area">
             <object class="GtkBox">
                 <child>
