@@ -145,7 +145,6 @@ class BluetoothSerialPort : public HardwareInterface,
         void probe_finish(Glib::RefPtr<Gio::AsyncResult>& result, 
                           unsigned int timeout,
                           const Glib::RefPtr<Gio::DBus::Proxy>& controller);
-        void pair_finished(Glib::RefPtr<Gio::AsyncResult>& result);
         void initiate_connection(const Glib::RefPtr<Gio::DBus::Proxy>& device);
         void finish_connection(Glib::RefPtr<Gio::AsyncResult>& result);
         bool update_probe_progress();
@@ -173,11 +172,6 @@ class BluetoothSerialPort : public HardwareInterface,
                                  const Glib::ustring&  method_name,
                                  const Glib::VariantContainerBase& parameters,
                                  const Glib::RefPtr<Gio::DBus::MethodInvocation>& invocation);
-        void
-        request_pairing_info(const Glib::VariantContainerBase& parameters,
-                             const Glib::RefPtr<Gio::DBus::MethodInvocation>& invocation,
-                             Glib::RefPtr<Gio::DBus::MethodInvocation>& saved_invocation,
-                             sigc::signal<void(Glib::ustring)> & signal);
 
         static void profile_method(const Glib::RefPtr<Gio::DBus::Connection>&,
                                    const Glib::ustring&  sender,
