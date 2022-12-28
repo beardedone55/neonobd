@@ -27,10 +27,37 @@ Home::Home(MainWindow* window) :
     settings_btn = ui->get_widget<Gtk::Button>("settings_button");
     settings_btn->signal_clicked().connect(
         sigc::mem_fun(*this, &Home::settings_clicked));
+    enabled_buttons.insert(settings_btn);
+
+    //Connect button
     connect_btn = Gtk::Builder::get_widget_derived<ConnectButton>(ui, "connect_button");
+    enabled_buttons.insert(connect_btn);
 }
 
 void Home::settings_clicked() {
     window->viewStack->set_visible_child("settings_view");
 }
 
+void Home::disable_all() {
+    for(auto button : enabled_buttons) {
+        button->set_sensitive(false);
+    }
+}
+
+void Home::enable_all() {
+    for(auto button : enabled_buttons) {
+        button->set_sensitive(true);
+    }
+}
+
+void Home::disable_button(Gtk::Button* button) {
+    if(enabled_buttons.contains(button)) {
+        button->set_sensitive(false);
+        enabled_buttons.erase(button);
+    }
+}
+
+void Home::enable_button(Gtk::Button* button) {
+    button->set_sensitive(true);
+    enabled_buttons.insert(button);
+}

@@ -18,6 +18,7 @@
 #pragma once
 
 #include <gtkmm.h>
+#include <unordered_set>
 #include "connect-button.h"
 #include "hardware-interface.h"
 #include "neonobd_types.h"
@@ -29,10 +30,15 @@ using neon::ResponseType;
 class Home : public sigc::trackable {
     public:
         Home(MainWindow* window);
+        void enable_all();
+        void disable_all();
+        void enable_button(Gtk::Button* button);
+        void disable_button(Gtk::Button* button);
     private:
         MainWindow* window;
         Gtk::Button* settings_btn;
         ConnectButton* connect_btn;
+        std::unordered_set<Gtk::Button*> enabled_buttons;
 
         void settings_clicked();
 
