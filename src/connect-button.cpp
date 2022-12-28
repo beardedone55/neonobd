@@ -31,6 +31,8 @@ void ConnectButton::clicked() {
     Logger::debug("Connect button clicked.");
     auto hwif = window->hardwareInterface;
 
+    window->home->disable_all();
+
     user_prompt_connection =
         hwif->attach_user_prompt(sigc::mem_fun(*this,&ConnectButton::user_prompt));
 
@@ -47,9 +49,12 @@ void ConnectButton::connect_complete(bool result) {
 
     if(result) {
         Logger::debug("Connection to device was successful!");
+        window->home->disable_button(this);
     } else {
         Logger::debug("Connection to device failed!");
     }
+
+    window->home->enable_all();
 }
 
 void ConnectButton::send_cancel() {
