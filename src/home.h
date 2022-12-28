@@ -32,7 +32,7 @@ class Home : public sigc::trackable {
     private:
         MainWindow* window;
         Gtk::Button* settings_btn;
-        ConnectButton connect_btn;
+        ConnectButton* connect_btn;
 
         void settings_clicked();
 
