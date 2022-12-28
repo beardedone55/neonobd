@@ -88,13 +88,57 @@ void BluetoothSerialPort::initiate_connection(const Glib::RefPtr<Gio::DBus::Prox
                  sigc::mem_fun(*this, &BluetoothSerialPort::finish_connection));
 }
 
-bool BluetoothSerialPort::connect(const Glib::ustring& device_name) {
-
-    if(!remoteDevices.contains(device_name)) {
-        return false;
-        //Need to probe for device....
+void BluetoothSerialPort::pair_finished(Glib::RefPtr<Gio::AsyncResult>& result) {
+    Logger::debug("Pair finished.");
+    auto device = std::dynamic_pointer_cast<Gio::DBus::Proxy>(result->get_source_object_base());
+    if(!device) {
+        Logger::error("BluetoothSerialPort::pair_finished invalid result!");
+        complete_connection.emit(false);
+        return;
     }
-    
+
+    try {
+        auto status = device->call_finish(result);
+        Logger::debug("Pair called, " + status.get_type_string() + " returned.");
+        initiate_connection(device);
+        return;
+    } catch(Glib::Error &e) {
+        Logger::error("Error occurred pairing Bluetooth Device");
+        std::stringstream logstr;
+        logstr << e.what() << ":" << e.code();
+        Logger::error(logstr.str());
+    }
+
+    complete_connection.emit(false);
+}
+
+void BluetoothSerialPort::preConnectionScanProgress(int p, const Glib::ustring& device_name) {
+    if(remoteDevices.contains(device_name)) {
+        Logger::debug("Device " + device_name + " found.");
+        preConnectionScanResult.disconnect();
+        initiate_connection(remoteDevices[device_name]);
+        //device->call("Pair", sigc::mem_fun(*this, &BluetoothSerialPort::pair_finished));
+    } else if(p == 100) {
+        //Could not find device
+        preConnectionScanResult.disconnect();
+        complete_connection.emit(false);
+    }
+
+    //Device not found... just keep probing....
+}
+
+bool BluetoothSerialPort::connect(const Glib::ustring& device_name) {
+    if(!remoteDevices.contains(device_name)) {
+        //Device not in inventory.  Perform device discovery before attemting to connect.
+        Logger::debug("Device " + device_name + " not found in inventory.");
+        preConnectionScanResult = probe_progress_signal.connect(
+            sigc::bind(sigc::mem_fun(*this, &BluetoothSerialPort::preConnectionScanProgress),
+                       device_name));
+
+        probe_remote_devices();
+        return true;
+    }
+
     initiate_connection(remoteDevices[device_name]);
     return true;
 }
@@ -316,9 +360,8 @@ void BluetoothSerialPort::stop_probe()
     //Timeout occurred; stop probing devices.
     if(selected_controller) {
         auto ctlr = selected_controller;
-        auto bt = bluetoothSerialPort.lock();
-        ctlr->call("StopDiscovery", [bt,ctlr](auto& res){
-                                        bt->stop_probe_finish(res, ctlr);});
+        ctlr->call("StopDiscovery", sigc::bind(
+            sigc::mem_fun(*this, &BluetoothSerialPort::stop_probe_finish), ctlr));
     } else {
         emit_probe_progress(100);
     }
@@ -357,6 +400,7 @@ void BluetoothSerialPort::probe_finish(Glib::RefPtr<Gio::AsyncResult>& result,
 
 void BluetoothSerialPort::probe_remote_devices(unsigned int time)
 {
+    Logger::debug("Probing remote Bluetooth devices.");
     if(probe_in_progress)
         return;
     
@@ -364,10 +408,8 @@ void BluetoothSerialPort::probe_remote_devices(unsigned int time)
     {
         probe_in_progress = true;
         auto ctlr = selected_controller;
-        auto bt = bluetoothSerialPort.lock();
-        ctlr->call("StartDiscovery", [bt, time, ctlr]
-                                     (Glib::RefPtr<Gio::AsyncResult>& res)
-                                     {bt->probe_finish(res, time, ctlr);});
+        ctlr->call("StartDiscovery", sigc::bind(
+            sigc::mem_fun(*this, &BluetoothSerialPort::probe_finish), time, ctlr));
     } 
     else 
     {
@@ -510,11 +552,9 @@ void BluetoothSerialPort::register_profile()
 
     auto parameters = Glib::VariantContainerBase::create_tuple(register_profile_params);
 
-    auto profman = profileManager;
-    auto bt = bluetoothSerialPort.lock();
-    profileManager->call("RegisterProfile",[bt, profman](auto& res)
-                                           {bt->register_complete(res, profman);}, 
-                                           parameters); 
+    profileManager->call("RegisterProfile", sigc::bind(
+        sigc::mem_fun(*this, &BluetoothSerialPort::register_complete), profileManager),
+        parameters);
 
     Logger::debug("Registering bluetooth profile manager.");
 }
@@ -537,11 +577,9 @@ void BluetoothSerialPort::register_agent()
                 Glib::Variant<Glib::ustring>::create("KeyboardDisplay"),
             }));
 
-    auto agentman = agentManager;
-    auto bt = bluetoothSerialPort.lock();
-    agentman->call("RegisterAgent",[bt,agentman](auto& res)
-                       {bt->register_complete(res, agentman);},
-                       parameters);
+    agentManager->call("RegisterAgent", sigc::bind(
+        sigc::mem_fun(*this, &BluetoothSerialPort::register_complete), agentManager),
+        parameters);
 
     Logger::debug("Registering bluetooth agent manager.");
 }

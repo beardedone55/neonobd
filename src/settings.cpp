@@ -101,6 +101,14 @@ InterfaceType Settings::getInterfaceType() {
 }
 
 Glib::ustring Settings::getSelectedDevice() {
+    auto ifType = settings->get_enum("interface-type");
+    if(ifType == neon::BLUETOOTH_IF) {
+        //Somebody wants the selected device in order to initiate a connection.
+        //Make sure that the configured host adapter is selected.
+        auto bluetoothController = settings->get_string("bluetooth-controller");
+        btHardwareInterface->select_controller(bluetoothController);
+    }
+
     return settings->get_string("selected-device-address");
 }
 void Settings::homeClicked() {

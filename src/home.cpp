@@ -20,14 +20,14 @@
 #include "mainwindow.h"
 
 Home::Home(MainWindow* window) : 
-    window{window},
-    connect_btn{window}
+    window{window}
 {
     auto ui = window->ui;
     //Settings button
     settings_btn = ui->get_widget<Gtk::Button>("settings_button");
     settings_btn->signal_clicked().connect(
         sigc::mem_fun(*this, &Home::settings_clicked));
+    connect_btn = Gtk::Builder::get_widget_derived<ConnectButton>(ui, "connect_button");
 }
 
 void Home::settings_clicked() {

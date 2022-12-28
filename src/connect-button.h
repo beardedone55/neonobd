@@ -24,12 +24,11 @@ class MainWindow;
 
 using neon::ResponseType;
 
-class ConnectButton : public sigc::trackable {
+class ConnectButton : public Gtk::Button {
     public:
-        ConnectButton(MainWindow* window);
+        ConnectButton(BaseObjectType* cobj, const Glib::RefPtr<Gtk::Builder>& ui);
     private:
         MainWindow* window;
-        Gtk::Button* button;
         sigc::connection user_prompt_connection;
         sigc::connection connect_complete_connection;
         Glib::RefPtr<void> user_prompt_handle;

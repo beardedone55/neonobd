@@ -92,6 +92,11 @@ void MainWindow::showPopup(const std::string& message,
     popup_response_connection = popup->signal_response().connect(response);
     popup->set_transient_for(*this);
     popup->set_message(message);
+    if(type == neon::USER_YN) {
+        popup->set_default_response(Gtk::ResponseType::YES);
+    } else {
+        popup->set_default_response(Gtk::ResponseType::OK);
+    }
     popup->show();
 }
 

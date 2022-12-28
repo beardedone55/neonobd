@@ -123,6 +123,7 @@ class BluetoothSerialPort : public HardwareInterface,
         Glib::RefPtr<Gio::DBus::Proxy> profileManager;
         Glib::RefPtr<Gio::DBus::ObjectManagerClient> manager;
         sigc::signal<void(int)> probe_progress_signal;
+        sigc::connection preConnectionScanResult;
         bool probe_in_progress;
         int probe_progress;
         int sock_fd;
@@ -144,9 +145,11 @@ class BluetoothSerialPort : public HardwareInterface,
         void probe_finish(Glib::RefPtr<Gio::AsyncResult>& result, 
                           unsigned int timeout,
                           const Glib::RefPtr<Gio::DBus::Proxy>& controller);
+        void pair_finished(Glib::RefPtr<Gio::AsyncResult>& result);
         void initiate_connection(const Glib::RefPtr<Gio::DBus::Proxy>& device);
         void finish_connection(Glib::RefPtr<Gio::AsyncResult>& result);
         bool update_probe_progress();
+        void preConnectionScanProgress(int p, const Glib::ustring& device_name);
         void stop_probe();
         void stop_probe_finish(const Glib::RefPtr<Gio::AsyncResult>& result,
                                const Glib::RefPtr<Gio::DBus::Proxy>& controller);

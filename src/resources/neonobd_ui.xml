@@ -260,6 +260,7 @@ along with neonobd.  If not, see <http://www.gnu.org/licenses/>.
                 <child>
                     <object class="GtkEntry" id="number_user_input">
                         <property name="input-purpose">GTK_INPUT_PURPOSE_NUMBER</property>
+                        <property name="activates-default">True</property>
                     </object>
                 </child>
             </object>
@@ -273,7 +274,8 @@ along with neonobd.  If not, see <http://www.gnu.org/licenses/>.
             <object class="GtkBox">
                 <child>
                     <object class="GtkEntry" id="text_user_input">
-                        <property name="input-purpose">GTK_INPUT_PURPOSE_FREEFORM</property>
+                        <property name="input-purpose">GTK_INPUT_PURPOSE_FREE_FORM</property>
+                        <property name="activates-default">True</property>
                     </object>
                 </child>
             </object>

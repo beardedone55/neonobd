@@ -19,13 +19,11 @@
 #include "mainwindow.h"
 #include "logger.h"
 
-ConnectButton::ConnectButton(MainWindow* window) :
-    window{window}
+ConnectButton::ConnectButton(BaseObjectType* cobj, const Glib::RefPtr<Gtk::Builder>& ui) :
+    Gtk::Button{cobj}
 {
-    auto ui = window->ui;
-
-    button = ui->get_widget<Gtk::Button>("connect_button");
-    button->signal_clicked().connect(
+    window = dynamic_cast<MainWindow*>(get_ancestor(GTK_TYPE_WINDOW));
+    signal_clicked().connect(
         sigc::mem_fun(*this, &ConnectButton::clicked));
 }
 
@@ -108,9 +106,10 @@ void ConnectButton::user_yes_no_response(int responseCode) {
 }
 
 Glib::ustring ConnectButton::get_user_input(int responseCode, const char* widget) {
+    Logger::debug("User responded with responseCode " + std::to_string(responseCode));
     auto ui = window->ui;
     auto text_input = ui->get_widget<Gtk::Entry>(widget)->get_text(); 
-    if(responseCode == Gtk::ResponseType::CANCEL || text_input.empty()) {
+    if(responseCode != Gtk::ResponseType::OK || text_input.empty()) {
         send_cancel();
         return "";
     }
