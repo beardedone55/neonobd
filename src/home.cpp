@@ -36,7 +36,7 @@ Home::Home(MainWindow* window) :
     //Terminal button
     terminal_btn = ui->get_widget<Gtk::Button>("terminal_button");
     //Disable this button until connected.
-    //terminal_btn->set_sensitive(false);
+    terminal_btn->set_sensitive(false);
     terminal_btn->signal_clicked().connect(
         sigc::mem_fun(*this, &Home::terminal_clicked));
 }

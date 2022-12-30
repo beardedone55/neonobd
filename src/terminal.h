@@ -22,12 +22,17 @@
 #include <gtkmm/button.h>
 #include <gtkmm/textbuffer.h>
 #include <gtkmm/textview.h>
+#include <glibmm/dispatcher.h>
+#include <thread>
 
 class MainWindow;
 
 class Terminal : public sigc::trackable {
     public:
         Terminal(MainWindow* window);
+        Terminal(const Terminal&) = delete;
+        Terminal& operator=(const Terminal&) = delete;
+        ~Terminal();
 
     private:
         MainWindow* window;
@@ -37,11 +42,20 @@ class Terminal : public sigc::trackable {
         Glib::RefPtr<Gtk::TextBuffer> textBuffer;
         Glib::RefPtr<Gtk::TextBuffer::Tag> tagReadOnly;
         Glib::RefPtr<Gtk::TextBuffer::Mark> inputBegin;
+        Glib::Dispatcher dispatcher;
+        std::unique_ptr<std::thread> reader_thread;
+        volatile bool stop_reader = false;
+        volatile bool reader_stopped = true;
+        std::string read_buffer;
+        std::mutex read_buffer_mutex;
 
         void on_show();
         void homeClicked();
         void textEntered(Gtk::TextBuffer::iterator& pos, const Glib::ustring& text, int bytes);
         void cursorMoved();
-        void lock_text();
+        void lock_text(const Gtk::TextBuffer::iterator& pos);
+        void read_data();
+        void start_reader_thread();
+        void reader_notification();
 };
 
