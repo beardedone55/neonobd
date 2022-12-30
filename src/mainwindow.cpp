@@ -41,6 +41,7 @@ MainWindow::MainWindow() :
 
     home = std::make_unique<Home>(this);
     settings = std::make_unique<Settings>(this);
+    terminal = std::make_unique<Terminal>(this);
     yes_no_dialog.reset(ui->get_widget<Gtk::MessageDialog>("yes_no_dialog"));
     text_input_dialog.reset(ui->get_widget<Gtk::MessageDialog>("text_input_dialog"));
     number_input_dialog.reset(ui->get_widget<Gtk::MessageDialog>("number_input_dialog"));

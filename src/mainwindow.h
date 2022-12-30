@@ -23,6 +23,7 @@
 
 #include "home.h"
 #include "settings.h"
+#include "terminal.h"
 #include "bluetooth-serial-port.h"
 #include "hardware-interface.h"
 #include "neonobd_types.h"
@@ -41,6 +42,7 @@ class MainWindow : public Gtk::Window
         std::shared_ptr<HardwareInterface> hardwareInterface;
         std::unique_ptr<Home> home;
         std::unique_ptr<Settings> settings;
+        std::unique_ptr<Terminal> terminal;
         Gtk::Stack *viewStack;
         Glib::RefPtr<Gtk::Builder> ui;
 

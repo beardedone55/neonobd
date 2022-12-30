@@ -18,33 +18,30 @@
 #pragma once
 
 #include <sigc++/trackable.h>
+#include <glibmm/ustring.h>
 #include <gtkmm/button.h>
-#include <unordered_set>
-#include "connect-button.h"
-#include "hardware-interface.h"
-#include "neonobd_types.h"
+#include <gtkmm/textbuffer.h>
+#include <gtkmm/textview.h>
 
 class MainWindow;
 
-using neon::ResponseType;
-
-class Home : public sigc::trackable {
+class Terminal : public sigc::trackable {
     public:
-        Home(MainWindow* window);
-        void enable_all();
-        void disable_all();
-        void set_connected(bool connected);
+        Terminal(MainWindow* window);
+
     private:
         MainWindow* window;
-        Gtk::Button* settings_btn;
-        ConnectButton* connect_btn;
-        Gtk::Button* terminal_btn;
-        std::unordered_set<Gtk::Button*> enabled_buttons;
-        bool connected = false;
+        Glib::PropertyProxy<Glib::ustring> visibleView;
+        Gtk::Button* homeButton;
+        Gtk::TextView* terminal;
+        Glib::RefPtr<Gtk::TextBuffer> textBuffer;
+        Glib::RefPtr<Gtk::TextBuffer::Tag> tagReadOnly;
+        Glib::RefPtr<Gtk::TextBuffer::Mark> inputBegin;
 
-        void settings_clicked();
-        void terminal_clicked();
-        void enable_button(Gtk::Button* button);
-        void disable_button(Gtk::Button* button);
+        void on_show();
+        void homeClicked();
+        void textEntered(Gtk::TextBuffer::iterator& pos, const Glib::ustring& text, int bytes);
+        void cursorMoved();
+        void lock_text();
 };
 

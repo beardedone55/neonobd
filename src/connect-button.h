@@ -17,7 +17,10 @@
 
 #pragma once
 
-#include <gtkmm.h>
+#include <gtkmm/button.h>
+#include <sigc++/connection.h>
+#include <glibmm/ustring.h>
+#include <gtkmm/builder.h>
 #include "neonobd_types.h"
 
 class MainWindow;
