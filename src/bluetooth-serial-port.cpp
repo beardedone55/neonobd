@@ -127,7 +127,9 @@ BluetoothSerialPort::read(std::vector<char>& buf,
     if (sock_fd >= 0)
     {
         buf.resize(buf_size);
-        return recv(sock_fd, buf.data(), buf_size * sizeof(char), 0);
+        auto result = recv(sock_fd, buf.data(), buf_size * sizeof(char), 0);
+        if(result != -1)
+            return result;
     }
     return 0;
 }
@@ -137,7 +139,9 @@ std::vector<char>::size_type BluetoothSerialPort::write(const std::vector<char>&
     std::shared_lock lock(sock_fd_mutex);
     if (sock_fd >= 0)
     {
-        return send(sock_fd, buf.data(), buf.size() * sizeof(char), 0);
+        auto result = send(sock_fd, buf.data(), buf.size() * sizeof(char), 0);
+        if(result != -1)
+            return result;
     }
     return 0;
 }
@@ -151,7 +155,11 @@ BluetoothSerialPort::read(std::string& buf,
     if (sock_fd >= 0)
     {
         buf.resize(buf_size);
-        return recv(sock_fd, buf.data(), buf.size(), 0);
+        auto result = recv(sock_fd, buf.data(), buf.size(), 0);
+        if(result != -1) {
+            buf.resize(result);
+            return result;
+        }
     }
     return 0;
 }
@@ -161,9 +169,20 @@ std::size_t BluetoothSerialPort::write(const std::string& buf)
     std::shared_lock lock(sock_fd_mutex);
     if (sock_fd >= 0)
     {
-        return send(sock_fd, buf.data(), buf.size(), 0);
+        auto result = send(sock_fd, buf.data(), buf.size(), 0);
+        if(result != -1)
+            return result;
     }
     return 0;
+}
+
+void BluetoothSerialPort::set_timeout(int milliseconds) {
+    std::shared_lock lock(sock_fd_mutex);
+    if (sock_fd >= 0) {
+        timeval time = { milliseconds / 1000, milliseconds * 1000};
+        setsockopt(sock_fd, SOL_SOCKET, SO_RCVTIMEO, &time, sizeof(time));
+        setsockopt(sock_fd, SOL_SOCKET, SO_SNDTIMEO, &time, sizeof(time));
+    }
 }
 
 std::shared_ptr<BluetoothSerialPort> BluetoothSerialPort::getBluetoothSerialPort() {

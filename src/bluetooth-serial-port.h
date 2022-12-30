@@ -47,6 +47,8 @@ class BluetoothSerialPort : public HardwareInterface,
                          HardwareInterface::Flags flags = HardwareInterface::FLAGS_NONE) override;
         std::size_t write(const std::string&  buf) override;
 
+        void set_timeout(int milliseconds) override;
+
         static std::shared_ptr<BluetoothSerialPort> getBluetoothSerialPort();
 
         //Host Controller Access Methods

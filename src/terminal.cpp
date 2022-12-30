@@ -38,27 +38,83 @@ Terminal::Terminal(MainWindow* window) :
     inputBegin = textBuffer->create_mark(textBuffer->begin());
     textBuffer->property_cursor_position().signal_changed().connect(
             sigc::mem_fun(*this, &Terminal::cursorMoved));
+
+    dispatcher.connect(sigc::mem_fun(*this, &Terminal::reader_notification));
 }
 
+Terminal::~Terminal() {
+    stop_reader = true;
+    if(reader_thread && reader_thread->joinable()) {
+        reader_thread->join();
+    }
+}
 
-void Terminal::lock_text() {
-    textBuffer->apply_tag(tagReadOnly, textBuffer->begin(), textBuffer->end());
-    textBuffer->move_mark(inputBegin, textBuffer->end());
+void Terminal::read_data() {
+    Logger::debug("Terminal reader thread started.");
+    auto hwif = window->hardwareInterface;
+    hwif->set_timeout(100);
+    std::string tempBuffer;
+    while(!stop_reader) {
+        auto bytecount = hwif->read(tempBuffer, 128, HardwareInterface::FLAGS_NONE);
+        if(bytecount) {
+            std::lock_guard lock(read_buffer_mutex);
+            read_buffer.append(tempBuffer);
+            dispatcher.emit();
+        }
+    }
+    reader_stopped = true;
+    Logger::debug("Terminal reader thread stopped.");
+}
+
+void Terminal::start_reader_thread() {
+    if(reader_thread && reader_thread->joinable())
+        reader_thread->join();
+
+    reader_stopped = false;
+    read_buffer.resize(0);
+    reader_thread = std::make_unique<std::thread>([this](){this->read_data();});
+}
+
+void Terminal::reader_notification() {
+    if(reader_stopped) {
+        reader_thread->join();
+        if(!stop_reader) {
+            start_reader_thread();
+        }
+        return;
+    }
+
+    std::lock_guard lock(read_buffer_mutex);
+    auto pos = textBuffer->insert(inputBegin->get_iter(), read_buffer);
+    lock_text(pos);
+    terminal->scroll_to(inputBegin);
+    read_buffer.resize(0);
+}
+
+void Terminal::lock_text(const Gtk::TextBuffer::iterator& pos) {
+    textBuffer->apply_tag(tagReadOnly, textBuffer->begin(), pos);
+    textBuffer->move_mark(inputBegin, pos);
 }
 
 void Terminal::on_show() {
     if(visibleView.get_value() != "terminal_view")
         return;
 
-    textBuffer->set_text("> ");
-    lock_text();
+
     terminal->grab_focus();
+    textBuffer->set_text(">");
+    lock_text(textBuffer->end());
+
+    stop_reader = false;
+
+    if(!reader_stopped)
+        return;
+
+    start_reader_thread();
 }
 
 void Terminal::homeClicked() {
-    //Leaving page, clean up.
-    //
-
+    stop_reader = true;
     window->viewStack->set_visible_child("home_view");
 }
 
@@ -74,7 +130,11 @@ void Terminal::textEntered(Gtk::TextBuffer::iterator& pos, const Glib::ustring& 
         auto user_input = textBuffer->get_text(inputBegin->get_iter(), textBuffer->end());
         Logger::debug("User input: " + user_input);
         textBuffer->place_cursor(textBuffer->end());
-        textBuffer->insert_at_cursor("\n> ");
-        lock_text();
+        textBuffer->insert_at_cursor("\r\n");
+        lock_text(textBuffer->end());
+        terminal->scroll_to(inputBegin);
+
+        user_input.append("\r");
+        window->hardwareInterface->write(user_input);
     }
 }

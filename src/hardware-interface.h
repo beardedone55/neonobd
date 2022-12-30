@@ -46,6 +46,7 @@ class HardwareInterface {
                                  std::size_t buf_size = 1024,
                                  Flags flags = FLAGS_NONE) = 0; 
         virtual std::size_t write(const std::string& buf) = 0;
+        virtual void set_timeout(int milliseconds) {}
 
     protected:
         sigc::signal<void(bool)> complete_connection;
