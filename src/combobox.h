@@ -18,7 +18,11 @@
 #pragma once
 
 #include <tuple>
-#include <gtkmm.h>
+#include <gtkmm/combobox.h>
+#include <glibmm/refptr.h>
+#include <gtkmm/liststore.h>
+#include <gtkmm/treemodelcolumn.h>
+#include <gtkmm/builder.h>
 
 template<class... T>
 class ComboBox : public Gtk::ComboBox

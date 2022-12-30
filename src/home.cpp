@@ -32,10 +32,21 @@ Home::Home(MainWindow* window) :
     //Connect button
     connect_btn = Gtk::Builder::get_widget_derived<ConnectButton>(ui, "connect_button");
     enabled_buttons.insert(connect_btn);
+
+    //Terminal button
+    terminal_btn = ui->get_widget<Gtk::Button>("terminal_button");
+    //Disable this button until connected.
+    //terminal_btn->set_sensitive(false);
+    terminal_btn->signal_clicked().connect(
+        sigc::mem_fun(*this, &Home::terminal_clicked));
 }
 
 void Home::settings_clicked() {
     window->viewStack->set_visible_child("settings_view");
+}
+
+void Home::terminal_clicked() {
+    window->viewStack->set_visible_child("terminal_view");
 }
 
 void Home::disable_all() {
@@ -47,6 +58,18 @@ void Home::disable_all() {
 void Home::enable_all() {
     for(auto button : enabled_buttons) {
         button->set_sensitive(true);
+    }
+}
+
+void Home::set_connected(bool connected) {
+    this->connected = connected;
+
+    if(connected) {
+        disable_button(connect_btn);
+        enable_button(terminal_btn);
+    } else {
+        enable_button(connect_btn);
+        disable_button(terminal_btn);
     }
 }
 

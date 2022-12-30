@@ -17,7 +17,17 @@
 
 #pragma once
 
-#include <gtkmm.h>
+#include <sigc++/trackable.h>
+#include <sigc++/connection.h>
+#include <glibmm/ustring.h>
+#include <gtkmm/button.h>
+#include <gtkmm/label.h>
+#include <gtkmm/comboboxtext.h>
+#include <gtkmm/checkbutton.h>
+#include <gtkmm/progressbar.h>
+#include <gtkmm/messagedialog.h>
+#include <gtkmm/grid.h>
+#include <gtkmm/stack.h>
 #include "bluetooth-serial-port.h"
 #include "combobox.h"
 #include "neonobd_types.h"

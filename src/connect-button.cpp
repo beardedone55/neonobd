@@ -49,7 +49,7 @@ void ConnectButton::connect_complete(bool result) {
 
     if(result) {
         Logger::debug("Connection to device was successful!");
-        window->home->disable_button(this);
+        window->home->set_connected(true);
     } else {
         Logger::debug("Connection to device failed!");
     }
