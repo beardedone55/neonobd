@@ -37,12 +37,24 @@ class HardwareInterface {
                                                 Glib::RefPtr<void>)>& slot);
         virtual void respond_from_user(const Glib::VariantBase& response,
                                        const Glib::RefPtr<void>& signal_handle) = 0;
-        virtual std::vector<char>::size_type read(std::vector<char>& buf,
-                                                  std::vector<char>::size_type buf_size = 1024);
-        virtual std::vector<char>::size_type write(const std::vector<char>& buf);
-        virtual std::size_t read(std::string& buf,
-                                 std::size_t buf_size = 1024);
-        virtual std::size_t write(const std::string& buf);
+
+        template<typename Container, typename Contents = typename Container::value_type>
+        std::size_t read(Container& container, std::size_t buf_size = 1024) {
+            static_assert(sizeof(Contents) == sizeof(char),
+                   "Container used with HardwareInterface::read() must have elements with size of char.");
+            container.resize(buf_size);
+            auto bytecount = read(container.data(), buf_size);
+            container.resize(bytecount);
+            return bytecount;
+        }
+
+        template<typename Container, typename Contents = typename Container::value_type>
+        std::size_t write(const Container& buf) {
+            static_assert(sizeof(Contents) == sizeof(char),
+                   "Container used with HardwareInterface::write() must have elements with size of char.");
+            return write(buf.data(), buf.size());
+        }
+
         virtual void set_timeout(int milliseconds) {}
 
     protected:
@@ -50,5 +62,8 @@ class HardwareInterface {
         sigc::signal<void(const Glib::ustring&, ResponseType, Glib::RefPtr<void>)> request_user_input;
         int sock_fd = -1;
         std::shared_mutex sock_fd_mutex;
+
+        virtual std::size_t read(char* buf, std::size_t size);
+        virtual std::size_t write(const char* buf, std::size_t size);
 
 };
