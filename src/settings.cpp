@@ -26,6 +26,8 @@ Settings::Settings(MainWindow* window) :
     auto ui = window->ui;
     btHardwareInterface = BluetoothSerialPort::getBluetoothSerialPort();
 
+    serialHardwareInterface = window->serialPort;
+
     //Detect if view has changed.
     visibleView.signal_changed().connect(sigc::mem_fun(*this, &Settings::on_show));
 
@@ -88,6 +90,16 @@ Settings::Settings(MainWindow* window) :
         btDeviceCombo->append(deviceAddress, deviceName);
         btDeviceCombo->set_active(0);
     }
+
+    serialDeviceCombo = ui->get_widget<Gtk::ComboBoxText>("serial_device");
+    serialBaudrateCombo = ui->get_widget<Gtk::ComboBoxText>("serial_baudrate");
+
+    serialDeviceCombo->signal_changed().connect(sigc::mem_fun(*this,&Settings::selectSerialDevice));
+    serialBaudrateCombo->signal_changed().connect(sigc::mem_fun(*this,&Settings::selectSerialBaudrate));
+
+    populateComboBox(SerialPort::get_valid_baudrates(), serialBaudrateCombo,
+                     std::to_string(settings->get_enum("baud-rate")));
+
     Logger::debug("Created Settings object.");
 }
 
@@ -102,14 +114,19 @@ InterfaceType Settings::getInterfaceType() {
 
 Glib::ustring Settings::getSelectedDevice() {
     auto ifType = settings->get_enum("interface-type");
+    Glib::ustring selectedDevice;
     if(ifType == neon::BLUETOOTH_IF) {
         //Somebody wants the selected device in order to initiate a connection.
         //Make sure that the configured host adapter is selected.
         auto bluetoothController = settings->get_string("bluetooth-controller");
         btHardwareInterface->select_controller(bluetoothController);
+        selectedDevice = settings->get_string("selected-device-address");
+    } else {
+        serialHardwareInterface->set_baudrate(std::to_string(settings->get_enum("baud-rate")));
+        selectedDevice = settings->get_string("serial-port");
     }
 
-    return settings->get_string("selected-device-address");
+    return selectedDevice;
 }
 void Settings::homeClicked() {
     window->viewStack->set_visible_child("home_view");
@@ -142,15 +159,8 @@ void Settings::selectBluetoothController()
     if(btHostCombo->get_active_row_number() == -1)
         return;
 
-    Logger::debug("Selecting new bluetooth controller.");
-    auto bluetoothController = settings->get_string("bluetooth-controller");
-    Logger::debug("Previous controller: " + bluetoothController);
     auto newBluetoothController = btHostCombo->get_active_text();
-    Logger::debug("Settings: selected bluetooth controller " + newBluetoothController);
-    if(newBluetoothController != bluetoothController)
-    {
-        settings->set_string("bluetooth-controller", newBluetoothController);
-    }
+    settings->set_string("bluetooth-controller", newBluetoothController);
     btHardwareInterface->select_controller(newBluetoothController);
 }
 
@@ -166,6 +176,23 @@ void Settings::selectBluetoothDevice()
         settings->set_string("selected-device-name", name);
     }
 }
+
+void Settings::selectSerialDevice() {
+    if(serialDeviceCombo->get_active_row_number() == -1)
+        return;
+
+    auto selectedSerialDevice = serialDeviceCombo->get_active_text();
+    settings->set_string("serial-port", selectedSerialDevice);
+}
+
+void Settings::selectSerialBaudrate() {
+    if(serialBaudrateCombo->get_active_row_number() == -1)
+        return;
+
+    auto selectedBaudrate = serialBaudrateCombo->get_active_text();
+    settings->set_enum("baud-rate", std::stoi(selectedBaudrate));
+}
+
 
 void Settings::scanComplete()
 {
@@ -222,6 +249,20 @@ void Settings::scanBluetooth()
     bt->probe_remote_devices();
 }
 
+void Settings::populateComboBox(const std::vector<Glib::ustring>& values,
+                                Gtk::ComboBoxText* combobox,
+                                const Glib::ustring& default_value)
+{
+    combobox->remove_all();
+    for(int i=0; i < values.size(); ++i) {
+        auto& value = values[i];
+        combobox->append(value);
+        if(value == default_value) {
+            combobox->set_active(i);
+        }
+    }
+}
+
 void Settings::on_show()
 {
     if(visibleView.get_value() != "settings_view")
@@ -230,20 +271,8 @@ void Settings::on_show()
     Logger::debug("Showing settings dialog.");
     //Populate Combo Box:
     auto controllers = btHardwareInterface->get_controller_names();
-    btHostCombo->remove_all();
+    populateComboBox(controllers, btHostCombo, settings->get_string("bluetooth-controller"));
 
-    auto selectedController = settings->get_string("bluetooth-controller");
-
-    Logger::debug("Selected bluetooth controller is " + selectedController);
-
-    for(int i=0; i < controllers.size(); i++)
-    {
-        btHostCombo->append(controllers[i]);
-        if(controllers[i] == selectedController) {
-            Logger::debug("Setting active controller to " + selectedController);
-            btHostCombo->set_active(i);
-        }
-    }
     //If we only have one controller, asking user to select one is silly.
     if(controllers.size() == 1) {
         Logger::debug("Only one bluetooth controller found, hiding dropdown.");
@@ -263,4 +292,8 @@ void Settings::on_show()
     } else {
         bluetooth_rb->set_sensitive(true); //Enable Bluetooth
     }
+
+    //Populate comboboxes for serial port
+
+    populateComboBox(SerialPort::get_serial_devices(), serialDeviceCombo, settings->get_string("serial-port"));
 }

@@ -55,7 +55,7 @@ void Terminal::read_data() {
     hwif->set_timeout(100);
     std::string tempBuffer;
     while(!stop_reader) {
-        auto bytecount = hwif->read(tempBuffer, 128, HardwareInterface::FLAGS_NONE);
+        auto bytecount = hwif->read(tempBuffer);
         if(bytecount) {
             std::lock_guard lock(read_buffer_mutex);
             read_buffer.append(tempBuffer);

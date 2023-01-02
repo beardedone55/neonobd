@@ -27,6 +27,7 @@
 #include "bluetooth-serial-port.h"
 #include "hardware-interface.h"
 #include "neonobd_types.h"
+#include "serial-port.h"
 
 using neon::ResponseType;
 using neon::InterfaceType;
@@ -39,6 +40,7 @@ class MainWindow : public Gtk::Window
         MainWindow& operator=(const MainWindow&) = delete;
         virtual ~MainWindow();
         std::shared_ptr<BluetoothSerialPort> bluetoothSerialPort;
+        std::shared_ptr<SerialPort> serialPort;
         std::shared_ptr<HardwareInterface> hardwareInterface;
         std::unique_ptr<Home> home;
         std::unique_ptr<Settings> settings;
