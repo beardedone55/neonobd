@@ -15,17 +15,55 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <glibmm/ustring.h>
+#include <string>
+#include <ostream>
 
-class Logger {
-	public:
-		enum LogLevel {DEBUG, WARN, ERR, NONE};
-		static void setLogLevel(LogLevel);
-		static void debug(const Glib::ustring& msg);
-		static void warning(const Glib::ustring& msg);
-		static void error(const Glib::ustring& msg);
-	
-	private:
-		static LogLevel logLevel;
+namespace Logger {
+    enum LogLevel {DEBUG, INFO, WARN, ERR, NONE};
+    class LogStream {
+        LogStream(LogLevel lvl, std::ostream& out) : lvl{lvl}, out{out} {}
+        template<typename T>
+        LogStream& operator<<(const T& rhs) {
+            if(logLevel <= lvl) {
+                out << rhs;
+            }
+            return *this;
+        }
+        LogLevel lvl;
+        std::ostream& out;
+        static LogLevel logLevel;
+        friend void setLogLevel(LogLevel lvl);
+        friend class Logger;
+    };
+
+    class Logger {
+        public:
+            Logger(LogLevel lvl, std::ostream& out) : lvl{lvl}, stream{lvl, out} {}
+            void operator()(const std::string& msg);
+            template<typename T>
+            LogStream& operator<<(const T& rhs) {
+                stream << log_header.at(lvl) << rhs;
+                return stream;
+            }
+        private:
+            LogLevel lvl;
+            LogStream stream;
+            static const std::unordered_map<LogLevel, std::string> log_header;
+    };
+
+    class NoLog {
+        public:
+            template<typename T>
+            NoLog& operator<<(const T&) {
+                return *this;
+            }
+            void operator()(const std::string&) {}
+    };
+
+    void setLogLevel(LogLevel lvl);
+
+    extern Logger debug;
+    extern Logger info;
+    extern Logger warning;
+    extern Logger error;
 };
-

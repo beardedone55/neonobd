@@ -53,7 +53,7 @@ BluetoothSerialPort::~BluetoothSerialPort()
         }
     }
 
-    Logger::debug("Destroyed BluetoothSerialPort.");
+    Logger::debug << "Destroyed BluetoothSerialPort.\n";
 }
 
 void BluetoothSerialPort::finish_connection(Glib::RefPtr<Gio::AsyncResult>& result)
