@@ -16,28 +16,27 @@
  */
 
 #include <iostream>
+#include <unordered_map>
 #include "logger.h"
 
-Logger::LogLevel Logger::logLevel = Logger::DEBUG;
+Logger::LogLevel Logger::LogStream::logLevel = DEBUG;
 
-void Logger::setLogLevel(Logger::LogLevel lvl) {
-	logLevel = lvl;
+Logger::Logger Logger::debug(DEBUG, std::clog);
+Logger::Logger Logger::info(INFO, std::clog);
+Logger::Logger Logger::warning(WARN, std::clog);
+Logger::Logger Logger::error(ERR, std::cerr);
+
+void Logger::setLogLevel(LogLevel lvl) {
+    LogStream::logLevel = lvl;
 }
 
-void Logger::debug(const Glib::ustring& msg) {
-	if(logLevel <= DEBUG) {
-		std::clog << "DEBUG: " << msg << '\n';
-	}
+const std::unordered_map<Logger::LogLevel, std::string> Logger::Logger::log_header =
+    {{DEBUG, "DEBUG: "},
+     {INFO, "INFO: "},
+     {WARN, "WARNING: "},
+     {ERR, "ERROR: "}};
+
+void Logger::Logger::operator()(const std::string& msg) {
+    *this << msg << '\n';
 }
 
-void Logger::warning(const Glib::ustring& msg) {
-	if(logLevel <= WARN) {
-		std::clog << "WARNING: " << msg << '\n';
-	}
-}
-
-void Logger::error(const Glib::ustring& msg) {
-	if(logLevel <= ERR) {
-		std::cerr << "ERROR: " << msg << '\n';
-	}
-}
