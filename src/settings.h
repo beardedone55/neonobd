@@ -28,7 +28,9 @@
 #include <gtkmm/messagedialog.h>
 #include <gtkmm/grid.h>
 #include <gtkmm/stack.h>
+#include <giomm/settings.h>
 #include "bluetooth-serial-port.h"
+#include "serial-port.h"
 #include "combobox.h"
 #include "neonobd_types.h"
 
@@ -50,6 +52,7 @@ class Settings : public sigc::trackable {
         MainWindow* window;
         Glib::PropertyProxy<Glib::ustring> visibleView;
         std::shared_ptr<BluetoothSerialPort> btHardwareInterface;
+        std::shared_ptr<SerialPort> serialHardwareInterface;
         Gtk::Button* homeButton;
         Gtk::CheckButton* bluetooth_rb;
         Gtk::CheckButton* serial_rb;
@@ -62,6 +65,8 @@ class Settings : public sigc::trackable {
         Gtk::ProgressBar* btScanProgress;
         Gtk::Grid* btGrid;
         Gtk::Grid* serialGrid;
+        Gtk::ComboBoxText* serialDeviceCombo;
+        Gtk::ComboBoxText* serialBaudrateCombo;
         sigc::connection btScanConnection;
         Glib::RefPtr<Gio::Settings> settings;
         InterfaceType iftype;
@@ -71,7 +76,12 @@ class Settings : public sigc::trackable {
         void selectBluetooth();
         void selectBluetoothController();
         void selectBluetoothDevice();
+        void selectSerialDevice();
+        void selectSerialBaudrate();
         void scanBluetooth();
         void scanComplete();
         void updateScanProgress(int percentComplete);
+        static void populateComboBox(const std::vector<Glib::ustring>& values,
+                                     Gtk::ComboBoxText* combobox,
+                                     const Glib::ustring& default_value);
 };

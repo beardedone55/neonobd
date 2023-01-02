@@ -20,7 +20,8 @@
 #include <iostream>
 
 MainWindow::MainWindow() :
-    bluetoothSerialPort{BluetoothSerialPort::getBluetoothSerialPort()}
+    bluetoothSerialPort{BluetoothSerialPort::getBluetoothSerialPort()},
+    serialPort{new SerialPort}
 {
     css = Gtk::CssProvider::create();
     css->load_from_resource("/stylesheets/appstyle.css");
@@ -59,8 +60,7 @@ void MainWindow::setHardwareInterface(InterfaceType ifType) {
         hardwareInterface = bluetoothSerialPort;
         break;
       case neon::SERIAL_IF:
-        hardwareInterface.reset();
-        //hardwareInterface = serialPort; ????
+        hardwareInterface = serialPort;
         break;
     }    
 }

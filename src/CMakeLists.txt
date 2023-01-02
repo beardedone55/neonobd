@@ -24,7 +24,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 find_package(PkgConfig)
 pkg_check_modules(GTKMM REQUIRED gtkmm-4.0)
 
-add_executable(neonobd neonobd.cpp bluetooth-serial-port.cpp home.cpp mainwindow.cpp settings.cpp waitdialog.cpp logger.cpp connect-button.cpp terminal.cpp)
+add_executable(neonobd neonobd.cpp hardware-interface.cpp bluetooth-serial-port.cpp home.cpp mainwindow.cpp settings.cpp waitdialog.cpp logger.cpp connect-button.cpp terminal.cpp serial-port.cpp)
 
 target_include_directories(neonobd PRIVATE "${PROJECT_SOURCE_DIR}" ${GTKMM_INCLUDE_DIRS})
 

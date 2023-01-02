@@ -23,14 +23,16 @@
 #include <iomanip>
 #include <sys/socket.h>
 #include <sstream>
+#include <glibmm/main.h>
+#include <giomm/resource.h>
+#include <giomm/dbuserror.h>
 
 std::weak_ptr<BluetoothSerialPort> BluetoothSerialPort::bluetoothSerialPort;
 Gio::DBus::InterfaceVTable BluetoothSerialPort::profile_vtable {&BluetoothSerialPort::profile_method};
 Gio::DBus::InterfaceVTable BluetoothSerialPort::agent_vtable {&BluetoothSerialPort::agent_method};
 
 BluetoothSerialPort::BluetoothSerialPort() :
-    probe_in_progress{false},
-    sock_fd{-1}
+    probe_in_progress{false}
 {
     Logger::debug("Created BluetoothSerialPort.");
 }
@@ -116,64 +118,6 @@ bool BluetoothSerialPort::connect(const Glib::ustring& device_name) {
 
     initiate_connection(remoteDevices[device_name]);
     return true;
-}
-
-std::vector<char>::size_type 
-BluetoothSerialPort::read(std::vector<char>& buf,
-                          std::vector<char>::size_type buf_size,
-                          HardwareInterface::Flags flags)
-{
-    std::shared_lock lock(sock_fd_mutex);
-    if (sock_fd >= 0)
-    {
-        buf.resize(buf_size);
-        auto result = recv(sock_fd, buf.data(), buf_size * sizeof(char), 0);
-        if(result != -1)
-            return result;
-    }
-    return 0;
-}
-
-std::vector<char>::size_type BluetoothSerialPort::write(const std::vector<char>& buf)
-{
-    std::shared_lock lock(sock_fd_mutex);
-    if (sock_fd >= 0)
-    {
-        auto result = send(sock_fd, buf.data(), buf.size() * sizeof(char), 0);
-        if(result != -1)
-            return result;
-    }
-    return 0;
-}
-
-std::size_t 
-BluetoothSerialPort::read(std::string& buf,
-                          std::size_t buf_size,
-                          HardwareInterface::Flags flags)
-{
-    std::shared_lock lock(sock_fd_mutex);
-    if (sock_fd >= 0)
-    {
-        buf.resize(buf_size);
-        auto result = recv(sock_fd, buf.data(), buf.size(), 0);
-        if(result != -1) {
-            buf.resize(result);
-            return result;
-        }
-    }
-    return 0;
-}
-
-std::size_t BluetoothSerialPort::write(const std::string& buf)
-{
-    std::shared_lock lock(sock_fd_mutex);
-    if (sock_fd >= 0)
-    {
-        auto result = send(sock_fd, buf.data(), buf.size(), 0);
-        if(result != -1)
-            return result;
-    }
-    return 0;
 }
 
 void BluetoothSerialPort::set_timeout(int milliseconds) {

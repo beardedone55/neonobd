@@ -20,8 +20,9 @@
 #include "hardware-interface.h"
 #include <cstdint>
 #include <unordered_map>
-#include <shared_mutex>
 #include <memory>
+#include <giomm/dbusproxy.h>
+#include <giomm/dbusobjectmanagerclient.h>
 #include "neonobd_types.h"
 
 using neon::ResponseType;
@@ -38,14 +39,6 @@ class BluetoothSerialPort : public HardwareInterface,
         bool connect(const Glib::ustring& device_name) override;
         void respond_from_user(const Glib::VariantBase&  response,
                                const Glib::RefPtr<void>&  signal_handle) override;
-        std::vector<char>::size_type read(std::vector<char>&  buf, 
-                                          std::vector<char>::size_type buf_size = 1024,
-                                          HardwareInterface::Flags flags = HardwareInterface::FLAGS_NONE) override;
-        std::vector<char>::size_type write(const std::vector<char>&  buf) override;
-        std::size_t read(std::string&  buf,
-                         std::size_t buf_size = 1024,
-                         HardwareInterface::Flags flags = HardwareInterface::FLAGS_NONE) override;
-        std::size_t write(const std::string&  buf) override;
 
         void set_timeout(int milliseconds) override;
 
@@ -128,8 +121,6 @@ class BluetoothSerialPort : public HardwareInterface,
         sigc::connection preConnectionScanResult;
         bool probe_in_progress;
         int probe_progress;
-        int sock_fd;
-        std::shared_mutex sock_fd_mutex;
         Glib::DBusObjectPathString connected_device_path;
         sigc::signal<void()> agent_cancel;
         Glib::RefPtr<Gio::DBus::MethodInvocation> request_pin_invocation;

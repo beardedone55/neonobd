@@ -18,6 +18,7 @@
 #pragma once
 
 #include <tuple>
+#include <optional>
 #include <gtkmm/combobox.h>
 #include <glibmm/refptr.h>
 #include <gtkmm/liststore.h>
