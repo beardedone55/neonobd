@@ -29,54 +29,25 @@ HardwareInterface::attach_user_prompt(const sigc::slot<void(const Glib::ustring&
     return request_user_input.connect(slot);
 }
 
-std::vector<char>::size_type
-HardwareInterface::read(std::vector<char>& buf,
-                        std::vector<char>::size_type buf_size)
-{
-    std::shared_lock lock(sock_fd_mutex);
-    if (sock_fd >= 0)
-    {
-        buf.resize(buf_size);
-        auto result = ::read(sock_fd, buf.data(), buf_size * sizeof(char));
-        if(result != -1)
-            return result;
-    }
-    return 0;
-}
-
-std::vector<char>::size_type HardwareInterface::write(const std::vector<char>& buf)
-{
-    std::shared_lock lock(sock_fd_mutex);
-    if (sock_fd >= 0)
-    {
-        auto result = ::write(sock_fd, buf.data(), buf.size() * sizeof(char));
-        if(result != -1)
-            return result;
-    }
-    return 0;
-}
-
 std::size_t
-HardwareInterface::read(std::string& buf, std::size_t buf_size) {
+HardwareInterface::read(char* buf, std::size_t buf_size) {
     std::shared_lock lock(sock_fd_mutex);
     if (sock_fd >= 0)
     {
-        buf.resize(buf_size);
-        auto result = ::read(sock_fd, buf.data(), buf.size());
+        auto result = ::read(sock_fd, buf, buf_size);
         if(result != -1) {
-            buf.resize(result);
             return result;
         }
     }
     return 0;
 }
 
-std::size_t HardwareInterface::write(const std::string& buf)
+std::size_t HardwareInterface::write(const char* buf, std::size_t buf_size)
 {
     std::shared_lock lock(sock_fd_mutex);
     if (sock_fd >= 0)
     {
-        auto result = ::write(sock_fd, buf.data(), buf.size());
+        auto result = ::write(sock_fd, buf, buf_size);
         if(result != -1)
             return result;
     }

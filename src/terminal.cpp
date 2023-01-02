@@ -127,7 +127,7 @@ void Terminal::cursorMoved() {
 void Terminal::textEntered(Gtk::TextBuffer::iterator& pos, const Glib::ustring& text, int bytes) {
     if(text == "\n" && pos > inputBegin->get_iter()) {
         textBuffer->backspace(pos);
-        auto user_input = textBuffer->get_text(inputBegin->get_iter(), textBuffer->end());
+        std::string user_input = textBuffer->get_text(inputBegin->get_iter(), textBuffer->end());
         Logger::debug("User input: " + user_input);
         textBuffer->place_cursor(textBuffer->end());
         textBuffer->insert_at_cursor("\r\n");
