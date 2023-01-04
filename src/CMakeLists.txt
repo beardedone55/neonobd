@@ -20,11 +20,15 @@ project(neonobd VERSION 0.1)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic -Wunused -Wcast-align \
+                     -Wunused -Woverloaded-virtual -Wpedantic -Wconversion -Wmisleading-indentation \
+                     -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wnull-dereference \
+                     -Wformat=2")
 
 find_package(PkgConfig)
 pkg_check_modules(GTKMM REQUIRED gtkmm-4.0)
 
-add_executable(neonobd neonobd.cpp hardware-interface.cpp bluetooth-serial-port.cpp home.cpp mainwindow.cpp settings.cpp waitdialog.cpp logger.cpp connect-button.cpp terminal.cpp serial-port.cpp)
+add_executable(neonobd neonobd.cpp hardware-interface.cpp bluetooth-serial-port.cpp home.cpp mainwindow.cpp settings.cpp logger.cpp connect-button.cpp terminal.cpp serial-port.cpp)
 
 target_include_directories(neonobd PRIVATE "${PROJECT_SOURCE_DIR}" ${GTKMM_INCLUDE_DIRS})
 

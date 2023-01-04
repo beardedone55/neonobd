@@ -19,8 +19,8 @@
 #include "logger.h"
 #include "mainwindow.h"
 
-Settings::Settings(MainWindow* window) :
-   window{window},
+Settings::Settings(MainWindow* main_window) :
+   window{main_window},
    visibleView{window->viewStack->property_visible_child_name()}
 {
     auto ui = window->ui;
@@ -254,7 +254,7 @@ void Settings::populateComboBox(const std::vector<Glib::ustring>& values,
                                 const Glib::ustring& default_value)
 {
     combobox->remove_all();
-    for(int i=0; i < values.size(); ++i) {
+    for(unsigned int i=0; i < values.size(); ++i) {
         auto& value = values[i];
         combobox->append(value);
         if(value == default_value) {

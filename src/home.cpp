@@ -19,8 +19,8 @@
 #include "logger.h"
 #include "mainwindow.h"
 
-Home::Home(MainWindow* window) : 
-    window{window}
+Home::Home(MainWindow* main_window) : 
+    window{main_window}
 {
     auto ui = window->ui;
     //Settings button
@@ -61,8 +61,8 @@ void Home::enable_all() {
     }
 }
 
-void Home::set_connected(bool connected) {
-    this->connected = connected;
+void Home::set_connected(bool isConnected) {
+    connected = isConnected;
 
     if(connected) {
         disable_button(connect_btn);
