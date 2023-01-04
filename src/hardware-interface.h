@@ -30,6 +30,10 @@ using neon::ResponseType;
 
 class HardwareInterface {
     public:
+        HardwareInterface() = default;
+        HardwareInterface(const HardwareInterface&) = delete;
+        HardwareInterface& operator=(const HardwareInterface&) = delete;
+        virtual ~HardwareInterface() = default;
         virtual bool connect(const Glib::ustring& device_name) = 0;
         sigc::connection attach_connect_complete(const sigc::slot<void(bool)>& slot);
         sigc::connection attach_user_prompt(const sigc::slot<void(const Glib::ustring&, 
@@ -55,7 +59,7 @@ class HardwareInterface {
             return write(buf.data(), buf.size());
         }
 
-        virtual void set_timeout(int milliseconds) {}
+        virtual void set_timeout(unsigned int) {}
 
     protected:
         sigc::signal<void(bool)> complete_connection;

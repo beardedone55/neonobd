@@ -29,9 +29,9 @@ class SerialPort: public HardwareInterface,
         SerialPort();
         ~SerialPort();
         bool connect(const Glib::ustring& device_name) override;
-        void respond_from_user(const Glib::VariantBase& response,
-                               const Glib::RefPtr<void>& signal_handle) override {}
-        void set_timeout(int milliseconds) override;
+        void respond_from_user(const Glib::VariantBase&,
+                               const Glib::RefPtr<void>&) override {}
+        void set_timeout(unsigned int milliseconds) override;
 
         void set_baudrate(const Glib::ustring& baudrate);
         static std::vector<Glib::ustring> get_valid_baudrates();
@@ -42,7 +42,7 @@ class SerialPort: public HardwareInterface,
         Glib::Dispatcher dispatcher;
         std::unique_ptr<std::thread> connect_thread;
         bool connected = false;
-        int timeout = 0;
+        unsigned char timeout = 0;
 
         void initiate_connection(const Glib::ustring& device_name);
         void connect_complete();

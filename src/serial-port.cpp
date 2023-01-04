@@ -94,8 +94,8 @@ std::vector<Glib::ustring> SerialPort::get_serial_devices() {
     return device_list;
 }
 
-void SerialPort::set_baudrate(const Glib::ustring& baudrate) {
-    this->baudrate = baudrates.at(baudrate);
+void SerialPort::set_baudrate(const Glib::ustring& new_baudrate) {
+    baudrate = baudrates.at(new_baudrate);
 }
 
 void SerialPort::connect_complete() {
@@ -165,8 +165,10 @@ bool SerialPort::connect(const Glib::ustring& device_name) {
     return true;
 }
 
-void SerialPort::set_timeout(int milliseconds) {
-    timeout = milliseconds / 100;
+void SerialPort::set_timeout(unsigned int milliseconds) {
+    auto deciseconds = milliseconds / 100;
+
+    timeout = (deciseconds > UCHAR_MAX) ? UCHAR_MAX : static_cast<unsigned char>(deciseconds);
 
     std::shared_lock lock(sock_fd_mutex);
     if(sock_fd == -1)

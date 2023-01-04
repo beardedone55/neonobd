@@ -29,7 +29,7 @@ template<class... T>
 class ComboBox : public Gtk::ComboBox
 {
     public:
-        ComboBox(BaseObjectType* cobj, const Glib::RefPtr<Gtk::Builder>& ui) :
+        ComboBox(BaseObjectType* cobj, const Glib::RefPtr<Gtk::Builder>&) :
             Gtk::ComboBox(cobj)
         {
             std::apply([this](auto&&... cols){((column_record.add(cols)), ...);}, columns);

@@ -40,7 +40,7 @@ class BluetoothSerialPort : public HardwareInterface,
         void respond_from_user(const Glib::VariantBase&  response,
                                const Glib::RefPtr<void>&  signal_handle) override;
 
-        void set_timeout(int milliseconds) override;
+        void set_timeout(unsigned int milliseconds) override;
 
         static std::shared_ptr<BluetoothSerialPort> getBluetoothSerialPort();
 

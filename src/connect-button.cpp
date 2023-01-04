@@ -19,7 +19,7 @@
 #include "mainwindow.h"
 #include "logger.h"
 
-ConnectButton::ConnectButton(BaseObjectType* cobj, const Glib::RefPtr<Gtk::Builder>& ui) :
+ConnectButton::ConnectButton(BaseObjectType* cobj, const Glib::RefPtr<Gtk::Builder>&) :
     Gtk::Button{cobj}
 {
     window = dynamic_cast<MainWindow*>(get_ancestor(GTK_TYPE_WINDOW));
@@ -143,6 +143,6 @@ void ConnectButton::user_number_response(int responseCode) {
     }
 }
 
-void ConnectButton::user_none_response(int responseCode) {
+void ConnectButton::user_none_response(int) {
     window->hidePopup();
 }

@@ -72,7 +72,7 @@ void BluetoothSerialPort::finish_connection(Glib::RefPtr<Gio::AsyncResult>& resu
             complete_connection.emit(true);
             return;
         }
-        catch(Glib::Error &e)
+        catch(Glib::Error& e)
         {
             Logger::error("Error occurred connecting to Bluetooth Device");
             std::stringstream logstr;
@@ -120,7 +120,7 @@ bool BluetoothSerialPort::connect(const Glib::ustring& device_name) {
     return true;
 }
 
-void BluetoothSerialPort::set_timeout(int milliseconds) {
+void BluetoothSerialPort::set_timeout(unsigned int milliseconds) {
     std::shared_lock lock(sock_fd_mutex);
     if (sock_fd >= 0) {
         timeval time = { milliseconds / 1000, milliseconds * 1000};
@@ -150,7 +150,7 @@ void BluetoothSerialPort::manager_created(Glib::RefPtr<Gio::AsyncResult>& result
     {
         manager = Gio::DBus::ObjectManagerClient::create_for_bus_finish(result);
     }
-    catch(Glib::Error e)
+    catch(Glib::Error& e)
     {
         Logger::error(e.what());
         return;
@@ -288,7 +288,7 @@ void BluetoothSerialPort::stop_probe_finish(const Glib::RefPtr<Gio::AsyncResult>
                                             const Glib::RefPtr<Gio::DBus::Proxy>& controller)
 {
     try { controller->call_finish(result); }
-    catch(Glib::Error e) { Logger::error(e.what()); }
+    catch(Glib::Error& e) { Logger::error(e.what()); }
 
     emit_probe_progress(100);
 }
@@ -322,7 +322,7 @@ void BluetoothSerialPort::probe_finish(Glib::RefPtr<Gio::AsyncResult>& result,
 {
     //StartDiscovery command issued; now wait for timeout
     try { controller->call_finish(result); }
-    catch(Glib::Error e) {
+    catch(Glib::Error& e) {
         Logger::error(e.what());
         emit_probe_progress(100);
         return;
@@ -416,13 +416,13 @@ constexpr auto OBJECT_PATH = "/com/github/beardedone55/bluetooth_serial";
 constexpr auto SERIAL_PORT_UUID = "00001101-0000-1000-8000-00805f9b34fb";
 
 void BluetoothSerialPort::register_complete(const Glib::RefPtr<Gio::AsyncResult>& result,
-                                            const Glib::RefPtr<Gio::DBus::Proxy>& manager)
+                                            const Glib::RefPtr<Gio::DBus::Proxy>& registered_manager)
 {
     //RegisterAgent and RegisterProfile don't
     //return anything.  This just checks if there were
     //errors.
-    try {manager->call_finish(result);}
-    catch(Glib::Error e) {Logger::error(e.what());}
+    try {registered_manager->call_finish(result);}
+    catch(Glib::Error& e) {Logger::error(e.what());}
     Logger::debug("Bluetooth agent registration complete.");
 }
 
@@ -524,9 +524,9 @@ void BluetoothSerialPort::register_agent()
 
 void
 BluetoothSerialPort::agent_method(const Glib::RefPtr<Gio::DBus::Connection>&,
-                                  const Glib::ustring& sender,
-                                  const Glib::ustring& object_path,
-                                  const Glib::ustring& interface_name,
+                                  const Glib::ustring&,
+                                  const Glib::ustring&,
+                                  const Glib::ustring&,
                                   const Glib::ustring& method_name,
                                   const Glib::VariantContainerBase& parameters,
                                   const Glib::RefPtr<Gio::DBus::MethodInvocation>& invocation)
@@ -669,9 +669,9 @@ void BluetoothSerialPort::respond_from_user(const Glib::VariantBase& response,
 
 void
 BluetoothSerialPort::profile_method(const Glib::RefPtr<Gio::DBus::Connection>&,
-                                    const Glib::ustring& sender,
-                                    const Glib::ustring& object_path,
-                                    const Glib::ustring& interface_name,
+                                    const Glib::ustring&,
+                                    const Glib::ustring&,
+                                    const Glib::ustring&,
                                     const Glib::ustring& method_name,
                                     const Glib::VariantContainerBase& parameters,
                                     const Glib::RefPtr<Gio::DBus::MethodInvocation>& invocation)

@@ -19,8 +19,8 @@
 #include "mainwindow.h"
 #include "logger.h"
 
-Terminal::Terminal(MainWindow* window) : 
-    window{window},
+Terminal::Terminal(MainWindow* main_window) : 
+    window{main_window},
     visibleView{window->viewStack->property_visible_child_name()}
 {
     auto ui = window->ui;
@@ -124,7 +124,7 @@ void Terminal::cursorMoved() {
     }
 }
 
-void Terminal::textEntered(Gtk::TextBuffer::iterator& pos, const Glib::ustring& text, int bytes) {
+void Terminal::textEntered(Gtk::TextBuffer::iterator& pos, const Glib::ustring& text, int) {
     if(text == "\n" && pos > inputBegin->get_iter()) {
         textBuffer->backspace(pos);
         std::string user_input = textBuffer->get_text(inputBegin->get_iter(), textBuffer->end());
