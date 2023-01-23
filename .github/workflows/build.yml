@@ -17,7 +17,7 @@ jobs:
           wget https://download.gnome.org/sources/libsigc++/3.4/libsigc++-3.4.0.tar.xz
           tar Jxvf libsigc++-3.4.0.tar.xz
           cd libsigc++-3.4.0/
-          ./autogen.sh --prifix=/usr/local
+          ./autogen.sh --prefix=/usr/local
           make
           sudo make install
       - name: Configure cmake
