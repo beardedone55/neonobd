@@ -10,10 +10,12 @@ jobs:
     steps:
       - name: Checkout default branch
         uses: actions/checkout@v3
+      - name: Install Prerequisites
+        run: sudo apt-get install -y mm-common
       - name: Build and Install sigc++
         run: |
-          wget https://download.gnome.org/sources/libsigc++/3.4/libsigc++-3.4.0.tar.xz || exit 1
-          tar Jxvf libsigc++-3.4.0.tar.xz || exit 1
+          wget https://download.gnome.org/sources/libsigc++/3.4/libsigc++-3.4.0.tar.xz
+          tar Jxvf libsigc++-3.4.0.tar.xz
           cd libsigc++-3.4.0/
           ./autogen.sh --prifix=/usr/local
           make
