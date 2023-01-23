@@ -1,0 +1,17 @@
+name: Build Project
+run-name: Building latest version of ${{ github.repository }}
+on:
+  pull_request:
+    branches:
+      - master
+jobs:
+  build_project:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout default branch
+        uses: actions/checkout@v3
+      - name: Configure cmake
+        run: cmake -B build src
+      - name: Compile project
+        run: cmake --build build
+
