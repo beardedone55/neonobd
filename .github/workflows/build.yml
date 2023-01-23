@@ -10,8 +10,14 @@ jobs:
     steps:
       - name: Checkout default branch
         uses: actions/checkout@v3
-      - name: Install gtkmm-4.0
-        run: sudo apt-get install -y libgtkmm-4.0-dev
+      - name: Build and Install sigc++
+        run: |
+          wget https://download.gnome.org/sources/libsigc++/3.4/libsigc++-3.4.0.tar.xz || exit 1
+          tar Jxvf libsigc++-3.4.0.tar.xz || exit 1
+          cd libsigc++-3.4.0/
+          ./autogen.sh --prifix=/usr/local
+          make
+          sudo make install
       - name: Configure cmake
         run: cmake -B build src
       - name: Compile project
