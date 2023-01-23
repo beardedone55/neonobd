@@ -11,7 +11,7 @@ jobs:
       - name: Checkout default branch
         uses: actions/checkout@v3
       - name: Install gtkmm-4.0
-        run: sudo apt-get install -y gtkmm-4.0
+        run: sudo apt-get install -y libgtkmm-4.0-dev
       - name: Configure cmake
         run: cmake -B build src
       - name: Compile project
