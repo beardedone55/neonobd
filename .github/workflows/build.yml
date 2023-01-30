@@ -11,13 +11,45 @@ jobs:
       - name: Checkout default branch
         uses: actions/checkout@v3
       - name: Install Prerequisites
-        run: sudo apt-get install -y mm-common docbook-xsl
+        run: sudo apt-get install -y mm-common docbook-xsl libxml-parser-perl libpango1.0-dev libcairo2-dev libgtk-4-dev
       - name: Build and Install sigc++
         run: |
           wget https://download.gnome.org/sources/libsigc++/3.4/libsigc++-3.4.0.tar.xz
           tar Jxvf libsigc++-3.4.0.tar.xz
           cd libsigc++-3.4.0/
           ./autogen.sh --prefix=/usr/local
+          make
+          sudo make install
+      - name: Build and Install glibmm
+        run: |
+          wget https://download.gnome.org/sources/glibmm/2.72/glibmm-2.72.1.tar.xz
+          tar Jxvf glibmm-2.72.1.tar.xz
+          cd glibmm-2.72.1/
+          ./autogen.sh --prefix=/usr
+          make
+          sudo make install
+      - name: Build and Install cairomm
+        run: |
+          wget https://download.gnome.org/sources/cairomm/1.15/cairomm-1.15.4.tar.xz
+          tar Jxvf cairomm-1.15.4.tar.xz
+          cd cairomm-1.15.4/
+          ./autogen.sh --prefix=/usr
+          make
+          sudo make install
+      - name: Build and Install pangomm
+        run: |
+          wget https://download.gnome.org/sources/pangomm/2.50/pangomm-2.50.1.tar.xz
+          tar Jxvf pangomm-2.50.1.tar.xz
+          cd pangomm-2.50.1/
+          ./autogen.sh --prefix=/usr
+          make
+          sudo make install
+      - name: Build and Install gtkmm
+        run: |
+          wget https://download.gnome.org/sources/gtkmm/4.7/gtkmm-4.7.1.tar.xz
+          tar Jxvf gtkmm-4.7.1.tar.xz
+          cd gtkmm-4.7.1/
+          ./autogen.sh --prefix=/usr
           make
           sudo make install
       - name: Configure cmake
