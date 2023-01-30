@@ -11,7 +11,7 @@ jobs:
       - name: Checkout default branch
         uses: actions/checkout@v3
       - name: Install Prerequisites
-        run: sudo apt-get install -y mm-common
+        run: sudo apt-get install -y mm-common docbook-xsl
       - name: Build and Install sigc++
         run: |
           wget https://download.gnome.org/sources/libsigc++/3.4/libsigc++-3.4.0.tar.xz
