@@ -21,9 +21,9 @@
 
 MainWindow::MainWindow() :
     bluetoothSerialPort{BluetoothSerialPort::getBluetoothSerialPort()},
-    serialPort{new SerialPort}
+    serialPort{new SerialPort},
+    css{Gtk::CssProvider::create()}
 {
-    css = Gtk::CssProvider::create();
     css->load_from_resource("/stylesheets/appstyle.css");
     Gtk::StyleContext::add_provider_for_display(Gdk::Display::get_default(),
                                  css, 

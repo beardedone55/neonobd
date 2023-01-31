@@ -29,7 +29,7 @@ class MainWindow;
 
 class Terminal : public sigc::trackable {
     public:
-        Terminal(MainWindow* window);
+        explicit Terminal(MainWindow* window);
         Terminal(const Terminal&) = delete;
         Terminal& operator=(const Terminal&) = delete;
         ~Terminal();

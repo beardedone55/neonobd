@@ -32,7 +32,8 @@ Gio::DBus::InterfaceVTable BluetoothSerialPort::profile_vtable {&BluetoothSerial
 Gio::DBus::InterfaceVTable BluetoothSerialPort::agent_vtable {&BluetoothSerialPort::agent_method};
 
 BluetoothSerialPort::BluetoothSerialPort() :
-    probe_in_progress{false}
+    probe_in_progress{false},
+    probe_progress{0}
 {
     Logger::debug("Created BluetoothSerialPort.");
 }
@@ -164,8 +165,9 @@ void BluetoothSerialPort::manager_created(Glib::RefPtr<Gio::AsyncResult>& result
                 sigc::mem_fun(*this, &BluetoothSerialPort::remove_object));
 
         auto objects = manager->get_objects();
-        for(auto &object : objects)
+        for(const auto& object : objects) {
             add_object(object);
+        }
     }
     register_profile();
     register_agent();
@@ -271,9 +273,8 @@ std::vector<Glib::ustring> BluetoothSerialPort::get_controller_names()
     std::vector<Glib::ustring> ret;
 
     ret.reserve(controllers.size());
-    for(auto& controller : controllers)
-        ret.emplace_back(controller.first);
-
+    std::transform(controllers.begin(), controllers.end(), 
+                   std::back_inserter(ret), [](const auto& a){return a.first;});
     return ret;
 }
 
@@ -362,19 +363,7 @@ sigc::signal<void(int)> BluetoothSerialPort::signal_probe_progress()
     return probe_progress_signal;
 }
 
-std::map<Glib::ustring, Glib::ustring> 
-BluetoothSerialPort::get_device_names_addresses()
-{
-    std::map<Glib::ustring, Glib::ustring> ret;
-
-    for(auto &[ address, d ] : remoteDevices)
-        ret[address] = get_property_value(d, "Alias");
-
-    return ret;
-}
-
-Glib::ustring 
-BluetoothSerialPort::get_property_value(const Glib::RefPtr<Gio::DBus::Proxy>& proxy,
+static Glib::ustring get_property_value(const Glib::RefPtr<Gio::DBus::Proxy>& proxy,
                                         const Glib::ustring& property_name)
 {
     Glib::Variant<Glib::ustring> property;
@@ -384,29 +373,15 @@ BluetoothSerialPort::get_property_value(const Glib::RefPtr<Gio::DBus::Proxy>& pr
     return property.get();
 }
 
-std::vector<Glib::ustring> 
-BluetoothSerialPort::get_property_values(const ProxyMap& proxy_list,
-                                         const Glib::ustring& property_name)
+std::vector<std::pair<Glib::ustring, Glib::ustring>>
+BluetoothSerialPort::get_device_names_addresses()
 {
-    std::vector<Glib::ustring> ret;
+    std::vector<std::pair<Glib::ustring, Glib::ustring>> ret;
 
-    ret.reserve(proxy_list.size());
-
-    for (auto &[name, proxy] : proxy_list)
-        ret.push_back(get_property_value(proxy, property_name));
+    std::transform(remoteDevices.begin(), remoteDevices.end(), std::back_inserter(ret), 
+                   [](const auto& a){return std::make_pair<Glib::ustring, Glib::ustring>(a.first, get_property_value(a.second, "Alias"));});
 
     return ret;
-}
-
-
-std::vector<Glib::ustring> BluetoothSerialPort::get_device_names()
-{
-    return get_property_values(remoteDevices, "Alias");
-}
-
-std::vector<Glib::ustring> BluetoothSerialPort::get_device_addresses()
-{
-    return get_property_values(remoteDevices, "Address");
 }
 
 constexpr auto OBJECT_PATH = "/com/github/beardedone55/bluetooth_serial";

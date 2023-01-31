@@ -21,10 +21,11 @@
 
 Settings::Settings(MainWindow* main_window) :
    window{main_window},
-   visibleView{window->viewStack->property_visible_child_name()}
+   visibleView{window->viewStack->property_visible_child_name()},
+   btHardwareInterface{BluetoothSerialPort::getBluetoothSerialPort()}
+
 {
     auto ui = window->ui;
-    btHardwareInterface = BluetoothSerialPort::getBluetoothSerialPort();
 
     serialHardwareInterface = window->serialPort;
 
@@ -107,11 +108,6 @@ Settings::~Settings() {
     Logger::debug("Settings object destroyed.");
 }
 
-
-InterfaceType Settings::getInterfaceType() {
-    return iftype;
-}
-
 Glib::ustring Settings::getSelectedDevice() {
     auto ifType = settings->get_enum("interface-type");
     Glib::ustring selectedDevice;
@@ -166,7 +162,6 @@ void Settings::selectBluetoothController()
 
 void Settings::selectBluetoothDevice()
 {
-    auto defaultAddress = settings->get_string("selected-device-address");
     auto activeDevice = btDeviceCombo->get_active_values();
     if(activeDevice)
     {

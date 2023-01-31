@@ -30,7 +30,7 @@ using neon::ResponseType;
 
 class Home : public sigc::trackable {
     public:
-        Home(MainWindow* window);
+        explicit Home(MainWindow* window);
         void enable_all();
         void disable_all();
         void set_connected(bool connected);
