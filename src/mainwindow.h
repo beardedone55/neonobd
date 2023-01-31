@@ -55,7 +55,7 @@ class MainWindow : public Gtk::Window
         void hidePopup();
 
     protected:
-        Gtk::MessageDialog* popup;
+        Gtk::MessageDialog* popup = nullptr;
         sigc::connection popup_response_connection;
         bool popup_shown = false;
         std::unique_ptr<Gtk::MessageDialog> yes_no_dialog;

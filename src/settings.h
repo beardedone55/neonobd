@@ -40,12 +40,11 @@ using neon::InterfaceType;
 
 class Settings : public sigc::trackable {
     public:
-        Settings(MainWindow* window);
+        explicit Settings(MainWindow* window);
         Settings(const Settings&) = delete;
         Settings& operator=(const Settings&) = delete;
         ~Settings();
 
-        InterfaceType getInterfaceType();
         Glib::ustring getSelectedDevice();
 
     private:

@@ -58,14 +58,9 @@ class BluetoothSerialPort : public HardwareInterface,
 
         //Remote Device Access Methods
         //-------------------------------------------------
-        //Get vecotr of addresses of all remote devices
-        std::vector<Glib::ustring> get_device_addresses();
-
-        //Get vector of names of all remote devices
-        std::vector<Glib::ustring> get_device_names();
 
         //Return map of remote device addresses to their device names
-        std::map<Glib::ustring, Glib::ustring> get_device_names_addresses();
+        std::vector<std::pair<Glib::ustring, Glib::ustring>> get_device_names_addresses();
 
         //Signal to connect to that will report progress of
         //device scan.  Parameter is integer that represents
@@ -146,12 +141,6 @@ class BluetoothSerialPort : public HardwareInterface,
         void stop_probe_finish(const Glib::RefPtr<Gio::AsyncResult>& result,
                                const Glib::RefPtr<Gio::DBus::Proxy>& controller);
         void emit_probe_progress(int percentComplete);
-        std::vector<Glib::ustring> get_property_values(
-                          const ProxyMap& proxy_list,
-                          const Glib::ustring& property_name);
-        Glib::ustring get_property_value(
-                          const Glib::RefPtr<Gio::DBus::Proxy>& proxy,
-                          const Glib::ustring & property_name);
         guint register_object(const std::string& interface_path,
                              const Gio::DBus::InterfaceVTable& vtable);
         void register_profile();

@@ -13,4 +13,4 @@ jobs:
       - name: Install Prerequisites
         run: sudo apt-get install cppcheck
       - name: Run cppcheck
-        run: cppcheck --enable=all --error-exitcode=1 --suppress=missingIncludeSystem src
+        run: cppcheck --enable=all --error-exitcode=1 --suppressions-list=cppcheck_suppression_list src
