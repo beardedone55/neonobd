@@ -16,8 +16,8 @@
  */
 
 #include <ostream>
-#include <unordered_map>
 #include <string>
+#include <unordered_map>
 
 namespace Logger {
 enum LogLevel { DEBUG, INFO, WARN, ERR, NONE };
