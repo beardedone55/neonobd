@@ -1,16 +1,16 @@
 /* This file is part of neonobd - OBD diagnostic software.
- * Copyright (C) 2022  Brian LePage
- * 
+ * Copyright (C) 2022-2023  Brian LePage
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
@@ -19,21 +19,19 @@
 #include "logger.h"
 #include <iostream>
 
-MainWindow::MainWindow() :
-    bluetoothSerialPort{BluetoothSerialPort::getBluetoothSerialPort()},
-    serialPort{new SerialPort},
-    css{Gtk::CssProvider::create()}
-{
+MainWindow::MainWindow()
+    : bluetoothSerialPort{BluetoothSerialPort::getBluetoothSerialPort()},
+      serialPort{new SerialPort}, css{Gtk::CssProvider::create()} {
     css->load_from_resource("/stylesheets/appstyle.css");
-    Gtk::StyleContext::add_provider_for_display(Gdk::Display::get_default(),
-                                 css, 
-                                 GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-    
+    Gtk::StyleContext::add_provider_for_display(
+        Gdk::Display::get_default(), css,
+        GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+
     ui = Gtk::Builder::create_from_resource("/ui/neonobd_ui.xml");
 
     viewStack = ui->get_widget<Gtk::Stack>("view_stack");
 
-    if(!viewStack) {
+    if (!viewStack) {
         Logger::error("Could not instantiate view_stack.");
         return;
     }
@@ -44,48 +42,47 @@ MainWindow::MainWindow() :
     settings = std::make_unique<Settings>(this);
     terminal = std::make_unique<Terminal>(this);
     yes_no_dialog.reset(ui->get_widget<Gtk::MessageDialog>("yes_no_dialog"));
-    text_input_dialog.reset(ui->get_widget<Gtk::MessageDialog>("text_input_dialog"));
-    number_input_dialog.reset(ui->get_widget<Gtk::MessageDialog>("number_input_dialog"));
+    text_input_dialog.reset(
+        ui->get_widget<Gtk::MessageDialog>("text_input_dialog"));
+    number_input_dialog.reset(
+        ui->get_widget<Gtk::MessageDialog>("number_input_dialog"));
 
     set_name("mainwindow");
 }
 
-MainWindow::~MainWindow() {
-    Logger::debug("Destroying MainWindow.");
-}
+MainWindow::~MainWindow() { Logger::debug("Destroying MainWindow."); }
 
 void MainWindow::setHardwareInterface(InterfaceType ifType) {
-    switch(ifType) {
-      case neon::BLUETOOTH_IF:
+    switch (ifType) {
+    case neon::BLUETOOTH_IF:
         hardwareInterface = bluetoothSerialPort;
         break;
-      case neon::SERIAL_IF:
+    case neon::SERIAL_IF:
         hardwareInterface = serialPort;
         break;
-    }    
+    }
 }
 
-void MainWindow::showPopup(const std::string& message,
-                           ResponseType type,
-                           const sigc::slot<void(int)>& response) {
-    
+void MainWindow::showPopup(const std::string &message, ResponseType type,
+                           const sigc::slot<void(int)> &response) {
+
     Logger::debug("Showing popup dialog.");
 
-    if(popup_shown) {
+    if (popup_shown) {
         hidePopup();
     }
 
-    switch(type) {
-      case neon::USER_YN:
+    switch (type) {
+    case neon::USER_YN:
         popup = yes_no_dialog.get();
         break;
-      case neon::USER_STRING:
+    case neon::USER_STRING:
         popup = text_input_dialog.get();
         break;
-      case neon::USER_INT:
+    case neon::USER_INT:
         popup = number_input_dialog.get();
         break;
-      default:
+    default:
         return;
     }
 
@@ -93,7 +90,7 @@ void MainWindow::showPopup(const std::string& message,
     popup_response_connection = popup->signal_response().connect(response);
     popup->set_transient_for(*this);
     popup->set_message(message);
-    if(type == neon::USER_YN) {
+    if (type == neon::USER_YN) {
         popup->set_default_response(Gtk::ResponseType::YES);
     } else {
         popup->set_default_response(Gtk::ResponseType::OK);
@@ -102,7 +99,7 @@ void MainWindow::showPopup(const std::string& message,
 }
 
 void MainWindow::hidePopup() {
-    if(!popup_shown)
+    if (!popup_shown)
         return;
 
     popup->hide();
