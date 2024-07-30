@@ -28,7 +28,7 @@ set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic -Wunuse
 find_package(PkgConfig)
 pkg_check_modules(GTKMM REQUIRED gtkmm-4.0)
 
-add_executable(neonobd neonobd.cpp hardware-interface.cpp bluetooth-serial-port.cpp home.cpp mainwindow.cpp settings.cpp logger.cpp connect-button.cpp terminal.cpp serial-port.cpp)
+add_executable(neonobd neonobd.cpp hardware-interface.cpp bluetooth-serial-port.cpp home.cpp mainwindow.cpp settings.cpp logger.cpp connect-button.cpp terminal.cpp serial-port.cpp elm327.cpp obd.cpp)
 
 target_include_directories(neonobd PRIVATE "${PROJECT_SOURCE_DIR}" ${GTKMM_INCLUDE_DIRS})
 

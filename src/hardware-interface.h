@@ -35,7 +35,7 @@ class HardwareInterface {
     virtual ~HardwareInterface() = default;
     virtual bool connect(const Glib::ustring &device_name) = 0;
     sigc::connection
-    attach_connect_complete(const sigc::slot<void(bool)> &slot);
+        attach_connect_complete(const sigc::slot<void(bool)> &slot);
     sigc::connection attach_user_prompt(
         const sigc::slot<void(const Glib::ustring &, ResponseType,
                               Glib::RefPtr<void>)> &slot);
@@ -66,11 +66,11 @@ class HardwareInterface {
     virtual void set_timeout(unsigned int) {}
 
   protected:
-    sigc::signal<void(bool)> complete_connection;
+    sigc::signal<void(bool)> m_complete_connection;
     sigc::signal<void(const Glib::ustring &, ResponseType, Glib::RefPtr<void>)>
-        request_user_input;
-    int sock_fd = -1;
-    std::shared_mutex sock_fd_mutex;
+        m_request_user_input;
+    int m_sock_fd = -1;
+    std::shared_mutex m_sock_fd_mutex;
 
     virtual std::size_t read(char *buf, std::size_t size);
     virtual std::size_t write(const char *buf, std::size_t size);

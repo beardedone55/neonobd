@@ -20,7 +20,7 @@
 #include <iostream>
 
 MainWindow::MainWindow()
-    : bluetoothSerialPort{BluetoothSerialPort::getBluetoothSerialPort()},
+    : bluetoothSerialPort{BluetoothSerialPort::get_BluetoothSerialPort()},
       serialPort{new SerialPort}, css{Gtk::CssProvider::create()} {
     css->load_from_resource("/stylesheets/appstyle.css");
     Gtk::StyleContext::add_provider_for_display(
