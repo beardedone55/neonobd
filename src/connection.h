@@ -24,10 +24,11 @@ class Connection {
     Connection() = default;
     Connection(const Connection&) = delete;
     Connection& operator=(const Connection&) = delete;
-    Connection(const sigc::connection& conn) : m_connection{conn} {}
-    Connection& operator=(const sigc::connection& conn) {
+    explicit Connection(const sigc::connection& connection)
+        : m_connection{connection} {}
+    Connection& operator=(const sigc::connection& connection) {
         disconnect();
-        m_connection = conn;
+        m_connection = connection;
         return *this;
     }
     ~Connection() { disconnect(); }

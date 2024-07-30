@@ -1,0 +1,15 @@
+name: Check Formatting
+run-name: Check formatting of source files in ${{ github.repository }}
+on:
+  pull_request:
+    branches:
+      - master
+jobs:
+  format_check:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout default branch
+        uses: actions/checkout@v4
+      - name: Check formatting
+        run: clang-format --Werror --dry-run src/*.h src/*.cpp
+

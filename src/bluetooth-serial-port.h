@@ -32,7 +32,7 @@ class BluetoothSerialPort : public HardwareInterface {
   public:
     BluetoothSerialPort(const BluetoothSerialPort&) = delete;
     void operator=(const BluetoothSerialPort&) = delete;
-    virtual ~BluetoothSerialPort();
+    ~BluetoothSerialPort() override;
 
     // HardwareInterface overrides
     bool connect(const Glib::ustring& device_name) override;

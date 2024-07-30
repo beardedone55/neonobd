@@ -6,24 +6,14 @@ on:
       - master
 jobs:
   build_project:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout default branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install Prerequisites
         run: |
-          sudo add-apt-repository 'deb http://us.archive.ubuntu.com/ubuntu/ kinetic main universe'
-          cat > repo << EOF
-          Package: *
-          Pin: release n=kinetic
-          Pin-Priority: 50
-          EOF
-          sudo cp repo /etc/apt/preferences.d/repo
-          sudo apt-get install -y -t kinetic libgtkmm-4.0-dev g++-12
-          ls -l /usr/bin/g++
-          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-12 12
-          sudo update-alternatives --set g++ "/usr/bin/g++-12"
-          ls -l /usr/bin/g++
+          sudo apt-get -y install libgtkmm-4.0-dev
+          echo "Do nothing for prereqs"
       - name: Configure cmake
         run: cmake -B build src
       - name: Compile project
