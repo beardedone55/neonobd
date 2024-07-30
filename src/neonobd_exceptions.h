@@ -22,7 +22,7 @@ namespace neon {
 class InvalidState : public std::exception {
   public:
     InvalidState() {}
-    InvalidState(const char* msg) : m_msg(msg) {}
+    explicit InvalidState(const char* msg) : m_msg(msg) {}
     const char* what() { return m_msg; }
 
   private:

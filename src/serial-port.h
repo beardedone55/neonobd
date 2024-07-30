@@ -25,7 +25,7 @@
 class SerialPort : public HardwareInterface, public sigc::trackable {
   public:
     SerialPort();
-    ~SerialPort();
+    ~SerialPort() override;
     bool connect(const Glib::ustring& device_name) override;
     void respond_from_user(const Glib::VariantBase&,
                            const Glib::RefPtr<void>&) override {}

@@ -33,28 +33,27 @@ class Elm327 : public ObdDevice, public sigc::trackable {
     Elm327() = default;
     Elm327(const Elm327&) = delete;
     Elm327& operator=(const Elm327&) = delete;
-    virtual ~Elm327();
+    ~Elm327() override;
 
-    virtual sigc::signal<void(bool)>
+    sigc::signal<void(bool)>
     init(std::shared_ptr<HardwareInterface> hwif) override;
 
-    virtual Glib::ustring getErrorString() const override;
+    Glib::ustring getErrorString() const override;
 
-    virtual sigc::signal<void(
+    sigc::signal<void(
         const std::unordered_map<unsigned int, std::vector<unsigned char>>&)>
     signal_command_complete() override;
 
-    virtual void
-    sendCommand(unsigned char obd_address, unsigned char obd_service,
-                const std::vector<unsigned char>& obd_data) override;
+    void sendCommand(unsigned char obd_address, unsigned char obd_service,
+                     const std::vector<unsigned char>& obd_data) override;
 
-    virtual bool isCAN() const override;
+    bool isCAN() const override;
 
-    virtual bool isConnecting() const override;
+    bool isConnecting() const override;
 
-    virtual bool isConnected() const override;
+    bool isConnected() const override;
 
-    virtual sigc::signal<void()> disconnect() override;
+    sigc::signal<void()> disconnect() override;
 
   private:
     struct Command {
@@ -103,7 +102,7 @@ class Elm327 : public ObdDevice, public sigc::trackable {
     void command_complete();
     void command_thread_exit();
     std::string send_command(const std::string& cmd);
-    int protocol;
+    int protocol = 0;
 
     // ELM327 Config commands
     bool set_header(unsigned int header);

@@ -35,7 +35,7 @@ class Obd {
     bool m_connecting = false;
     sigc::signal<void(bool)> m_init_signal;
     Connection m_init_connection;
-    bool m_is_CAN;
+    bool m_is_CAN = false;
     sigc::signal<void()> m_disconnect_signal;
     Connection m_disconnect_connection;
     bool disconnecting = false;
