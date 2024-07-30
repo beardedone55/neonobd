@@ -19,7 +19,7 @@
 #include "mainwindow.h"
 #include <gtkmm/application.h>
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
 
     Logger::setLogLevel(Logger::DEBUG);
 

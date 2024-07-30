@@ -17,19 +17,18 @@
 
 #pragma once
 
+#include "connection.h"
 #include "obd-device.h"
 #include <memory>
 #include <sigc++/signal.h>
-#include "connection.h"
 
 class Obd {
-public:
-    sigc::signal<void(bool)>
-    init(std::shared_ptr<ObdDevice> obd_device, 
-         std::shared_ptr<HardwareInterface> hwif);
+  public:
+    sigc::signal<void(bool)> init(std::shared_ptr<ObdDevice> obd_device,
+                                  std::shared_ptr<HardwareInterface> hwif);
     sigc::signal<void()> disconnect();
 
-private:
+  private:
     std::shared_ptr<ObdDevice> m_obdDevice;
     std::shared_ptr<HardwareInterface> m_hwif;
     bool m_connected = false;
@@ -44,4 +43,3 @@ private:
     void initComplete(bool success);
     void disconnectComplete();
 };
-

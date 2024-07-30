@@ -19,7 +19,7 @@
 #include "logger.h"
 #include "mainwindow.h"
 
-Home::Home(MainWindow *main_window) : window{main_window} {
+Home::Home(MainWindow* main_window) : window{main_window} {
     auto ui = window->ui;
     // Settings button
     settings_btn = ui->get_widget<Gtk::Button>("settings_button");
@@ -72,14 +72,14 @@ void Home::set_connected(bool isConnected) {
     }
 }
 
-void Home::disable_button(Gtk::Button *button) {
+void Home::disable_button(Gtk::Button* button) {
     if (enabled_buttons.contains(button)) {
         button->set_sensitive(false);
         enabled_buttons.erase(button);
     }
 }
 
-void Home::enable_button(Gtk::Button *button) {
+void Home::enable_button(Gtk::Button* button) {
     button->set_sensitive(true);
     enabled_buttons.insert(button);
 }

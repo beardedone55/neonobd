@@ -34,6 +34,6 @@ const std::unordered_map<Logger::LogLevel, std::string>
                                   {WARN, "WARNING: "},
                                   {ERR, "ERROR: "}};
 
-void Logger::Logger::operator()(const std::string &msg) {
+void Logger::Logger::operator()(const std::string& msg) {
     *this << msg << '\n';
 }

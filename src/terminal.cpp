@@ -19,7 +19,7 @@
 #include "logger.h"
 #include "mainwindow.h"
 
-Terminal::Terminal(MainWindow *main_window)
+Terminal::Terminal(MainWindow* main_window)
     : window{main_window},
       visibleView{window->viewStack->property_visible_child_name()} {
     auto ui = window->ui;
@@ -94,7 +94,7 @@ void Terminal::reader_notification() {
     read_buffer.resize(0);
 }
 
-void Terminal::lock_text(const Gtk::TextBuffer::iterator &pos) {
+void Terminal::lock_text(const Gtk::TextBuffer::iterator& pos) {
     textBuffer->apply_tag(tagReadOnly, textBuffer->begin(), pos);
     textBuffer->move_mark(inputBegin, pos);
 }
@@ -126,8 +126,8 @@ void Terminal::cursorMoved() {
     }
 }
 
-void Terminal::textEntered(Gtk::TextBuffer::iterator &pos,
-                           const Glib::ustring &text, int) {
+void Terminal::textEntered(Gtk::TextBuffer::iterator& pos,
+                           const Glib::ustring& text, int) {
     if (text == "\n" && pos > inputBegin->get_iter()) {
         textBuffer->backspace(pos);
         std::string user_input =

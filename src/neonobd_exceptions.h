@@ -20,12 +20,12 @@
 
 namespace neon {
 class InvalidState : public std::exception {
-public:
+  public:
     InvalidState() {}
     InvalidState(const char* msg) : m_msg(msg) {}
     const char* what() { return m_msg; }
-private:
+
+  private:
     const char* m_msg = "Invalid state to perform requested action.";
 };
-}
-
+} // namespace neon

@@ -29,10 +29,10 @@ using neon::ResponseType;
 
 class ConnectButton : public Gtk::Button {
   public:
-    ConnectButton(BaseObjectType *cobj, const Glib::RefPtr<Gtk::Builder> &ui);
+    ConnectButton(BaseObjectType* cobj, const Glib::RefPtr<Gtk::Builder>& ui);
 
   private:
-    MainWindow *window;
+    MainWindow* window;
     sigc::connection user_prompt_connection;
     sigc::connection connect_complete_connection;
     Glib::RefPtr<void> user_prompt_handle;
@@ -44,7 +44,7 @@ class ConnectButton : public Gtk::Button {
 
     void user_yes_no_response(int responseCode);
 
-    Glib::ustring get_user_input(int responseCode, const char *widget);
+    Glib::ustring get_user_input(int responseCode, const char* widget);
     void user_text_response(int responseCode);
     void user_number_response(int responseCode);
     void user_none_response(int responseCode);

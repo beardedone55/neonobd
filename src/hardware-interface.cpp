@@ -19,16 +19,16 @@
 #include <unistd.h>
 
 sigc::connection
-HardwareInterface::attach_connect_complete(const sigc::slot<void(bool)> &slot) {
+HardwareInterface::attach_connect_complete(const sigc::slot<void(bool)>& slot) {
     return m_complete_connection.connect(slot);
 }
 sigc::connection HardwareInterface::attach_user_prompt(
-    const sigc::slot<void(const Glib::ustring &, ResponseType,
-                          Glib::RefPtr<void>)> &slot) {
+    const sigc::slot<void(const Glib::ustring&, ResponseType,
+                          Glib::RefPtr<void>)>& slot) {
     return m_request_user_input.connect(slot);
 }
 
-std::size_t HardwareInterface::read(char *buf, std::size_t buf_size) {
+std::size_t HardwareInterface::read(char* buf, std::size_t buf_size) {
     std::shared_lock lock(m_sock_fd_mutex);
     if (m_sock_fd >= 0) {
         auto result = ::read(m_sock_fd, buf, buf_size);
@@ -39,7 +39,7 @@ std::size_t HardwareInterface::read(char *buf, std::size_t buf_size) {
     return 0;
 }
 
-std::size_t HardwareInterface::write(const char *buf, std::size_t buf_size) {
+std::size_t HardwareInterface::write(const char* buf, std::size_t buf_size) {
     std::shared_lock lock(m_sock_fd_mutex);
     if (m_sock_fd >= 0) {
         auto result = ::write(m_sock_fd, buf, buf_size);

@@ -20,7 +20,7 @@
 #include <sigc++/connection.h>
 
 class Connection {
-public:
+  public:
     Connection() = default;
     Connection(const Connection&) = delete;
     Connection& operator=(const Connection&) = delete;
@@ -30,15 +30,12 @@ public:
         m_connection = conn;
         return *this;
     }
-    ~Connection() {
-        disconnect();
-    }
+    ~Connection() { disconnect(); }
     void disconnect() {
-        if(m_connection)
+        if (m_connection)
             m_connection.disconnect();
     }
 
-private:
+  private:
     sigc::connection m_connection;
 };
-

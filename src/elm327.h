@@ -17,43 +17,43 @@
 
 #pragma once
 
-#include "obd-device.h"
-#include <thread>
-#include <glibmm/dispatcher.h>
-#include <sigc++/signal.h>
 #include "connection.h"
+#include "obd-device.h"
+#include <glibmm/dispatcher.h>
 #include <memory>
 #include <mutex>
-#include <semaphore>
 #include <queue>
+#include <semaphore>
+#include <sigc++/signal.h>
+#include <thread>
 #include <unordered_map>
 
 class Elm327 : public ObdDevice, public sigc::trackable {
   public:
     Elm327() = default;
-    Elm327(const Elm327 &) = delete;
-    Elm327 &operator=(const Elm327 &) = delete;
+    Elm327(const Elm327&) = delete;
+    Elm327& operator=(const Elm327&) = delete;
     virtual ~Elm327();
 
-    virtual sigc::signal<void(bool)> 
-        init(std::shared_ptr<HardwareInterface> hwif) override;
-    
+    virtual sigc::signal<void(bool)>
+    init(std::shared_ptr<HardwareInterface> hwif) override;
+
     virtual Glib::ustring getErrorString() const override;
 
-    virtual sigc::signal<void(const std::unordered_map<unsigned int, 
-                              std::vector<unsigned char>>&)>
-                                signal_command_complete() override;
+    virtual sigc::signal<void(
+        const std::unordered_map<unsigned int, std::vector<unsigned char>>&)>
+    signal_command_complete() override;
 
-    virtual void sendCommand(unsigned char obd_address,
-                             unsigned char obd_service,
-                             const std::vector<unsigned char> &obd_data) override;
+    virtual void
+    sendCommand(unsigned char obd_address, unsigned char obd_service,
+                const std::vector<unsigned char>& obd_data) override;
 
     virtual bool isCAN() const override;
 
     virtual bool isConnecting() const override;
 
     virtual bool isConnected() const override;
-    
+
     virtual sigc::signal<void()> disconnect() override;
 
   private:
@@ -64,7 +64,7 @@ class Elm327 : public ObdDevice, public sigc::trackable {
     };
 
     struct Completion {
-        std::unordered_map<unsigned int,std::vector<unsigned char>> obd_data;
+        std::unordered_map<unsigned int, std::vector<unsigned char>> obd_data;
     };
 
     std::shared_ptr<HardwareInterface> hwif;
@@ -86,8 +86,9 @@ class Elm327 : public ObdDevice, public sigc::trackable {
     std::unique_ptr<std::thread> command_thread;
     std::mutex completion_queue_lock;
     std::queue<Completion> completion_queue;
-    sigc::signal<void(const std::unordered_map<unsigned int,std::vector<unsigned char>>&)> 
-    command_complete_signal;
+    sigc::signal<void(
+        const std::unordered_map<unsigned int, std::vector<unsigned char>>&)>
+        command_complete_signal;
     unsigned int current_obd_address = 0;
     Glib::ustring error_string;
 
@@ -103,8 +104,8 @@ class Elm327 : public ObdDevice, public sigc::trackable {
     void command_thread_exit();
     std::string send_command(const std::string& cmd);
     int protocol;
-    
-    //ELM327 Config commands
+
+    // ELM327 Config commands
     bool set_header(unsigned int header);
     bool reset();
     bool enable_echo();
