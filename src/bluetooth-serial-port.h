@@ -24,23 +24,24 @@
 #include <giomm/dbusproxy.h>
 #include <memory>
 #include <unordered_map>
+#include "connection.h"
 
 using neon::ResponseType;
 
-class BluetoothSerialPort : public HardwareInterface, public sigc::trackable {
+class BluetoothSerialPort : public HardwareInterface {
   public:
-    BluetoothSerialPort(const BluetoothSerialPort &) = delete;
-    void operator=(const BluetoothSerialPort &) = delete;
+    BluetoothSerialPort(const BluetoothSerialPort&) = delete;
+    void operator=(const BluetoothSerialPort&) = delete;
     virtual ~BluetoothSerialPort();
 
     // HardwareInterface overrides
-    bool connect(const Glib::ustring &device_name) override;
-    void respond_from_user(const Glib::VariantBase &response,
-                           const Glib::RefPtr<void> &signal_handle) override;
+    bool connect(const Glib::ustring& device_name) override;
+    void respond_from_user(const Glib::VariantBase& response,
+                           const Glib::RefPtr<void>& signal_handle) override;
 
     void set_timeout(unsigned int milliseconds) override;
 
-    static std::shared_ptr<BluetoothSerialPort> getBluetoothSerialPort();
+    static std::shared_ptr<BluetoothSerialPort> get_BluetoothSerialPort();
 
     // Host Controller Access Methods
     //--------------------------------------------------------
@@ -51,7 +52,7 @@ class BluetoothSerialPort : public HardwareInterface, public sigc::trackable {
     // Select the default controller by dbus object path.
     // This controller will be used to find and connect
     // to remote devices.
-    bool select_controller(const Glib::ustring &controller_name);
+    bool select_controller(const Glib::ustring& controller_name);
 
     // Remote Device Access Methods
     //-------------------------------------------------
@@ -74,7 +75,7 @@ class BluetoothSerialPort : public HardwareInterface, public sigc::trackable {
     // Send pin code in response to request for pin
     // code during device pairing.  Must be called
     // by slot that is connected to request_pin_code signal.
-    void send_pin_code(const Glib::ustring &pin_code);
+    void send_pin_code(const Glib::ustring& pin_code);
 
     // Send 6-digit passkey as integer in response
     // to request for passkey during device pairing.
@@ -100,75 +101,78 @@ class BluetoothSerialPort : public HardwareInterface, public sigc::trackable {
     using ProxyMap =
         std::unordered_map<std::string, Glib::RefPtr<Gio::DBus::Proxy>>;
 
-    static std::weak_ptr<BluetoothSerialPort> bluetoothSerialPort;
-    static Gio::DBus::InterfaceVTable agent_vtable;
-    static Gio::DBus::InterfaceVTable profile_vtable;
+    static std::weak_ptr<BluetoothSerialPort> m_bluetooth_serial_port;
+    static Gio::DBus::InterfaceVTable m_agent_vtable;
+    static Gio::DBus::InterfaceVTable m_profile_vtable;
 
-    ProxyMap controllers;
-    ProxyMap remoteDevices;
-    guint agent_id = 0;
-    guint profile_id = 0;
-    Glib::RefPtr<Gio::DBus::Proxy> selected_controller;
-    Glib::RefPtr<Gio::DBus::Proxy> agentManager;
-    Glib::RefPtr<Gio::DBus::Proxy> profileManager;
-    Glib::RefPtr<Gio::DBus::ObjectManagerClient> manager;
-    sigc::signal<void(int)> probe_progress_signal;
-    sigc::connection preConnectionScanResult;
-    bool probe_in_progress;
-    int probe_progress;
-    Glib::DBusObjectPathString connected_device_path;
-    sigc::signal<void()> agent_cancel;
-    Glib::RefPtr<Gio::DBus::MethodInvocation> request_pin_invocation;
-    Glib::RefPtr<Gio::DBus::MethodInvocation> request_passkey_invocation;
-    Glib::RefPtr<Gio::DBus::MethodInvocation> request_confirmation_invocation;
-    Glib::RefPtr<Gio::DBus::MethodInvocation> request_authorization_invocation;
+    ProxyMap m_controllers;
+    ProxyMap m_remote_devices;
+    guint m_agent_id = 0;
+    guint m_profile_id = 0;
+    Glib::RefPtr<Gio::DBus::Proxy> m_selected_controller;
+    Glib::RefPtr<Gio::DBus::Proxy> m_agent_manager;
+    Glib::RefPtr<Gio::DBus::Proxy> m_profile_manager;
+    Glib::RefPtr<Gio::DBus::ObjectManagerClient> m_manager;
+    sigc::signal<void(int)> m_probe_progress_signal;
+    Connection m_pre_connection_scan_result;
+    bool m_probe_in_progress;
+    int m_probe_progress;
+    Glib::DBusObjectPathString m_connected_device_path;
+    sigc::signal<void()> m_agent_cancel;
+    Glib::RefPtr<Gio::DBus::MethodInvocation> m_request_pin_invocation;
+    Glib::RefPtr<Gio::DBus::MethodInvocation> m_request_passkey_invocation;
+    Glib::RefPtr<Gio::DBus::MethodInvocation> m_request_confirmation_invocation;
+    Glib::RefPtr<Gio::DBus::MethodInvocation> m_request_authorization_invocation;
+    Connection m_object_add_connection;
+    Connection m_object_remove_connection;
+    Connection m_probe_timer_connection;
 
     // Private Methods
     BluetoothSerialPort();
-    void manager_created(Glib::RefPtr<Gio::AsyncResult> &result);
-    void update_object_state(const Glib::RefPtr<Gio::DBus::Object> &obj,
+    void manager_created(Glib::RefPtr<Gio::AsyncResult>& result);
+    void update_object_state(const Glib::RefPtr<Gio::DBus::Object>& obj,
                              bool addObject);
-    void add_object(const Glib::RefPtr<Gio::DBus::Object> &obj);
-    void remove_object(const Glib::RefPtr<Gio::DBus::Object> &obj);
-    void probe_finish(Glib::RefPtr<Gio::AsyncResult> &result,
+    void add_object(const Glib::RefPtr<Gio::DBus::Object>& obj);
+    void remove_object(const Glib::RefPtr<Gio::DBus::Object>& obj);
+    void probe_finish(Glib::RefPtr<Gio::AsyncResult>& result,
                       unsigned int timeout,
-                      const Glib::RefPtr<Gio::DBus::Proxy> &controller);
-    void initiate_connection(const Glib::RefPtr<Gio::DBus::Proxy> &device);
-    void finish_connection(Glib::RefPtr<Gio::AsyncResult> &result);
+                      const Glib::RefPtr<Gio::DBus::Proxy>& controller);
+    void initiate_connection(const Glib::RefPtr<Gio::DBus::Proxy>& device);
+    void finish_connection(Glib::RefPtr<Gio::AsyncResult>& result);
     bool update_probe_progress();
-    void preConnectionScanProgress(int p, const Glib::ustring &device_name);
+    void pre_connection_scan_progress(int p, const Glib::ustring& device_name);
     void stop_probe();
-    void stop_probe_finish(const Glib::RefPtr<Gio::AsyncResult> &result,
-                           const Glib::RefPtr<Gio::DBus::Proxy> &controller);
-    void emit_probe_progress(int percentComplete);
-    guint register_object(const std::string &interface_path,
-                          const Gio::DBus::InterfaceVTable &vtable);
+    void stop_probe_finish(const Glib::RefPtr<Gio::AsyncResult>& result,
+                           const Glib::RefPtr<Gio::DBus::Proxy>& controller);
+    void emit_probe_progress(int percent_complete);
+    guint register_object(const std::string& interface_path,
+                          const Gio::DBus::InterfaceVTable& vtable);
     void register_profile();
     void register_agent();
-    void register_complete(const Glib::RefPtr<Gio::AsyncResult> &result,
-                           const Glib::RefPtr<Gio::DBus::Proxy> &manager);
+    void register_complete(const Glib::RefPtr<Gio::AsyncResult>& result,
+                           const Glib::RefPtr<Gio::DBus::Proxy>& manager);
     static void
-    agent_method(const Glib::RefPtr<Gio::DBus::Connection> &,
-                 const Glib::ustring &sender, const Glib::ustring &object_path,
-                 const Glib::ustring &interface_name,
-                 const Glib::ustring &method_name,
-                 const Glib::VariantContainerBase &parameters,
-                 const Glib::RefPtr<Gio::DBus::MethodInvocation> &invocation);
+    agent_method(const Glib::RefPtr<Gio::DBus::Connection>&,
+                 const Glib::ustring& sender, const Glib::ustring& object_path,
+                 const Glib::ustring& interface_name,
+                 const Glib::ustring& method_name,
+                 const Glib::VariantContainerBase& parameters,
+                 const Glib::RefPtr<Gio::DBus::MethodInvocation>& invocation);
 
     static void profile_method(
-        const Glib::RefPtr<Gio::DBus::Connection> &,
-        const Glib::ustring &sender, const Glib::ustring &object_path,
-        const Glib::ustring &interface_name, const Glib::ustring &method_name,
-        const Glib::VariantContainerBase &parameters,
-        const Glib::RefPtr<Gio::DBus::MethodInvocation> &invocation);
+        const Glib::RefPtr<Gio::DBus::Connection>&,
+        const Glib::ustring& sender, const Glib::ustring& object_path,
+        const Glib::ustring& interface_name, const Glib::ustring& method_name,
+        const Glib::VariantContainerBase& parameters,
+        const Glib::RefPtr<Gio::DBus::MethodInvocation>& invocation);
     template <typename T>
-    void dbus_return(Glib::RefPtr<Gio::DBus::MethodInvocation> &invocation,
-                     const T &return_value);
+    void dbus_return(Glib::RefPtr<Gio::DBus::MethodInvocation>& invocation,
+                     const T& return_value);
     void
     dbus_confirm_request(bool confirmed,
-                         Glib::RefPtr<Gio::DBus::MethodInvocation> &invocation);
+                         Glib::RefPtr<Gio::DBus::MethodInvocation>& invocation);
 
     void request_from_user(
-        const Glib::ustring &message, const ResponseType responseType,
-        const Glib::RefPtr<Gio::DBus::MethodInvocation> &invocation);
+        const Glib::ustring& message, const ResponseType response_type,
+        const Glib::RefPtr<Gio::DBus::MethodInvocation>& invocation);
 };

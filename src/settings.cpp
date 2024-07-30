@@ -22,7 +22,7 @@
 Settings::Settings(MainWindow *main_window)
     : window{main_window},
       visibleView{window->viewStack->property_visible_child_name()},
-      btHardwareInterface{BluetoothSerialPort::getBluetoothSerialPort()}
+      btHardwareInterface{BluetoothSerialPort::get_BluetoothSerialPort()}
 
 {
     auto ui = window->ui;

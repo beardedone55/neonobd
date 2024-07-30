@@ -1,5 +1,5 @@
 /* This file is part of neonobd - OBD diagnostic software.
- * Copyright (C) 2023  Brian LePage
+ * Copyright (C) 2023-2024  Brian LePage
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,10 +18,10 @@
 #pragma once
 
 #include "hardware-interface.h"
-#include <sigc++/connection.h>
-#include <sigc++/functors/slot.h>
+#include <sigc++/signal.h>
 #include <glibmm/ustring.h>
 #include <vector>
+#include <optional>
 
 class ObdDevice {
   public:
@@ -30,16 +30,24 @@ class ObdDevice {
     ObdDevice &operator=(const ObdDevice &) = delete;
     virtual ~ObdDevice() = default;
 
-    virtual sigc::connection init(HardwareInterface *hwif,
-                                  const sigc::slot<void(bool)> &callback) = 0;
+    virtual sigc::signal<void(bool)> 
+        init(std::shared_ptr<HardwareInterface> hwif) = 0;
 
-    virtual Glib::ustring getErrorString() = 0;
+    virtual Glib::ustring getErrorString() const = 0;
 
-    virtual sigc::connection sendCommand(unsigned char obd_module,
-                                         unsigned char obd_service,
-                                         const std::vector<unsigned char> &obd_data,
-                                         const sigc::slot<void(std::vector<unsigned char>)> &callback) = 0;
-    virtual bool isCAN() = 0;
+    virtual sigc::signal<void(const std::unordered_map<unsigned int, 
+                              std::vector<unsigned char>>&)>
+                                signal_command_complete() = 0;
+
+    virtual void sendCommand(unsigned char obd_module,
+                             unsigned char obd_service,
+                             const std::vector<unsigned char> &obd_data) = 0;
+
+    virtual bool isConnecting() const = 0;
+
+    virtual bool isConnected() const = 0;
+
+    virtual bool isCAN() const = 0;
     
-    virtual sigc::connection disconnect(const sigc::slot<void()> &callback) = 0;
-}
+    virtual sigc::signal<void()> disconnect() = 0;
+};

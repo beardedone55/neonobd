@@ -36,12 +36,12 @@ class SerialPort : public HardwareInterface, public sigc::trackable {
     static std::vector<Glib::ustring> get_serial_devices();
 
   private:
-    speed_t baudrate = B38400;
-    static const std::unordered_map<std::string, speed_t> baudrates;
-    Glib::Dispatcher dispatcher;
-    std::unique_ptr<std::thread> connect_thread;
-    bool connected = false;
-    unsigned char timeout = 0;
+    speed_t m_baudrate = B38400;
+    static const std::unordered_map<std::string, speed_t> m_baudrates;
+    Glib::Dispatcher m_dispatcher;
+    std::unique_ptr<std::thread> m_connect_thread;
+    bool m_connected = false;
+    unsigned char m_timeout = 0;
 
     void initiate_connection(const Glib::ustring &device_name);
     void connect_complete();
