@@ -18,36 +18,36 @@
 #pragma once
 
 #include "hardware-interface.h"
-#include <sigc++/signal.h>
 #include <glibmm/ustring.h>
-#include <vector>
 #include <optional>
+#include <sigc++/signal.h>
+#include <vector>
 
 class ObdDevice {
   public:
     ObdDevice() = default;
-    ObdDevice(const ObdDevice &) = delete;
-    ObdDevice &operator=(const ObdDevice &) = delete;
+    ObdDevice(const ObdDevice&) = delete;
+    ObdDevice& operator=(const ObdDevice&) = delete;
     virtual ~ObdDevice() = default;
 
-    virtual sigc::signal<void(bool)> 
-        init(std::shared_ptr<HardwareInterface> hwif) = 0;
+    virtual sigc::signal<void(bool)>
+    init(std::shared_ptr<HardwareInterface> hwif) = 0;
 
     virtual Glib::ustring getErrorString() const = 0;
 
-    virtual sigc::signal<void(const std::unordered_map<unsigned int, 
-                              std::vector<unsigned char>>&)>
-                                signal_command_complete() = 0;
+    virtual sigc::signal<void(
+        const std::unordered_map<unsigned int, std::vector<unsigned char>>&)>
+    signal_command_complete() = 0;
 
     virtual void sendCommand(unsigned char obd_module,
                              unsigned char obd_service,
-                             const std::vector<unsigned char> &obd_data) = 0;
+                             const std::vector<unsigned char>& obd_data) = 0;
 
     virtual bool isConnecting() const = 0;
 
     virtual bool isConnected() const = 0;
 
     virtual bool isCAN() const = 0;
-    
+
     virtual sigc::signal<void()> disconnect() = 0;
 };

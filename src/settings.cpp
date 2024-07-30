@@ -19,7 +19,7 @@
 #include "logger.h"
 #include "mainwindow.h"
 
-Settings::Settings(MainWindow *main_window)
+Settings::Settings(MainWindow* main_window)
     : window{main_window},
       visibleView{window->viewStack->property_visible_child_name()},
       btHardwareInterface{BluetoothSerialPort::get_BluetoothSerialPort()}
@@ -191,7 +191,7 @@ void Settings::selectSerialBaudrate() {
 }
 
 void Settings::scanComplete() {
-    auto &bt = btHardwareInterface;
+    auto& bt = btHardwareInterface;
 
     // Update Combo Box
     auto devices = bt->get_device_names_addresses();
@@ -202,7 +202,7 @@ void Settings::scanComplete() {
     if (defaultAddress != "")
         btDeviceCombo->append(defaultAddress, defaultName);
 
-    for (auto &[address, name] : devices)
+    for (auto& [address, name] : devices)
         if (address != defaultAddress)
             btDeviceCombo->append(address, "<" + name + ">");
 
@@ -228,7 +228,7 @@ void Settings::updateScanProgress(int percentComplete) {
 }
 
 void Settings::scanBluetooth() {
-    auto &bt = btHardwareInterface;
+    auto& bt = btHardwareInterface;
     btScanConnection = bt->signal_probe_progress().connect(
         sigc::mem_fun(*this, &Settings::updateScanProgress));
 
@@ -243,12 +243,12 @@ void Settings::scanBluetooth() {
     bt->probe_remote_devices();
 }
 
-void Settings::populateComboBox(const std::vector<Glib::ustring> &values,
-                                Gtk::ComboBoxText *combobox,
-                                const Glib::ustring &default_value) {
+void Settings::populateComboBox(const std::vector<Glib::ustring>& values,
+                                Gtk::ComboBoxText* combobox,
+                                const Glib::ustring& default_value) {
     combobox->remove_all();
     for (unsigned int i = 0; i < values.size(); ++i) {
-        auto &value = values[i];
+        auto& value = values[i];
         combobox->append(value);
         if (value == default_value) {
             combobox->set_active(i);

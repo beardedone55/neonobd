@@ -26,12 +26,12 @@ class SerialPort : public HardwareInterface, public sigc::trackable {
   public:
     SerialPort();
     ~SerialPort();
-    bool connect(const Glib::ustring &device_name) override;
-    void respond_from_user(const Glib::VariantBase &,
-                           const Glib::RefPtr<void> &) override {}
+    bool connect(const Glib::ustring& device_name) override;
+    void respond_from_user(const Glib::VariantBase&,
+                           const Glib::RefPtr<void>&) override {}
     void set_timeout(unsigned int milliseconds) override;
 
-    void set_baudrate(const Glib::ustring &baudrate);
+    void set_baudrate(const Glib::ustring& baudrate);
     static std::vector<Glib::ustring> get_valid_baudrates();
     static std::vector<Glib::ustring> get_serial_devices();
 
@@ -43,6 +43,6 @@ class SerialPort : public HardwareInterface, public sigc::trackable {
     bool m_connected = false;
     unsigned char m_timeout = 0;
 
-    void initiate_connection(const Glib::ustring &device_name);
+    void initiate_connection(const Glib::ustring& device_name);
     void connect_complete();
 };

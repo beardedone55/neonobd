@@ -22,15 +22,15 @@
 namespace Logger {
 enum LogLevel { DEBUG, INFO, WARN, ERR, NONE };
 class LogStream {
-    LogStream(LogLevel level, std::ostream &stream) : lvl{level}, out{stream} {}
-    template <typename T> LogStream &operator<<(const T &rhs) {
+    LogStream(LogLevel level, std::ostream& stream) : lvl{level}, out{stream} {}
+    template <typename T> LogStream& operator<<(const T& rhs) {
         if (logLevel <= lvl) {
             out << rhs;
         }
         return *this;
     }
     LogLevel lvl;
-    std::ostream &out;
+    std::ostream& out;
     static LogLevel logLevel;
     friend void setLogLevel(LogLevel lvl);
     friend class Logger;
@@ -38,10 +38,10 @@ class LogStream {
 
 class Logger {
   public:
-    Logger(LogLevel level, std::ostream &outstream)
+    Logger(LogLevel level, std::ostream& outstream)
         : lvl{level}, stream{level, outstream} {}
-    void operator()(const std::string &msg);
-    template <typename T> LogStream &operator<<(const T &rhs) {
+    void operator()(const std::string& msg);
+    template <typename T> LogStream& operator<<(const T& rhs) {
         stream << log_header.at(lvl) << rhs;
         return stream;
     }
@@ -54,8 +54,8 @@ class Logger {
 
 class NoLog {
   public:
-    template <typename T> NoLog &operator<<(const T &) { return *this; }
-    void operator()(const std::string &) {}
+    template <typename T> NoLog& operator<<(const T&) { return *this; }
+    void operator()(const std::string&) {}
 };
 
 void setLogLevel(LogLevel lvl);

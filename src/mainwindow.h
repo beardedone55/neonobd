@@ -35,8 +35,8 @@ using neon::ResponseType;
 class MainWindow : public Gtk::Window {
   public:
     MainWindow();
-    MainWindow(const MainWindow &) = delete;
-    MainWindow &operator=(const MainWindow &) = delete;
+    MainWindow(const MainWindow&) = delete;
+    MainWindow& operator=(const MainWindow&) = delete;
     virtual ~MainWindow();
     std::shared_ptr<BluetoothSerialPort> bluetoothSerialPort;
     std::shared_ptr<SerialPort> serialPort;
@@ -44,16 +44,16 @@ class MainWindow : public Gtk::Window {
     std::unique_ptr<Home> home;
     std::unique_ptr<Settings> settings;
     std::unique_ptr<Terminal> terminal;
-    Gtk::Stack *viewStack;
+    Gtk::Stack* viewStack;
     Glib::RefPtr<Gtk::Builder> ui;
 
     void setHardwareInterface(InterfaceType ifType);
-    void showPopup(const std::string &message, ResponseType type,
-                   const sigc::slot<void(int)> &response);
+    void showPopup(const std::string& message, ResponseType type,
+                   const sigc::slot<void(int)>& response);
     void hidePopup();
 
   protected:
-    Gtk::MessageDialog *popup = nullptr;
+    Gtk::MessageDialog* popup = nullptr;
     sigc::connection popup_response_connection;
     bool popup_shown = false;
     std::unique_ptr<Gtk::MessageDialog> yes_no_dialog;

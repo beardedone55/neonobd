@@ -63,8 +63,8 @@ void MainWindow::setHardwareInterface(InterfaceType ifType) {
     }
 }
 
-void MainWindow::showPopup(const std::string &message, ResponseType type,
-                           const sigc::slot<void(int)> &response) {
+void MainWindow::showPopup(const std::string& message, ResponseType type,
+                           const sigc::slot<void(int)>& response) {
 
     Logger::debug("Showing popup dialog.");
 

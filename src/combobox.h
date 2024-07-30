@@ -27,21 +27,21 @@
 
 template <class... T> class ComboBox : public Gtk::ComboBox {
   public:
-    ComboBox(BaseObjectType *cobj, const Glib::RefPtr<Gtk::Builder> &)
+    ComboBox(BaseObjectType* cobj, const Glib::RefPtr<Gtk::Builder>&)
         : Gtk::ComboBox(cobj) {
-        std::apply([this](auto &&...cols) { ((column_record.add(cols)), ...); },
+        std::apply([this](auto&&... cols) { ((column_record.add(cols)), ...); },
                    columns);
 
         list_store = Gtk::ListStore::create(column_record);
         set_model(list_store);
-        std::apply([this](auto &&...cols) { ((pack_start(cols)), ...); },
+        std::apply([this](auto&&... cols) { ((pack_start(cols)), ...); },
                    columns);
     }
-    ComboBox(const ComboBox &) = delete;
-    ComboBox &operator=(const ComboBox &) = delete;
+    ComboBox(const ComboBox&) = delete;
+    ComboBox& operator=(const ComboBox&) = delete;
     ~ComboBox() = default;
 
-    void append(const T &...args) {
+    void append(const T&... args) {
         auto row = *list_store->append();
         assignValues(row, columns, std::index_sequence_for<T...>{}, args...);
     }
@@ -59,15 +59,15 @@ template <class... T> class ComboBox : public Gtk::ComboBox {
     Glib::RefPtr<Gtk::ListStore> list_store;
 
     template <std::size_t... Is>
-    void assignValues(Gtk::TreeModel::Row &row,
-                      const std::tuple<Gtk::TreeModelColumn<T>...> &cols,
-                      std::index_sequence<Is...>, const T &...vals) {
+    void assignValues(Gtk::TreeModel::Row& row,
+                      const std::tuple<Gtk::TreeModelColumn<T>...>& cols,
+                      std::index_sequence<Is...>, const T&... vals) {
         ((row[std::get<Is>(cols)] = vals), ...);
     }
     template <std::size_t... Is>
     std::optional<std::tuple<T...>>
-    getValues(Gtk::TreeModel::iterator &it,
-              const std::tuple<Gtk::TreeModelColumn<T>...> &cols,
+    getValues(Gtk::TreeModel::iterator& it,
+              const std::tuple<Gtk::TreeModelColumn<T>...>& cols,
               std::index_sequence<Is...>) {
         auto row = *it;
         if (it)

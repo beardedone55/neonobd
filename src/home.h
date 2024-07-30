@@ -30,21 +30,21 @@ using neon::ResponseType;
 
 class Home : public sigc::trackable {
   public:
-    explicit Home(MainWindow *window);
+    explicit Home(MainWindow* window);
     void enable_all();
     void disable_all();
     void set_connected(bool connected);
 
   private:
-    MainWindow *window;
-    Gtk::Button *settings_btn;
-    ConnectButton *connect_btn;
-    Gtk::Button *terminal_btn;
-    std::unordered_set<Gtk::Button *> enabled_buttons;
+    MainWindow* window;
+    Gtk::Button* settings_btn;
+    ConnectButton* connect_btn;
+    Gtk::Button* terminal_btn;
+    std::unordered_set<Gtk::Button*> enabled_buttons;
     bool connected = false;
 
     void settings_clicked();
     void terminal_clicked();
-    void enable_button(Gtk::Button *button);
-    void disable_button(Gtk::Button *button);
+    void enable_button(Gtk::Button* button);
+    void disable_button(Gtk::Button* button);
 };

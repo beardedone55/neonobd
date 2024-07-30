@@ -29,16 +29,16 @@ class MainWindow;
 
 class Terminal : public sigc::trackable {
   public:
-    explicit Terminal(MainWindow *window);
-    Terminal(const Terminal &) = delete;
-    Terminal &operator=(const Terminal &) = delete;
+    explicit Terminal(MainWindow* window);
+    Terminal(const Terminal&) = delete;
+    Terminal& operator=(const Terminal&) = delete;
     ~Terminal();
 
   private:
-    MainWindow *window;
+    MainWindow* window;
     Glib::PropertyProxy<Glib::ustring> visibleView;
-    Gtk::Button *homeButton;
-    Gtk::TextView *terminal;
+    Gtk::Button* homeButton;
+    Gtk::TextView* terminal;
     Glib::RefPtr<Gtk::TextBuffer> textBuffer;
     Glib::RefPtr<Gtk::TextBuffer::Tag> tagReadOnly;
     Glib::RefPtr<Gtk::TextBuffer::Mark> inputBegin;
@@ -51,10 +51,10 @@ class Terminal : public sigc::trackable {
 
     void on_show();
     void homeClicked();
-    void textEntered(Gtk::TextBuffer::iterator &pos, const Glib::ustring &text,
+    void textEntered(Gtk::TextBuffer::iterator& pos, const Glib::ustring& text,
                      int bytes);
     void cursorMoved();
-    void lock_text(const Gtk::TextBuffer::iterator &pos);
+    void lock_text(const Gtk::TextBuffer::iterator& pos);
     void read_data();
     void start_reader_thread();
     void reader_notification();

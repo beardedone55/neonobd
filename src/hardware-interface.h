@@ -30,21 +30,21 @@ using neon::ResponseType;
 class HardwareInterface {
   public:
     HardwareInterface() = default;
-    HardwareInterface(const HardwareInterface &) = delete;
-    HardwareInterface &operator=(const HardwareInterface &) = delete;
+    HardwareInterface(const HardwareInterface&) = delete;
+    HardwareInterface& operator=(const HardwareInterface&) = delete;
     virtual ~HardwareInterface() = default;
-    virtual bool connect(const Glib::ustring &device_name) = 0;
+    virtual bool connect(const Glib::ustring& device_name) = 0;
     sigc::connection
-        attach_connect_complete(const sigc::slot<void(bool)> &slot);
-    sigc::connection attach_user_prompt(
-        const sigc::slot<void(const Glib::ustring &, ResponseType,
-                              Glib::RefPtr<void>)> &slot);
-    virtual void respond_from_user(const Glib::VariantBase &response,
-                                   const Glib::RefPtr<void> &signal_handle) = 0;
+    attach_connect_complete(const sigc::slot<void(bool)>& slot);
+    sigc::connection
+    attach_user_prompt(const sigc::slot<void(const Glib::ustring&, ResponseType,
+                                             Glib::RefPtr<void>)>& slot);
+    virtual void respond_from_user(const Glib::VariantBase& response,
+                                   const Glib::RefPtr<void>& signal_handle) = 0;
 
     template <typename Container,
               typename Contents = typename Container::value_type>
-    std::size_t read(Container &container, std::size_t buf_size = 1024) {
+    std::size_t read(Container& container, std::size_t buf_size = 1024) {
         static_assert(sizeof(Contents) == sizeof(char),
                       "Container used with HardwareInterface::read() must have "
                       "elements with size of char.");
@@ -56,7 +56,7 @@ class HardwareInterface {
 
     template <typename Container,
               typename Contents = typename Container::value_type>
-    std::size_t write(const Container &buf) {
+    std::size_t write(const Container& buf) {
         static_assert(sizeof(Contents) == sizeof(char),
                       "Container used with HardwareInterface::write() must "
                       "have elements with size of char.");
@@ -67,11 +67,11 @@ class HardwareInterface {
 
   protected:
     sigc::signal<void(bool)> m_complete_connection;
-    sigc::signal<void(const Glib::ustring &, ResponseType, Glib::RefPtr<void>)>
+    sigc::signal<void(const Glib::ustring&, ResponseType, Glib::RefPtr<void>)>
         m_request_user_input;
     int m_sock_fd = -1;
     std::shared_mutex m_sock_fd_mutex;
 
-    virtual std::size_t read(char *buf, std::size_t size);
-    virtual std::size_t write(const char *buf, std::size_t size);
+    virtual std::size_t read(char* buf, std::size_t size);
+    virtual std::size_t write(const char* buf, std::size_t size);
 };

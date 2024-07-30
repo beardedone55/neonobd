@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "connection.h"
 #include "hardware-interface.h"
 #include "neonobd_types.h"
 #include <cstdint>
@@ -24,7 +25,6 @@
 #include <giomm/dbusproxy.h>
 #include <memory>
 #include <unordered_map>
-#include "connection.h"
 
 using neon::ResponseType;
 
@@ -122,7 +122,8 @@ class BluetoothSerialPort : public HardwareInterface {
     Glib::RefPtr<Gio::DBus::MethodInvocation> m_request_pin_invocation;
     Glib::RefPtr<Gio::DBus::MethodInvocation> m_request_passkey_invocation;
     Glib::RefPtr<Gio::DBus::MethodInvocation> m_request_confirmation_invocation;
-    Glib::RefPtr<Gio::DBus::MethodInvocation> m_request_authorization_invocation;
+    Glib::RefPtr<Gio::DBus::MethodInvocation>
+        m_request_authorization_invocation;
     Connection m_object_add_connection;
     Connection m_object_remove_connection;
     Connection m_probe_timer_connection;
@@ -160,9 +161,9 @@ class BluetoothSerialPort : public HardwareInterface {
                  const Glib::RefPtr<Gio::DBus::MethodInvocation>& invocation);
 
     static void profile_method(
-        const Glib::RefPtr<Gio::DBus::Connection>&,
-        const Glib::ustring& sender, const Glib::ustring& object_path,
-        const Glib::ustring& interface_name, const Glib::ustring& method_name,
+        const Glib::RefPtr<Gio::DBus::Connection>&, const Glib::ustring& sender,
+        const Glib::ustring& object_path, const Glib::ustring& interface_name,
+        const Glib::ustring& method_name,
         const Glib::VariantContainerBase& parameters,
         const Glib::RefPtr<Gio::DBus::MethodInvocation>& invocation);
     template <typename T>

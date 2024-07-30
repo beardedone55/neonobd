@@ -40,32 +40,32 @@ using neon::InterfaceType;
 
 class Settings : public sigc::trackable {
   public:
-    explicit Settings(MainWindow *window);
-    Settings(const Settings &) = delete;
-    Settings &operator=(const Settings &) = delete;
+    explicit Settings(MainWindow* window);
+    Settings(const Settings&) = delete;
+    Settings& operator=(const Settings&) = delete;
     ~Settings();
 
     Glib::ustring getSelectedDevice();
 
   private:
-    MainWindow *window;
+    MainWindow* window;
     Glib::PropertyProxy<Glib::ustring> visibleView;
     std::shared_ptr<BluetoothSerialPort> btHardwareInterface;
     std::shared_ptr<SerialPort> serialHardwareInterface;
-    Gtk::Button *homeButton;
-    Gtk::CheckButton *bluetooth_rb;
-    Gtk::CheckButton *serial_rb;
-    Gtk::Label *btHostLabel;
-    Gtk::ComboBoxText *btHostCombo;
-    Gtk::Label *btDeviceLabel;
-    Gtk::Button *btDeviceScan;
-    ComboBox<Glib::ustring, Glib::ustring> *btDeviceCombo;
-    Gtk::Label *btScanLabel;
-    Gtk::ProgressBar *btScanProgress;
-    Gtk::Grid *btGrid;
-    Gtk::Grid *serialGrid;
-    Gtk::ComboBoxText *serialDeviceCombo;
-    Gtk::ComboBoxText *serialBaudrateCombo;
+    Gtk::Button* homeButton;
+    Gtk::CheckButton* bluetooth_rb;
+    Gtk::CheckButton* serial_rb;
+    Gtk::Label* btHostLabel;
+    Gtk::ComboBoxText* btHostCombo;
+    Gtk::Label* btDeviceLabel;
+    Gtk::Button* btDeviceScan;
+    ComboBox<Glib::ustring, Glib::ustring>* btDeviceCombo;
+    Gtk::Label* btScanLabel;
+    Gtk::ProgressBar* btScanProgress;
+    Gtk::Grid* btGrid;
+    Gtk::Grid* serialGrid;
+    Gtk::ComboBoxText* serialDeviceCombo;
+    Gtk::ComboBoxText* serialBaudrateCombo;
     sigc::connection btScanConnection;
     Glib::RefPtr<Gio::Settings> settings;
     InterfaceType iftype;
@@ -80,7 +80,7 @@ class Settings : public sigc::trackable {
     void scanBluetooth();
     void scanComplete();
     void updateScanProgress(int percentComplete);
-    static void populateComboBox(const std::vector<Glib::ustring> &values,
-                                 Gtk::ComboBoxText *combobox,
-                                 const Glib::ustring &default_value);
+    static void populateComboBox(const std::vector<Glib::ustring>& values,
+                                 Gtk::ComboBoxText* combobox,
+                                 const Glib::ustring& default_value);
 };
