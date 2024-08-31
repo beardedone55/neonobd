@@ -686,8 +686,8 @@ void BluetoothSerialPort::profile_method(
         } else // We are already connected to a device (Shouldn't happen...)
         {
             // Close the new socket and return an error.
-            Logger::error("File descriptor was already set to " +
-                          bt->m_sock_fd);
+            Logger::error << "File descriptor was already set to " <<
+                          bt->m_sock_fd;
             close(fd_list->get(fd_index.get()));
             Gio::DBus::Error error(Gio::DBus::Error::FAILED,
                                    "org.bluez.Error.Rejected");

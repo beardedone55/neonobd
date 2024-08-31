@@ -38,20 +38,20 @@ class Elm327 : public ObdDevice, public sigc::trackable {
     sigc::signal<void(bool)>
     init(std::shared_ptr<HardwareInterface> hwif) override;
 
-    Glib::ustring getErrorString() const override;
+    Glib::ustring get_error_string() const override;
 
     sigc::signal<void(
         const std::unordered_map<unsigned int, std::vector<unsigned char>>&)>
     signal_command_complete() override;
 
-    void sendCommand(unsigned char obd_address, unsigned char obd_service,
+    void send_command(unsigned char obd_address, unsigned char obd_service,
                      const std::vector<unsigned char>& obd_data) override;
 
-    bool isCAN() const override;
+    bool is_CAN() const override;
 
-    bool isConnecting() const override;
+    bool is_connecting() const override;
 
-    bool isConnected() const override;
+    bool is_connected() const override;
 
     sigc::signal<void()> disconnect() override;
 
@@ -66,43 +66,43 @@ class Elm327 : public ObdDevice, public sigc::trackable {
         std::unordered_map<unsigned int, std::vector<unsigned char>> obd_data;
     };
 
-    std::shared_ptr<HardwareInterface> hwif;
-    volatile bool disconnect_in_progress = false;
-    bool init_in_progress = false;
-    bool init_complete = false;
-    std::unique_ptr<std::thread> init_thread;
-    sigc::signal<void(bool)> init_signal;
-    sigc::signal<void()> disconnect_signal;
-    Glib::Dispatcher init_complete_dispatcher;
-    Connection init_complete_connection;
-    Glib::Dispatcher command_complete_dispatcher;
-    Connection command_complete_connection;
-    Glib::Dispatcher command_thread_exit_dispatcher;
-    Connection command_thread_exit_connection;
-    std::mutex cmd_queue_lock;
-    std::binary_semaphore cmd_semaphore;
-    std::queue<Command> cmd_queue;
-    std::unique_ptr<std::thread> command_thread;
-    std::mutex completion_queue_lock;
-    std::queue<Completion> completion_queue;
+    std::shared_ptr<HardwareInterface> m_hwif;
+    volatile bool m_disconnect_in_progress = false;
+    bool m_init_in_progress = false;
+    bool m_init_complete = false;
+    std::unique_ptr<std::thread> m_init_thread;
+    sigc::signal<void(bool)> m_init_signal;
+    sigc::signal<void()> m_disconnect_signal;
+    Glib::Dispatcher m_init_complete_dispatcher;
+    Connection m_init_complete_connection;
+    Glib::Dispatcher m_command_complete_dispatcher;
+    Connection m_command_complete_connection;
+    Glib::Dispatcher m_command_thread_exit_dispatcher;
+    Connection m_command_thread_exit_connection;
+    std::mutex m_cmd_queue_lock;
+    std::binary_semaphore m_cmd_semaphore;
+    std::queue<Command> m_cmd_queue;
+    std::unique_ptr<std::thread> m_command_thread;
+    std::mutex m_completion_queue_lock;
+    std::queue<Completion> m_completion_queue;
     sigc::signal<void(
         const std::unordered_map<unsigned int, std::vector<unsigned char>>&)>
-        command_complete_signal;
-    unsigned int current_obd_address = 0;
-    Glib::ustring error_string;
+        m_command_complete_signal;
+    unsigned int m_current_obd_address = 0;
+    Glib::ustring m_error_string;
+    int m_protocol = 0;
 
-    void initThread();
+    void init_thread();
     void init_done();
-    void sendCompletion(Completion&& completion);
-    Command getNextCmd();
-    Completion getNextCompletion();
+    void send_completion(Completion&& completion);
+    Command get_next_cmd();
+    Completion get_next_completion();
     static std::string command_to_string(const Command& command);
     Completion string_to_completion(const std::string& s);
-    void commandThread();
+    void command_thread();
     void command_complete();
     void command_thread_exit();
     std::string send_command(const std::string& cmd);
-    int protocol = 0;
 
     // ELM327 Config commands
     bool set_header(unsigned int header);
