@@ -38,7 +38,7 @@ sigc::signal<void(bool)> Obd::init(std::shared_ptr<ObdDevice> obd_device,
 void Obd::initComplete(bool success) {
     m_connected = success;
     m_connecting = false;
-    m_is_CAN = m_obdDevice->isCAN();
+    m_is_CAN = m_obdDevice->is_CAN();
     m_init_connection.disconnect();
     m_init_signal.emit(success);
 }

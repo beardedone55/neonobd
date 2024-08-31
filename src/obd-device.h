@@ -33,21 +33,22 @@ class ObdDevice {
     virtual sigc::signal<void(bool)>
     init(std::shared_ptr<HardwareInterface> hwif) = 0;
 
-    virtual Glib::ustring getErrorString() const = 0;
+    virtual Glib::ustring get_error_string() const = 0;
 
     virtual sigc::signal<void(
         const std::unordered_map<unsigned int, std::vector<unsigned char>>&)>
     signal_command_complete() = 0;
 
-    virtual void sendCommand(unsigned char obd_module,
+    virtual void send_command(unsigned char obd_module,
                              unsigned char obd_service,
                              const std::vector<unsigned char>& obd_data) = 0;
 
-    virtual bool isConnecting() const = 0;
+    virtual bool is_connecting() const = 0;
 
-    virtual bool isConnected() const = 0;
+    virtual bool is_connected() const = 0;
 
-    virtual bool isCAN() const = 0;
+    virtual bool is_CAN() const = 0;
 
     virtual sigc::signal<void()> disconnect() = 0;
 };
+
