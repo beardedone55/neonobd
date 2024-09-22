@@ -16,8 +16,10 @@
  */
 
 #pragma once
-#include "hardware-interface.h"
+#include "hardware-interface.hpp"
+#ifndef CPPCHECK
 #include <glibmm/dispatcher.h>
+#endif
 #include <memory>
 #include <termios.h>
 #include <thread>

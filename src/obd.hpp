@@ -17,26 +17,32 @@
 
 #pragma once
 
-#include <sigc++/connection.h>
+#include "connection.hpp"
+#include "obd-device.hpp"
+#include <memory>
 
-class Connection {
+#ifndef CPPCHECK
+#include <sigc++/signal.h>
+#endif
+
+class Obd {
   public:
-    Connection() = default;
-    Connection(const Connection&) = delete;
-    Connection& operator=(const Connection&) = delete;
-    explicit Connection(const sigc::connection& connection)
-        : m_connection{connection} {}
-    Connection& operator=(const sigc::connection& connection) {
-        disconnect();
-        m_connection = connection;
-        return *this;
-    }
-    ~Connection() { disconnect(); }
-    void disconnect() {
-        if (m_connection)
-            m_connection.disconnect();
-    }
+    sigc::signal<void(bool)> init(std::shared_ptr<ObdDevice> obd_device,
+                                  std::shared_ptr<HardwareInterface> hwif);
+    sigc::signal<void()> disconnect();
 
   private:
-    sigc::connection m_connection;
+    std::shared_ptr<ObdDevice> m_obdDevice;
+    std::shared_ptr<HardwareInterface> m_hwif;
+    bool m_connected = false;
+    bool m_connecting = false;
+    sigc::signal<void(bool)> m_init_signal;
+    Connection m_init_connection;
+    bool m_is_CAN = false;
+    sigc::signal<void()> m_disconnect_signal;
+    Connection m_disconnect_connection;
+    bool disconnecting = false;
+
+    void initComplete(bool success);
+    void disconnectComplete();
 };

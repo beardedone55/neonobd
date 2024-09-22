@@ -17,11 +17,14 @@
 
 #pragma once
 
+#ifndef CPPCHECK
 #include <glibmm/refptr.h>
 #include <gtkmm/builder.h>
 #include <gtkmm/combobox.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/treemodelcolumn.h>
+#endif
+
 #include <optional>
 #include <tuple>
 

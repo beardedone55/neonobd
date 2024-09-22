@@ -17,17 +17,20 @@
 
 #pragma once
 
+#ifndef CPPCHECK
 #include <gtkmm/cssprovider.h>
 #include <gtkmm/window.h>
+#endif
+
 #include <memory>
 
-#include "bluetooth-serial-port.h"
-#include "hardware-interface.h"
-#include "home.h"
-#include "neonobd_types.h"
-#include "serial-port.h"
-#include "settings.h"
-#include "terminal.h"
+#include "bluetooth-serial-port.hpp"
+#include "hardware-interface.hpp"
+#include "home.hpp"
+#include "neonobd_types.hpp"
+#include "serial-port.hpp"
+#include "settings.hpp"
+#include "terminal.hpp"
 
 using neon::InterfaceType;
 using neon::ResponseType;

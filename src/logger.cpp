@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "logger.h"
+#include "logger.hpp"
 #include <iostream>
 #include <unordered_map>
 

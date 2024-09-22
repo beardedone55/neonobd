@@ -15,11 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "bluetooth-serial-port.h"
-#include "logger.h"
+#include "bluetooth-serial-port.hpp"
+#include "logger.hpp"
+
+#ifndef CPPCHECK
 #include <giomm/dbuserror.h>
 #include <giomm/resource.h>
 #include <glibmm/main.h>
+#endif
+
 #include <iomanip>
 #include <iostream>
 #include <mutex>
@@ -686,8 +690,8 @@ void BluetoothSerialPort::profile_method(
         } else // We are already connected to a device (Shouldn't happen...)
         {
             // Close the new socket and return an error.
-            Logger::error << "File descriptor was already set to " <<
-                          bt->m_sock_fd;
+            Logger::error << "File descriptor was already set to "
+                          << bt->m_sock_fd;
             close(fd_list->get(fd_index.get()));
             Gio::DBus::Error error(Gio::DBus::Error::FAILED,
                                    "org.bluez.Error.Rejected");

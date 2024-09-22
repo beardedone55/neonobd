@@ -15,8 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "elm327.h"
-#include "neonobd_exceptions.h"
+#include "elm327.hpp"
+#include "neonobd_exceptions.hpp"
 #include <iomanip>
 #include <sstream>
 
@@ -32,8 +32,7 @@ Elm327::~Elm327() {
     }
 }
 
-sigc::signal<void(bool)>
-Elm327::init(std::shared_ptr<HardwareInterface> hwif) {
+sigc::signal<void(bool)> Elm327::init(std::shared_ptr<HardwareInterface> hwif) {
     if (m_init_thread || m_init_complete) {
         throw neon::InvalidState("Invalid state to issue init request.");
     }
@@ -43,8 +42,7 @@ Elm327::init(std::shared_ptr<HardwareInterface> hwif) {
     m_init_complete_connection =
         m_init_complete_dispatcher.connect([this]() { init_done(); });
 
-    m_init_thread =
-        std::make_unique<std::thread>([this]() { init_thread(); });
+    m_init_thread = std::make_unique<std::thread>([this]() { init_thread(); });
 
     return m_init_signal;
 }
@@ -92,8 +90,9 @@ void Elm327::init_done() {
     if (m_init_complete) {
         m_command_complete_connection = m_command_complete_dispatcher.connect(
             [this]() { command_complete(); });
-        m_command_thread_exit_connection = m_command_thread_exit_dispatcher.connect(
-            [this]() { command_thread_exit(); });
+        m_command_thread_exit_connection =
+            m_command_thread_exit_dispatcher.connect(
+                [this]() { command_thread_exit(); });
     }
     m_init_signal.emit(m_init_complete);
 }
@@ -105,7 +104,7 @@ Elm327::signal_command_complete() {
 }
 
 void Elm327::send_command(unsigned char obd_address, unsigned char obd_service,
-                         const std::vector<unsigned char>& obd_data) {
+                          const std::vector<unsigned char>& obd_data) {
 
     if (!m_init_complete || m_disconnect_in_progress)
         return;
@@ -215,8 +214,8 @@ void Elm327::command_thread() {
 
             send_completion(string_to_completion(response));
 
-            m_command_complete_dispatcher.emit(); // Let main thread know there is
-                                                // a response on the queue.
+            m_command_complete_dispatcher.emit(); // Let main thread know there
+                                                  // is a response on the queue.
         }
     }
     m_command_thread_exit_dispatcher.emit();

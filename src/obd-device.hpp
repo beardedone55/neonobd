@@ -17,10 +17,13 @@
 
 #pragma once
 
-#include "hardware-interface.h"
+#include "hardware-interface.hpp"
+
+#ifndef CPPCHECK
 #include <glibmm/ustring.h>
-#include <optional>
 #include <sigc++/signal.h>
+#endif
+#include <optional>
 #include <vector>
 
 class ObdDevice {
@@ -40,8 +43,8 @@ class ObdDevice {
     signal_command_complete() = 0;
 
     virtual void send_command(unsigned char obd_module,
-                             unsigned char obd_service,
-                             const std::vector<unsigned char>& obd_data) = 0;
+                              unsigned char obd_service,
+                              const std::vector<unsigned char>& obd_data) = 0;
 
     virtual bool is_connecting() const = 0;
 
@@ -51,4 +54,3 @@ class ObdDevice {
 
     virtual sigc::signal<void()> disconnect() = 0;
 };
-

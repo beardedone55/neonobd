@@ -11,5 +11,5 @@ jobs:
       - name: Checkout default branch
         uses: actions/checkout@v4
       - name: Check formatting
-        run: clang-format --Werror --dry-run src/*.h src/*.cpp
+        run: clang-format --Werror --dry-run src/*.hpp src/*.cpp
 

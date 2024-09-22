@@ -17,12 +17,16 @@
 
 #pragma once
 
-#include "connection.h"
-#include "hardware-interface.h"
-#include "neonobd_types.h"
-#include <cstdint>
+#include "connection.hpp"
+#include "hardware-interface.hpp"
+#include "neonobd_types.hpp"
+
+#ifndef CPPCHECK
 #include <giomm/dbusobjectmanagerclient.h>
 #include <giomm/dbusproxy.h>
+#endif
+
+#include <cstdint>
 #include <memory>
 #include <unordered_map>
 

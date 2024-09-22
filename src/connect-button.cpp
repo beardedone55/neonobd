@@ -15,9 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "connect-button.h"
-#include "logger.h"
-#include "mainwindow.h"
+#include "connect-button.hpp"
+#include "logger.hpp"
+#include "mainwindow.hpp"
 
 ConnectButton::ConnectButton(BaseObjectType* cobj,
                              const Glib::RefPtr<Gtk::Builder>&)

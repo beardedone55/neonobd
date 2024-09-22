@@ -22,14 +22,15 @@
 namespace Logger {
 enum LogLevel { DEBUG, INFO, WARN, ERR, NONE };
 class LogStream {
-public:
+  public:
     template <typename T> LogStream& operator<<(const T& rhs) {
         if (logLevel <= lvl) {
             out << rhs;
         }
         return *this;
     }
-private:
+
+  private:
     LogStream(LogLevel level, std::ostream& stream) : lvl{level}, out{stream} {}
     LogLevel lvl;
     std::ostream& out;
