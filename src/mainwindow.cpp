@@ -15,8 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "mainwindow.h"
-#include "logger.h"
+#include "mainwindow.hpp"
+#include "logger.hpp"
 #include <iostream>
 
 MainWindow::MainWindow()

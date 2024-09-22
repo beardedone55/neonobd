@@ -17,10 +17,12 @@
 
 #pragma once
 
-#include "bluetooth-serial-port.h"
-#include "combobox.h"
-#include "neonobd_types.h"
-#include "serial-port.h"
+#include "bluetooth-serial-port.hpp"
+#include "combobox.hpp"
+#include "neonobd_types.hpp"
+#include "serial-port.hpp"
+
+#ifndef CPPCHECK
 #include <giomm/settings.h>
 #include <glibmm/ustring.h>
 #include <gtkmm/button.h>
@@ -33,6 +35,7 @@
 #include <gtkmm/stack.h>
 #include <sigc++/connection.h>
 #include <sigc++/trackable.h>
+#endif
 
 class MainWindow;
 

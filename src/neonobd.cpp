@@ -15,9 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "logger.h"
-#include "mainwindow.h"
+#include "logger.hpp"
+#include "mainwindow.hpp"
+
+#ifndef CPPCHECK
 #include <gtkmm/application.h>
+#endif
 
 int main(int argc, char* argv[]) {
 

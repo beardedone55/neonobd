@@ -15,9 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "settings.h"
-#include "logger.h"
-#include "mainwindow.h"
+#include "settings.hpp"
+#include "logger.hpp"
+#include "mainwindow.hpp"
 
 Settings::Settings(MainWindow* main_window)
     : window{main_window},

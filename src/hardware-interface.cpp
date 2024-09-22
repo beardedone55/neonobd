@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hardware-interface.h"
+#include "hardware-interface.hpp"
 #include <unistd.h>
 
 sigc::connection
@@ -28,7 +28,7 @@ sigc::connection HardwareInterface::attach_user_prompt(
     return m_request_user_input.connect(slot);
 }
 
-std::size_t HardwareInterface::read(char* buf, std::size_t buf_size) {
+ssize_t HardwareInterface::read(char* buf, std::size_t buf_size) {
     std::shared_lock lock(m_sock_fd_mutex);
     if (m_sock_fd >= 0) {
         auto result = ::read(m_sock_fd, buf, buf_size);
@@ -39,7 +39,7 @@ std::size_t HardwareInterface::read(char* buf, std::size_t buf_size) {
     return 0;
 }
 
-std::size_t HardwareInterface::write(const char* buf, std::size_t buf_size) {
+ssize_t HardwareInterface::write(const char* buf, std::size_t buf_size) {
     std::shared_lock lock(m_sock_fd_mutex);
     if (m_sock_fd >= 0) {
         auto result = ::write(m_sock_fd, buf, buf_size);

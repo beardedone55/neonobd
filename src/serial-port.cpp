@@ -15,8 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "serial-port.h"
-#include "logger.h"
+#include "serial-port.hpp"
+#include "logger.hpp"
 #include <errno.h>
 #include <fcntl.h>
 #include <filesystem>

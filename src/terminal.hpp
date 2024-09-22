@@ -17,12 +17,15 @@
 
 #pragma once
 
+#ifndef CPPCHECK
 #include <glibmm/dispatcher.h>
 #include <glibmm/ustring.h>
 #include <gtkmm/button.h>
 #include <gtkmm/textbuffer.h>
 #include <gtkmm/textview.h>
 #include <sigc++/trackable.h>
+#endif
+
 #include <thread>
 
 class MainWindow;

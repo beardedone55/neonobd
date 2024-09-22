@@ -15,9 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "terminal.h"
-#include "logger.h"
-#include "mainwindow.h"
+#include "terminal.hpp"
+#include "logger.hpp"
+#include "mainwindow.hpp"
 
 Terminal::Terminal(MainWindow* main_window)
     : window{main_window},

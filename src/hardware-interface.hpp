@@ -16,12 +16,16 @@
  */
 
 #pragma once
-#include "neonobd_types.h"
+#include "neonobd_types.hpp"
+
+#ifndef CPPCHECK
 #include <glibmm/ustring.h>
 #include <glibmm/variant.h>
-#include <shared_mutex>
 #include <sigc++/connection.h>
 #include <sigc++/signal.h>
+#endif
+
+#include <shared_mutex>
 #include <string>
 #include <vector>
 
@@ -44,7 +48,7 @@ class HardwareInterface {
 
     template <typename Container,
               typename Contents = typename Container::value_type>
-    std::size_t read(Container& container, std::size_t buf_size = 1024) {
+    ssize_t read(Container& container, std::size_t buf_size = 1024) {
         static_assert(sizeof(Contents) == sizeof(char),
                       "Container used with HardwareInterface::read() must have "
                       "elements with size of char.");
@@ -56,7 +60,7 @@ class HardwareInterface {
 
     template <typename Container,
               typename Contents = typename Container::value_type>
-    std::size_t write(const Container& buf) {
+    ssize_t write(const Container& buf) {
         static_assert(sizeof(Contents) == sizeof(char),
                       "Container used with HardwareInterface::write() must "
                       "have elements with size of char.");
@@ -72,6 +76,6 @@ class HardwareInterface {
     int m_sock_fd = -1;
     std::shared_mutex m_sock_fd_mutex;
 
-    virtual std::size_t read(char* buf, std::size_t size);
-    virtual std::size_t write(const char* buf, std::size_t size);
+    virtual ssize_t read(char* buf, std::size_t size);
+    virtual ssize_t write(const char* buf, std::size_t size);
 };

@@ -15,8 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "obd.h"
-#include "neonobd_exceptions.h"
+#include "obd.hpp"
+#include "neonobd_exceptions.hpp"
 
 sigc::signal<void(bool)> Obd::init(std::shared_ptr<ObdDevice> obd_device,
                                    std::shared_ptr<HardwareInterface> hwif) {

@@ -15,9 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "home.h"
-#include "logger.h"
-#include "mainwindow.h"
+#include "home.hpp"
+#include "logger.hpp"
+#include "mainwindow.hpp"
 
 Home::Home(MainWindow* main_window) : window{main_window} {
     auto ui = window->ui;

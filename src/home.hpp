@@ -17,12 +17,15 @@
 
 #pragma once
 
-#include "connect-button.h"
-#include "hardware-interface.h"
-#include "neonobd_types.h"
+#include "connect-button.hpp"
+#include "hardware-interface.hpp"
+#include "neonobd_types.hpp"
+
+#ifndef CPPCHECK
 #include <gtkmm/button.h>
 #include <sigc++/trackable.h>
 #include <unordered_set>
+#endif
 
 class MainWindow;
 

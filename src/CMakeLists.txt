@@ -14,9 +14,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.20)
 
 project(neonobd VERSION 0.1)
+
+option(RUN_CPPCHECK "Run cppcheck during compilation" OFF)
+option(RUN_CLANG_TIDY "Run clang-tidy during compilation" OFF)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -24,6 +27,21 @@ set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic -Wunuse
                      -Wunused -Woverloaded-virtual -Wpedantic -Wconversion -Wmisleading-indentation \
                      -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wnull-dereference \
                      -Wformat=2")
+
+if(RUN_CPPCHECK)
+    find_program(CMAKE_CXX_CPPCHECK NAMES cppcheck REQUIRED)
+    list(APPEND CMAKE_CXX_CPPCHECK --enable=all --error-exitcode=1 
+        --suppressions-list=${CMAKE_SOURCE_DIR}/.cppcheck_suppression_list -DCPPCHECK  
+         --suppress=unusedFunction --force) 
+else()
+    unset(CMAKE_CXX_CPPCHECK CACHE)
+endif()
+
+if(RUN_CLANG_TIDY)
+    find_program(CMAKE_CXX_CLANG_TIDY NAMES clang-tidy REQUIRED)
+else()
+    unset(CMAKE_CXX_CLANG_TIDY CACHE)
+endif()
 
 find_package(PkgConfig)
 pkg_check_modules(GTKMM REQUIRED gtkmm-4.0)
@@ -35,5 +53,6 @@ target_include_directories(neonobd PRIVATE "${PROJECT_SOURCE_DIR}" ${GTKMM_INCLU
 target_link_libraries(neonobd PRIVATE ${GTKMM_LIBRARIES} resources)
 
 install(TARGETS neonobd RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
 
 add_subdirectory(resources)

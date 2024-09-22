@@ -17,11 +17,14 @@
 
 #pragma once
 
-#include "neonobd_types.h"
+#include "neonobd_types.hpp"
+
+#ifndef CPPCHECK
 #include <glibmm/ustring.h>
 #include <gtkmm/builder.h>
 #include <gtkmm/button.h>
 #include <sigc++/connection.h>
+#endif
 
 class MainWindow;
 

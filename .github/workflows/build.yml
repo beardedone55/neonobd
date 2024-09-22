@@ -13,9 +13,9 @@ jobs:
       - name: Install Prerequisites
         run: |
           sudo apt-get -y install libgtkmm-4.0-dev
-          echo "Do nothing for prereqs"
+          sudo apt-get -y install cppcheck
       - name: Configure cmake
-        run: cmake -B build src
+        run: cmake -B build src -DRUN_CPPCHECK=ON
       - name: Compile project
         run: cmake --build build
 

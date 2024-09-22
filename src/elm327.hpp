@@ -17,14 +17,18 @@
 
 #pragma once
 
-#include "connection.h"
-#include "obd-device.h"
+#include "connection.hpp"
+#include "obd-device.hpp"
+
+#ifndef CPPCHECK
 #include <glibmm/dispatcher.h>
+#include <sigc++/signal.h>
+#endif
+
 #include <memory>
 #include <mutex>
 #include <queue>
 #include <semaphore>
-#include <sigc++/signal.h>
 #include <thread>
 #include <unordered_map>
 
@@ -45,7 +49,7 @@ class Elm327 : public ObdDevice, public sigc::trackable {
     signal_command_complete() override;
 
     void send_command(unsigned char obd_address, unsigned char obd_service,
-                     const std::vector<unsigned char>& obd_data) override;
+                      const std::vector<unsigned char>& obd_data) override;
 
     bool is_CAN() const override;
 
