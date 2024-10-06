@@ -16,24 +16,28 @@
  */
 
 #include "home.hpp"
+#include "connect-button.hpp"
 #include "logger.hpp"
 #include "mainwindow.hpp"
+#include <gtkmm/builder.h>
+#include <gtkmm/button.h>
+#include <sigc++/functors/mem_fun.h>
 
 Home::Home(MainWindow* main_window) : window{main_window} {
-    auto ui = window->ui;
+    auto user_interface = window->ui;
     // Settings button
-    settings_btn = ui->get_widget<Gtk::Button>("settings_button");
+    settings_btn = user_interface->get_widget<Gtk::Button>("settings_button");
     settings_btn->signal_clicked().connect(
         sigc::mem_fun(*this, &Home::settings_clicked));
     enabled_buttons.insert(settings_btn);
 
     // Connect button
-    connect_btn =
-        Gtk::Builder::get_widget_derived<ConnectButton>(ui, "connect_button");
+    connect_btn = Gtk::Builder::get_widget_derived<ConnectButton>(
+        user_interface, "connect_button");
     enabled_buttons.insert(connect_btn);
 
     // Terminal button
-    terminal_btn = ui->get_widget<Gtk::Button>("terminal_button");
+    terminal_btn = user_interface->get_widget<Gtk::Button>("terminal_button");
     // Disable this button until connected.
     terminal_btn->set_sensitive(false);
     terminal_btn->signal_clicked().connect(
@@ -49,13 +53,13 @@ void Home::terminal_clicked() {
 }
 
 void Home::disable_all() {
-    for (auto button : enabled_buttons) {
+    for (auto* button : enabled_buttons) {
         button->set_sensitive(false);
     }
 }
 
 void Home::enable_all() {
-    for (auto button : enabled_buttons) {
+    for (auto* button : enabled_buttons) {
         button->set_sensitive(true);
     }
 }

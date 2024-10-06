@@ -1,5 +1,5 @@
 /* This file is part of neonobd - OBD diagnostic software.
- * Copyright (C) 2022-2023  Brian LePage
+ * Copyright (C) 2022-2024  Brian LePage
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,23 @@
  */
 
 #include "mainwindow.hpp"
+#include "bluetooth-serial-port.hpp"
+#include "home.hpp"
 #include "logger.hpp"
-#include <iostream>
+#include "neonobd_types.hpp"
+#include "serial-port.hpp"
+#include "settings.hpp"
+#include "terminal.hpp"
+#include <gdkmm/display.h>
+#include <gtk/gtkstyleprovider.h>
+#include <gtkmm/builder.h>
+#include <gtkmm/cssprovider.h>
+#include <gtkmm/dialog.h>
+#include <gtkmm/messagedialog.h>
+#include <gtkmm/stack.h>
+#include <gtkmm/stylecontext.h>
+#include <memory>
+#include <sigc++/functors/slot.h>
 
 MainWindow::MainWindow()
     : bluetoothSerialPort{BluetoothSerialPort::get_BluetoothSerialPort()},
@@ -31,7 +46,7 @@ MainWindow::MainWindow()
 
     viewStack = ui->get_widget<Gtk::Stack>("view_stack");
 
-    if (!viewStack) {
+    if (viewStack == nullptr) {
         Logger::error("Could not instantiate view_stack.");
         return;
     }
@@ -99,8 +114,9 @@ void MainWindow::showPopup(const std::string& message, ResponseType type,
 }
 
 void MainWindow::hidePopup() {
-    if (!popup_shown)
+    if (!popup_shown) {
         return;
+    }
 
     popup->hide();
     popup_response_connection.disconnect();

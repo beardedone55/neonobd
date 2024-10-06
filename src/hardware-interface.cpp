@@ -16,6 +16,13 @@
  */
 
 #include "hardware-interface.hpp"
+#include <cstddef>
+#include <glibmm/refptr.h>
+#include <glibmm/ustring.h>
+#include <shared_mutex>
+#include <sigc++/connection.h>
+#include <sigc++/functors/slot.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 sigc::connection
@@ -29,7 +36,7 @@ sigc::connection HardwareInterface::attach_user_prompt(
 }
 
 ssize_t HardwareInterface::read(char* buf, std::size_t buf_size) {
-    std::shared_lock lock(m_sock_fd_mutex);
+    const std::shared_lock lock(m_sock_fd_mutex);
     if (m_sock_fd >= 0) {
         auto result = ::read(m_sock_fd, buf, buf_size);
         if (result != -1) {
@@ -40,11 +47,12 @@ ssize_t HardwareInterface::read(char* buf, std::size_t buf_size) {
 }
 
 ssize_t HardwareInterface::write(const char* buf, std::size_t buf_size) {
-    std::shared_lock lock(m_sock_fd_mutex);
+    const std::shared_lock lock(m_sock_fd_mutex);
     if (m_sock_fd >= 0) {
         auto result = ::write(m_sock_fd, buf, buf_size);
-        if (result != -1)
+        if (result != -1) {
             return result;
+        }
     }
     return 0;
 }

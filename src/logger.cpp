@@ -1,5 +1,5 @@
 /* This file is part of neonobd - OBD diagnostic software.
- * Copyright (C) 2022-2023  Brian LePage
+ * Copyright (C) 2022-2024  Brian LePage
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,24 +16,17 @@
  */
 
 #include "logger.hpp"
-#include <iostream>
-#include <unordered_map>
+#include <string>
 
 Logger::LogLevel Logger::LogStream::logLevel = DEBUG;
 
-Logger::Logger Logger::debug(DEBUG, std::clog);
-Logger::Logger Logger::info(INFO, std::clog);
-Logger::Logger Logger::warning(WARN, std::clog);
-Logger::Logger Logger::error(ERR, std::cerr);
+const Logger::Logger Logger::debug(DEBUG);
+const Logger::Logger Logger::info(INFO);
+const Logger::Logger Logger::warning(WARN);
+const Logger::Logger Logger::error(ERR);
 
 void Logger::setLogLevel(LogLevel lvl) { LogStream::logLevel = lvl; }
 
-const std::unordered_map<Logger::LogLevel, std::string>
-    Logger::Logger::log_header = {{DEBUG, "DEBUG: "},
-                                  {INFO, "INFO: "},
-                                  {WARN, "WARNING: "},
-                                  {ERR, "ERROR: "}};
-
-void Logger::Logger::operator()(const std::string& msg) {
+void Logger::Logger::operator()(const std::string& msg) const {
     *this << msg << '\n';
 }

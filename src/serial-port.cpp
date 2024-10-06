@@ -17,6 +17,7 @@
 
 #include "serial-port.hpp"
 #include "logger.hpp"
+#include <chrono>
 #include <errno.h>
 #include <fcntl.h>
 #include <filesystem>
@@ -163,12 +164,12 @@ bool SerialPort::connect(const Glib::ustring& device_name) {
     return true;
 }
 
-void SerialPort::set_timeout(unsigned int milliseconds) {
-    auto deciseconds = milliseconds / 100;
+void SerialPort::set_timeout(std::chrono::milliseconds timeout) {
+    std::chrono::duration<long, std::deci> deciseconds = milliseconds / 100;
 
-    m_timeout = (deciseconds > UCHAR_MAX)
+    m_timeout = (deciseconds.count() > UCHAR_MAX)
                     ? UCHAR_MAX
-                    : static_cast<unsigned char>(deciseconds);
+                    : static_cast<unsigned char>(deciseconds.count());
 
     std::shared_lock lock(m_sock_fd_mutex);
     if (m_sock_fd == -1)

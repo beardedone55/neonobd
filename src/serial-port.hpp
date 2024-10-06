@@ -17,9 +17,8 @@
 
 #pragma once
 #include "hardware-interface.hpp"
-#ifndef CPPCHECK
+#include <chrono>
 #include <glibmm/dispatcher.h>
-#endif
 #include <memory>
 #include <termios.h>
 #include <thread>
@@ -31,7 +30,7 @@ class SerialPort : public HardwareInterface, public sigc::trackable {
     bool connect(const Glib::ustring& device_name) override;
     void respond_from_user(const Glib::VariantBase&,
                            const Glib::RefPtr<void>&) override {}
-    void set_timeout(unsigned int milliseconds) override;
+    void set_timeout(std::chrono::milliseconds timeout) override;
 
     void set_baudrate(const Glib::ustring& baudrate);
     static std::vector<Glib::ustring> get_valid_baudrates();

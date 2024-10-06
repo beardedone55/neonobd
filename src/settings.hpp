@@ -18,11 +18,9 @@
 #pragma once
 
 #include "bluetooth-serial-port.hpp"
-#include "combobox.hpp"
+#include "dropdown.hpp"
 #include "neonobd_types.hpp"
 #include "serial-port.hpp"
-
-#ifndef CPPCHECK
 #include <giomm/settings.h>
 #include <glibmm/ustring.h>
 #include <gtkmm/button.h>
@@ -35,7 +33,6 @@
 #include <gtkmm/stack.h>
 #include <sigc++/connection.h>
 #include <sigc++/trackable.h>
-#endif
 
 class MainWindow;
 
@@ -62,7 +59,7 @@ class Settings : public sigc::trackable {
     Gtk::ComboBoxText* btHostCombo;
     Gtk::Label* btDeviceLabel;
     Gtk::Button* btDeviceScan;
-    ComboBox<Glib::ustring, Glib::ustring>* btDeviceCombo;
+    Dropdown* m_bt_device_dropdown;
     Gtk::Label* btScanLabel;
     Gtk::ProgressBar* btScanProgress;
     Gtk::Grid* btGrid;

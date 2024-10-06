@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <iostream>
 #include <ostream>
 #include <string>
 #include <unordered_map>
@@ -23,7 +24,7 @@ namespace Logger {
 enum LogLevel { DEBUG, INFO, WARN, ERR, NONE };
 class LogStream {
   public:
-    template <typename T> LogStream& operator<<(const T& rhs) {
+    template <typename T> const LogStream& operator<<(const T& rhs) const {
         if (logLevel <= lvl) {
             out << rhs;
         }
@@ -31,7 +32,8 @@ class LogStream {
     }
 
   private:
-    LogStream(LogLevel level, std::ostream& stream) : lvl{level}, out{stream} {}
+    LogStream(LogLevel level) noexcept
+        : lvl{level}, out{(level == ERR) ? std::cerr : std::clog} {}
     LogLevel lvl;
     std::ostream& out;
     static LogLevel logLevel;
@@ -41,10 +43,9 @@ class LogStream {
 
 class Logger {
   public:
-    Logger(LogLevel level, std::ostream& outstream)
-        : lvl{level}, stream{level, outstream} {}
-    void operator()(const std::string& msg);
-    template <typename T> LogStream& operator<<(const T& rhs) {
+    Logger(LogLevel level) noexcept : lvl{level}, stream{level} {}
+    void operator()(const std::string& msg) const;
+    template <typename T> const LogStream& operator<<(const T& rhs) const {
         stream << log_header.at(lvl) << rhs;
         return stream;
     }
@@ -52,19 +53,23 @@ class Logger {
   private:
     LogLevel lvl;
     LogStream stream;
-    static const std::unordered_map<LogLevel, std::string> log_header;
+    const std::unordered_map<LogLevel, std::string> log_header = {
+        {DEBUG, "DEBUG: "},
+        {INFO, "INFO: "},
+        {WARN, "WARNING: "},
+        {ERR, "ERROR: "}};
 };
 
 class NoLog {
   public:
-    template <typename T> NoLog& operator<<(const T&) { return *this; }
-    void operator()(const std::string&) {}
+    template <typename T> const NoLog& operator<<(const T&) const { return *this; }
+    void operator()(const std::string&) const  {}
 };
 
 void setLogLevel(LogLevel lvl);
 
-extern Logger debug;
-extern Logger info;
-extern Logger warning;
-extern Logger error;
+extern const Logger debug;
+extern const Logger info;
+extern const Logger warning;
+extern const Logger error;
 }; // namespace Logger

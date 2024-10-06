@@ -17,13 +17,6 @@
 
 #pragma once
 
-#ifndef CPPCHECK
-#include <gtkmm/cssprovider.h>
-#include <gtkmm/window.h>
-#endif
-
-#include <memory>
-
 #include "bluetooth-serial-port.hpp"
 #include "hardware-interface.hpp"
 #include "home.hpp"
@@ -31,6 +24,9 @@
 #include "serial-port.hpp"
 #include "settings.hpp"
 #include "terminal.hpp"
+#include <gtkmm/cssprovider.h>
+#include <gtkmm/window.h>
+#include <memory>
 
 using neon::InterfaceType;
 using neon::ResponseType;

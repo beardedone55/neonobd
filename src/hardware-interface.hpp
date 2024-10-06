@@ -17,17 +17,11 @@
 
 #pragma once
 #include "neonobd_types.hpp"
-
-#ifndef CPPCHECK
 #include <glibmm/ustring.h>
 #include <glibmm/variant.h>
+#include <shared_mutex>
 #include <sigc++/connection.h>
 #include <sigc++/signal.h>
-#endif
-
-#include <shared_mutex>
-#include <string>
-#include <vector>
 
 using neon::ResponseType;
 
@@ -67,7 +61,7 @@ class HardwareInterface {
         return write(buf.data(), buf.size());
     }
 
-    virtual void set_timeout(unsigned int) {}
+    virtual void set_timeout(std::chrono::milliseconds) {}
 
   protected:
     sigc::signal<void(bool)> m_complete_connection;
