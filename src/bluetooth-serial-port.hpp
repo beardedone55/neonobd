@@ -20,20 +20,19 @@
 #include "connection.hpp"
 #include "hardware-interface.hpp"
 #include "neonobd_types.hpp"
-
-#ifndef CPPCHECK
+#include <chrono>
+#include <cstdint>
 #include <giomm/dbusobjectmanagerclient.h>
 #include <giomm/dbusproxy.h>
-#endif
-
-#include <cstdint>
 #include <memory>
 #include <unordered_map>
 
 using neon::ResponseType;
+using namespace std::chrono_literals;
 
 class BluetoothSerialPort : public HardwareInterface {
   public:
+    BluetoothSerialPort();
     BluetoothSerialPort(const BluetoothSerialPort&) = delete;
     void operator=(const BluetoothSerialPort&) = delete;
     ~BluetoothSerialPort() override;
@@ -43,7 +42,7 @@ class BluetoothSerialPort : public HardwareInterface {
     void respond_from_user(const Glib::VariantBase& response,
                            const Glib::RefPtr<void>& signal_handle) override;
 
-    void set_timeout(unsigned int milliseconds) override;
+    void set_timeout(std::chrono::milliseconds timeout) override;
 
     static std::shared_ptr<BluetoothSerialPort> get_BluetoothSerialPort();
 
@@ -72,7 +71,7 @@ class BluetoothSerialPort : public HardwareInterface {
 
     // Initiate scan of remote devices using default
     // bluetooth controller.
-    void probe_remote_devices(unsigned int probeTime = 10);
+    void probe_remote_devices(std::chrono::seconds probeTime = 10s);
 
     // Pairing response methods
     //-----------------------------------------------
@@ -106,8 +105,7 @@ class BluetoothSerialPort : public HardwareInterface {
         std::unordered_map<std::string, Glib::RefPtr<Gio::DBus::Proxy>>;
 
     static std::weak_ptr<BluetoothSerialPort> m_bluetooth_serial_port;
-    static Gio::DBus::InterfaceVTable m_agent_vtable;
-    static Gio::DBus::InterfaceVTable m_profile_vtable;
+    static int m_object_count;
 
     ProxyMap m_controllers;
     ProxyMap m_remote_devices;
@@ -133,19 +131,19 @@ class BluetoothSerialPort : public HardwareInterface {
     Connection m_probe_timer_connection;
 
     // Private Methods
-    BluetoothSerialPort();
     void manager_created(Glib::RefPtr<Gio::AsyncResult>& result);
     void update_object_state(const Glib::RefPtr<Gio::DBus::Object>& obj,
                              bool addObject);
     void add_object(const Glib::RefPtr<Gio::DBus::Object>& obj);
     void remove_object(const Glib::RefPtr<Gio::DBus::Object>& obj);
     void probe_finish(Glib::RefPtr<Gio::AsyncResult>& result,
-                      unsigned int timeout,
+                      std::chrono::seconds timeout,
                       const Glib::RefPtr<Gio::DBus::Proxy>& controller);
     void initiate_connection(const Glib::RefPtr<Gio::DBus::Proxy>& device);
     void finish_connection(Glib::RefPtr<Gio::AsyncResult>& result);
     bool update_probe_progress();
-    void pre_connection_scan_progress(int p, const Glib::ustring& device_name);
+    void pre_connection_scan_progress(int percent_complete,
+                                      const Glib::ustring& device_name);
     void stop_probe();
     void stop_probe_finish(const Glib::RefPtr<Gio::AsyncResult>& result,
                            const Glib::RefPtr<Gio::DBus::Proxy>& controller);
@@ -154,8 +152,9 @@ class BluetoothSerialPort : public HardwareInterface {
                           const Gio::DBus::InterfaceVTable& vtable);
     void register_profile();
     void register_agent();
-    void register_complete(const Glib::RefPtr<Gio::AsyncResult>& result,
-                           const Glib::RefPtr<Gio::DBus::Proxy>& manager);
+    static void
+    register_complete(const Glib::RefPtr<Gio::AsyncResult>& result,
+                      const Glib::RefPtr<Gio::DBus::Proxy>& manager);
     static void
     agent_method(const Glib::RefPtr<Gio::DBus::Connection>&,
                  const Glib::ustring& sender, const Glib::ustring& object_path,

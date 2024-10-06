@@ -20,12 +20,9 @@
 #include "connect-button.hpp"
 #include "hardware-interface.hpp"
 #include "neonobd_types.hpp"
-
-#ifndef CPPCHECK
 #include <gtkmm/button.h>
 #include <sigc++/trackable.h>
 #include <unordered_set>
-#endif
 
 class MainWindow;
 

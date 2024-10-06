@@ -31,7 +31,7 @@ set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic -Wunuse
 if(RUN_CPPCHECK)
     find_program(CMAKE_CXX_CPPCHECK NAMES cppcheck REQUIRED)
     list(APPEND CMAKE_CXX_CPPCHECK --enable=all --error-exitcode=1 
-        --suppressions-list=${CMAKE_SOURCE_DIR}/.cppcheck_suppression_list -DCPPCHECK  
+        --suppressions-list=${CMAKE_SOURCE_DIR}/.cppcheck_suppression_list
          --suppress=unusedFunction --force) 
 else()
     unset(CMAKE_CXX_CPPCHECK CACHE)
@@ -43,12 +43,13 @@ else()
     unset(CMAKE_CXX_CLANG_TIDY CACHE)
 endif()
 
-find_package(PkgConfig)
+find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTKMM REQUIRED gtkmm-4.0)
 
-add_executable(neonobd neonobd.cpp hardware-interface.cpp bluetooth-serial-port.cpp home.cpp mainwindow.cpp settings.cpp logger.cpp connect-button.cpp terminal.cpp serial-port.cpp elm327.cpp obd.cpp)
+add_executable(neonobd neonobd.cpp hardware-interface.cpp bluetooth-serial-port.cpp home.cpp mainwindow.cpp settings.cpp logger.cpp connect-button.cpp terminal.cpp serial-port.cpp elm327.cpp obd.cpp dropdown.cpp)
 
-target_include_directories(neonobd PRIVATE "${PROJECT_SOURCE_DIR}" ${GTKMM_INCLUDE_DIRS})
+target_include_directories(neonobd SYSTEM PRIVATE ${GTKMM_INCLUDE_DIRS})
+target_include_directories(neonobd PRIVATE "${PROJECT_SOURCE_DIR}")
 
 target_link_libraries(neonobd PRIVATE ${GTKMM_LIBRARIES} resources)
 
