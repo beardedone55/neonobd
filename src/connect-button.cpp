@@ -18,11 +18,26 @@
 #include "connect-button.hpp"
 #include "logger.hpp"
 #include "mainwindow.hpp"
+#include "neonobd_types.hpp"
+#include <glib.h>
+#include <glibmm/refptr.h>
+#include <glibmm/ustring.h>
+#include <glibmm/variant.h>
+#include <gtk/gtk.h>
+#include <gtkmm/builder.h>
+#include <gtkmm/button.h>
+#include <gtkmm/dialog.h>
+#include <gtkmm/entry.h>
+#include <sigc++/connection.h>
+#include <sigc++/functors/mem_fun.h>
+#include <sigc++/functors/slot.h>
+#include <string>
+#include <utility>
 
 ConnectButton::ConnectButton(BaseObjectType* cobj,
-                             const Glib::RefPtr<Gtk::Builder>&)
-    : Gtk::Button{cobj} {
-    window = dynamic_cast<MainWindow*>(get_ancestor(GTK_TYPE_WINDOW));
+                             const Glib::RefPtr<Gtk::Builder>& /*builder*/)
+    : Gtk::Button{cobj},
+      window{dynamic_cast<MainWindow*>(get_ancestor(GTK_TYPE_WINDOW))} {
     signal_clicked().connect(sigc::mem_fun(*this, &ConnectButton::clicked));
 }
 
@@ -38,8 +53,9 @@ void ConnectButton::clicked() {
     connect_complete_connection = hwif->attach_connect_complete(
         sigc::mem_fun(*this, &ConnectButton::connect_complete));
 
-    if (!hwif->connect(window->settings->getSelectedDevice()))
+    if (!hwif->connect(window->settings->getSelectedDevice())) {
         connect_complete(false);
+    }
 }
 
 void ConnectButton::connect_complete(bool result) {
@@ -65,7 +81,8 @@ void ConnectButton::send_cancel() {
     user_prompt_handle.reset();
 }
 
-void ConnectButton::user_prompt(Glib::ustring prompt, ResponseType responseType,
+void ConnectButton::user_prompt(const Glib::ustring& prompt,
+                                ResponseType responseType,
                                 Glib::RefPtr<void> handle) {
 
     if (user_prompt_handle) {
@@ -97,7 +114,7 @@ void ConnectButton::user_prompt(Glib::ustring prompt, ResponseType responseType,
 
     window->showPopup(prompt, responseType, user_response);
 
-    user_prompt_handle = handle;
+    user_prompt_handle = std::move(handle);
     Logger::debug("Received prompt: " + prompt);
 }
 
@@ -117,8 +134,9 @@ Glib::ustring ConnectButton::get_user_input(int responseCode,
                                             const char* widget) {
     Logger::debug("User responded with responseCode " +
                   std::to_string(responseCode));
-    auto ui = window->ui;
-    auto text_input = ui->get_widget<Gtk::Entry>(widget)->get_text();
+    auto user_interface = window->ui;
+    auto text_input =
+        user_interface->get_widget<Gtk::Entry>(widget)->get_text();
     if (responseCode != Gtk::ResponseType::OK || text_input.empty()) {
         send_cancel();
         return "";
@@ -142,7 +160,8 @@ void ConnectButton::user_text_response(int responseCode) {
 void ConnectButton::user_number_response(int responseCode) {
     auto text_input = get_user_input(responseCode, "number_user_input");
     if (!text_input.empty()) {
-        auto response = Glib::Variant<guint32>::create(std::stoi(text_input));
+        auto response = Glib::Variant<guint32>::create(
+            static_cast<guint32>(std::stoi(text_input)));
         Logger::debug("Received response from user: " + text_input);
         window->hardwareInterface->respond_from_user(response,
                                                      user_prompt_handle);
@@ -150,4 +169,4 @@ void ConnectButton::user_number_response(int responseCode) {
     }
 }
 
-void ConnectButton::user_none_response(int) { window->hidePopup(); }
+void ConnectButton::user_none_response(int /*none*/) { window->hidePopup(); }

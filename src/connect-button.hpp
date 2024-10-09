@@ -18,13 +18,10 @@
 #pragma once
 
 #include "neonobd_types.hpp"
-
-#ifndef CPPCHECK
 #include <glibmm/ustring.h>
 #include <gtkmm/builder.h>
 #include <gtkmm/button.h>
 #include <sigc++/connection.h>
-#endif
 
 class MainWindow;
 
@@ -42,7 +39,7 @@ class ConnectButton : public Gtk::Button {
 
     void clicked();
     void connect_complete(bool result);
-    void user_prompt(Glib::ustring prompt, ResponseType responseType,
+    void user_prompt(const Glib::ustring& prompt, ResponseType responseType,
                      Glib::RefPtr<void>);
 
     void user_yes_no_response(int responseCode);

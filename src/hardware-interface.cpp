@@ -35,23 +35,23 @@ sigc::connection HardwareInterface::attach_user_prompt(
     return m_request_user_input.connect(slot);
 }
 
-ssize_t HardwareInterface::read(char* buf, std::size_t buf_size) {
+size_t HardwareInterface::read(char* buf, std::size_t buf_size) {
     const std::shared_lock lock(m_sock_fd_mutex);
     if (m_sock_fd >= 0) {
         auto result = ::read(m_sock_fd, buf, buf_size);
-        if (result != -1) {
-            return result;
+        if (result > -1) {
+            return static_cast<size_t>(result);
         }
     }
     return 0;
 }
 
-ssize_t HardwareInterface::write(const char* buf, std::size_t buf_size) {
+size_t HardwareInterface::write(const char* buf, std::size_t buf_size) {
     const std::shared_lock lock(m_sock_fd_mutex);
     if (m_sock_fd >= 0) {
         auto result = ::write(m_sock_fd, buf, buf_size);
-        if (result != -1) {
-            return result;
+        if (result > -1) {
+            return static_cast<size_t>(result);
         }
     }
     return 0;

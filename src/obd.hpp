@@ -20,15 +20,13 @@
 #include "connection.hpp"
 #include "obd-device.hpp"
 #include <memory>
-
-#ifndef CPPCHECK
 #include <sigc++/signal.h>
-#endif
 
 class Obd {
   public:
-    sigc::signal<void(bool)> init(std::shared_ptr<ObdDevice> obd_device,
-                                  std::shared_ptr<HardwareInterface> hwif);
+    sigc::signal<void(bool)>
+    init(const std::shared_ptr<ObdDevice>& obd_device,
+         const std::shared_ptr<HardwareInterface>& hwif);
     sigc::signal<void()> disconnect();
 
   private:

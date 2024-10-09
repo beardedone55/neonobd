@@ -16,13 +16,19 @@
  */
 
 #include "obd.hpp"
+#include "hardware-interface.hpp"
 #include "neonobd_exceptions.hpp"
+#include "obd-device.hpp"
+#include <memory>
+#include <sigc++/signal.h>
 
-sigc::signal<void(bool)> Obd::init(std::shared_ptr<ObdDevice> obd_device,
-                                   std::shared_ptr<HardwareInterface> hwif) {
+sigc::signal<void(bool)>
+Obd::init(const std::shared_ptr<ObdDevice>& obd_device,
+          const std::shared_ptr<HardwareInterface>& hwif) {
 
-    if (m_connected || m_connecting)
+    if (m_connected || m_connecting) {
         throw neon::InvalidState("Invalid state to initialize OBD device.");
+    }
 
     m_obdDevice = obd_device;
     m_hwif = hwif;
@@ -44,8 +50,9 @@ void Obd::initComplete(bool success) {
 }
 
 sigc::signal<void()> Obd::disconnect() {
-    if (!m_connected || disconnecting)
+    if (!m_connected || disconnecting) {
         throw neon::InvalidState("Invalid state to disconnect OBD device.");
+    }
     m_disconnect_connection =
         m_obdDevice->disconnect().connect([this]() { disconnectComplete(); });
     return m_disconnect_signal;

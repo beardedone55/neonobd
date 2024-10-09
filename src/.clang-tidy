@@ -1,6 +1,6 @@
 ---
-Checks:          '*,-llvmlibc-*,-fuchsia-*,-modernize-use-trailing-return-type,-altera-*'
-WarningsAsErrors: '*,-misc-include-cleaner'
+Checks:          '*,-llvmlibc-*,-fuchsia-*,-modernize-use-trailing-return-type,-altera-*,-abseil-*,-*-avoid-do-while'
+WarningsAsErrors: '*,-misc-include-cleaner,-cppcoreguidelines-owning-memory'
 HeaderFileExtensions:
   - ''
   - h

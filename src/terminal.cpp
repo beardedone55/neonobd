@@ -1,5 +1,5 @@
 /* This file is part of neonobd - OBD diagnostic software.
- * Copyright (C) 2022-2023  Brian LePage
+ * Copyright (C) 2022-2024  Brian LePage
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,19 +18,27 @@
 #include "terminal.hpp"
 #include "logger.hpp"
 #include "mainwindow.hpp"
+#include <chrono>
+#include <gtkmm/button.h>
+#include <gtkmm/textbuffer.h>
+#include <gtkmm/textview.h>
+#include <memory>
+#include <mutex>
+#include <sigc++/functors/mem_fun.h>
 
 Terminal::Terminal(MainWindow* main_window)
     : window{main_window},
       visibleView{window->viewStack->property_visible_child_name()} {
-    auto ui = window->ui;
+    auto user_interface = window->ui;
     visibleView.signal_changed().connect(
         sigc::mem_fun(*this, &Terminal::on_show));
 
-    homeButton = ui->get_widget<Gtk::Button>("terminal_home_button");
+    homeButton =
+        user_interface->get_widget<Gtk::Button>("terminal_home_button");
     homeButton->signal_clicked().connect(
         sigc::mem_fun(*this, &Terminal::homeClicked));
 
-    terminal = ui->get_widget<Gtk::TextView>("terminal_text_view");
+    terminal = user_interface->get_widget<Gtk::TextView>("terminal_text_view");
     textBuffer = Gtk::TextBuffer::create();
     terminal->set_buffer(textBuffer);
     textBuffer->signal_insert().connect(
@@ -51,15 +59,18 @@ Terminal::~Terminal() {
     }
 }
 
+using namespace std::chrono_literals;
+
 void Terminal::read_data() {
     Logger::debug("Terminal reader thread started.");
     auto hwif = window->hardwareInterface;
-    hwif->set_timeout(100);
+    static constexpr std::chrono::milliseconds timeout = 100ms;
+    hwif->set_timeout(timeout);
     std::string tempBuffer;
     while (!stop_reader) {
         auto bytecount = hwif->read(tempBuffer);
-        if (bytecount) {
-            std::lock_guard lock(read_buffer_mutex);
+        if (bytecount > 0) {
+            const std::lock_guard lock(read_buffer_mutex);
             read_buffer.append(tempBuffer);
             dispatcher.emit();
         }
@@ -69,8 +80,9 @@ void Terminal::read_data() {
 }
 
 void Terminal::start_reader_thread() {
-    if (reader_thread && reader_thread->joinable())
+    if (reader_thread && reader_thread->joinable()) {
         reader_thread->join();
+    }
 
     reader_stopped = false;
     read_buffer.resize(0);
@@ -87,7 +99,7 @@ void Terminal::reader_notification() {
         return;
     }
 
-    std::lock_guard lock(read_buffer_mutex);
+    const std::lock_guard lock(read_buffer_mutex);
     auto pos = textBuffer->insert(inputBegin->get_iter(), read_buffer);
     lock_text(pos);
     terminal->scroll_to(inputBegin);
@@ -100,8 +112,9 @@ void Terminal::lock_text(const Gtk::TextBuffer::iterator& pos) {
 }
 
 void Terminal::on_show() {
-    if (visibleView.get_value() != "terminal_view")
+    if (visibleView.get_value() != "terminal_view") {
         return;
+    }
 
     terminal->grab_focus();
     textBuffer->set_text(">");
@@ -109,8 +122,9 @@ void Terminal::on_show() {
 
     stop_reader = false;
 
-    if (!reader_stopped)
+    if (!reader_stopped) {
         return;
+    }
 
     start_reader_thread();
 }
@@ -127,7 +141,7 @@ void Terminal::cursorMoved() {
 }
 
 void Terminal::textEntered(Gtk::TextBuffer::iterator& pos,
-                           const Glib::ustring& text, int) {
+                           const Glib::ustring& text, int /*bytes*/) {
     if (text == "\n" && pos > inputBegin->get_iter()) {
         textBuffer->backspace(pos);
         std::string user_input =
