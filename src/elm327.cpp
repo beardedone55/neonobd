@@ -16,9 +16,21 @@
  */
 
 #include "elm327.hpp"
+#include "hardware-interface.hpp"
 #include "neonobd_exceptions.hpp"
+#include <cstddef>
+#include <glibmm/ustring.h>
 #include <iomanip>
+#include <ios>
+#include <memory>
+#include <mutex>
+#include <sigc++/signal.h>
 #include <sstream>
+#include <stdexcept>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
 Elm327::~Elm327() {
     if (m_init_thread) {
@@ -50,37 +62,35 @@ sigc::signal<void(bool)> Elm327::init(std::shared_ptr<HardwareInterface> hwif) {
 Glib::ustring Elm327::get_error_string() const { return m_error_string; }
 
 void Elm327::init_thread() {
-    if (!reset()) {
-        m_error_string = "ELM327 reset failed.";
-        goto exit;
-    }
-
-    if (!disable_echo()) {
-        m_error_string = "ELM327 failed to disable command echo.";
-        goto exit;
-    }
-
-    if (!enable_headers()) {
-        m_error_string = "ELM237 failed to enable headers.";
-        goto exit;
-    }
-    /*
-        if(!disable_spaces()) {
-            m_error_string = "ELM237 failed to disable spaces.";
-            goto exit;
+    try {
+        if (!reset()) {
+            throw std::runtime_error("ELM327 reset failed.");
         }
-    */
-    if (!scan_protocol()) {
-        m_error_string = "ELM327 failed to determine OBD protocol.";
-        goto exit;
+
+        if (!disable_echo()) {
+            throw std::runtime_error("ELM327 failed to disable command echo.");
+        }
+
+        if (!enable_headers()) {
+            throw std::runtime_error("ELM237 failed to enable headers.");
+        }
+        /*
+            if(!disable_spaces()) {
+                throw std::runtime_error("ELM237 failed to disable spaces.");
+            }
+        */
+        if (!scan_protocol()) {
+            throw std::runtime_error(
+                "ELM327 failed to determine OBD protocol.");
+        }
+
+        m_init_complete = true;
+
+        m_command_thread =
+            std::make_unique<std::thread>([this]() { command_thread(); });
+    } catch (std::runtime_error& e) {
+        m_error_string = e.what();
     }
-
-    m_init_complete = true;
-
-    m_command_thread =
-        std::make_unique<std::thread>([this]() { command_thread(); });
-
-exit:
     m_init_complete_dispatcher.emit();
 }
 
@@ -106,16 +116,18 @@ Elm327::signal_command_complete() {
 void Elm327::send_command(unsigned char obd_address, unsigned char obd_service,
                           const std::vector<unsigned char>& obd_data) {
 
-    if (!m_init_complete || m_disconnect_in_progress)
+    if (!m_init_complete || m_disconnect_in_progress) {
         return;
-    std::lock_guard lock(m_cmd_queue_lock);
+    }
+    const std::lock_guard lock(m_cmd_queue_lock);
     m_cmd_queue.emplace(Command({obd_address, obd_service, obd_data}));
     m_cmd_semaphore.release();
 }
 
 bool Elm327::is_CAN() const {
-    // Protocol numbers above 5 are CAN bus protocols.
-    return m_protocol > 5;
+    // Protocol numbers 6 and above are CAN bus protocols.
+    constexpr int MIN_CAN_PROTOCOL = 6;
+    return m_protocol >= MIN_CAN_PROTOCOL;
 }
 
 bool Elm327::is_connecting() const { return !!m_init_thread; }
@@ -135,16 +147,18 @@ sigc::signal<void()> Elm327::disconnect() {
 }
 
 void Elm327::send_completion(Completion&& completion) {
-    std::lock_guard lock(m_completion_queue_lock);
-    m_completion_queue.emplace(completion);
+    const std::lock_guard lock(m_completion_queue_lock);
+    m_completion_queue.emplace(std::move(completion));
 }
 
-template <typename T> static T get_next(std::queue<T>& q, std::mutex& m) {
-    std::lock_guard lock(m);
-    auto result = std::move(q.front());
-    q.pop();
+namespace {
+template <typename T> T get_next(std::queue<T>& queue, std::mutex& mutex) {
+    const std::lock_guard lock(mutex);
+    auto result = std::move(queue.front());
+    queue.pop();
     return result;
 }
+} // namespace
 
 Elm327::Command Elm327::get_next_cmd() {
     return get_next(m_cmd_queue, m_cmd_queue_lock);
@@ -157,45 +171,52 @@ Elm327::Completion Elm327::get_next_completion() {
 std::string Elm327::command_to_string(const Elm327::Command& command) {
     std::stringstream cmd;
     cmd << std::setw(2) << std::hex << command.obd_service;
-    for (auto d : command.obd_data) {
-        cmd << d;
+    for (auto data : command.obd_data) {
+        cmd << data;
     }
     cmd << std::setw(0) << "\r";
     return cmd.str();
 }
 
-static unsigned int get_header(std::stringstream& ss, bool is_CAN) {
+namespace {
+unsigned int get_header(std::stringstream& bytestream, bool is_CAN) {
     unsigned int result = 0;
-    int count = is_CAN ? 1 : 3;
-    for (int i = 0; i < count && ss; ++i) {
-        if (ss.peek() == '\r')
+    const int count = is_CAN ? 1 : 3;
+    for (int i = 0; i < count && bytestream; ++i) {
+        if (bytestream.peek() == '\r') {
             return 0;
-        unsigned int temp;
-        ss >> std::hex >> temp;
-        result <<= 8;
+        }
+        unsigned int temp = 0;
+        bytestream >> std::hex >> temp;
+        static constexpr unsigned int BITS_PER_BYTE = 8;
+        result <<= BITS_PER_BYTE;
         result += temp;
     }
     return result;
 }
+} // namespace
 
-Elm327::Completion Elm327::string_to_completion(const std::string& s) {
+Elm327::Completion
+Elm327::string_to_completion(const std::string& bytes) const {
     Completion cpl;
-    bool is_can = is_CAN();
+    const bool is_can = is_CAN();
 
-    std::stringstream ss(s);
-    while (ss && ss.peek() != '>') {
-        unsigned int header = get_header(ss, is_can);
-        if (header == 0)
+    std::stringstream bytestream(bytes);
+    while (bytestream && bytestream.peek() != '>') {
+        const unsigned int header = get_header(bytestream, is_can);
+        if (header == 0) {
             break; // Some kind of error occurred...
+        }
 
-        while (ss && ss.peek() != '\r') {
-            unsigned int temp;
-            ss >> std::hex >> temp;
+        while (bytestream && bytestream.peek() != '\r') {
+            unsigned int temp = 0;
+            bytestream >> std::hex >> temp;
             cpl.obd_data[header].push_back(static_cast<unsigned char>(temp));
         }
 
-        if (ss && ss.peek() == '\r')
-            ss.get();
+        if (bytestream && bytestream.peek() == '\r') {
+            bytestream.get();
+        }
     }
 
     return cpl;
@@ -226,10 +247,13 @@ void Elm327::command_complete() {
     m_command_complete_signal.emit(cpl.obd_data);
 }
 
-template <typename T> static void clear_queue(std::queue<T>& q) {
-    while (!q.empty())
-        q.pop();
+namespace {
+template <typename T> void clear_queue(std::queue<T>& queue) {
+    while (!queue.empty()) {
+        queue.pop();
+    }
 }
+} // namespace
 
 void Elm327::command_thread_exit() {
     m_command_thread->join();
@@ -242,14 +266,15 @@ void Elm327::command_thread_exit() {
 }
 
 std::string Elm327::send_command(const std::string& cmd) {
-    std::string response, buffer;
+    std::string response;
+    std::string buffer;
     m_hwif->write(cmd);
-    size_t prompt_position;
+    size_t prompt_position = 0;
     do {
         m_hwif->read(buffer);
         prompt_position = buffer.find('>');
         response.append(buffer);
-    } while (buffer.size() > 0 && prompt_position == std::string::npos);
+    } while (!buffer.empty() && prompt_position == std::string::npos);
 
     // What if we don't get a prompt back????  Let caller take care of it?
 
@@ -258,15 +283,18 @@ std::string Elm327::send_command(const std::string& cmd) {
 
 // Elm327 Config commands
 
-static bool check_response(const std::string& response) {
+namespace {
+bool check_response(const std::string& response) {
     return response.find("OK") != std::string::npos &&
            response.find('>') != std::string::npos;
 }
+} // namespace
 
 bool Elm327::set_header(unsigned int header) {
     std::stringstream cmd;
-    cmd << "ATSH" << std::hex << std::setw(6) << std::setfill('0') << header
-        << "\r";
+    static constexpr unsigned int HEADER_SIZE_NIBBLES = 6;
+    cmd << "ATSH" << std::hex << std::setw(HEADER_SIZE_NIBBLES)
+        << std::setfill('0') << header << "\r";
 
     auto response = send_command(cmd.str());
     return check_response(response);
@@ -292,30 +320,27 @@ bool Elm327::enable_spaces() { return check_response(send_command("ATS1\r")); }
 bool Elm327::disable_spaces() { return check_response(send_command("ATS0\r")); }
 
 bool Elm327::scan_protocol() {
-    if (!check_response(send_command("ATSP0\r")))
+    if (!check_response(send_command("ATSP0\r"))) {
         return false;
+    }
 
-    if (send_command("0100\r").find('>') == std::string::npos)
+    if (send_command("0100\r").find('>') == std::string::npos) {
         return false;
+    }
 
     auto response = send_command("ATDPN\r");
 
     // Expected response is Ax, where x is the protocol number
-    if (response.size() < 2)
-        return false;
-
-    if (response.find('>') == std::string::npos)
-        return false;
-
-    m_protocol = response[1];
-    if (m_protocol >= '1' && m_protocol <= '9') {
-        m_protocol = m_protocol - '0';
-    } else if (m_protocol >= 'A' && m_protocol <= 'F') {
-        m_protocol = m_protocol - 'A' + 10;
-    } else {
-        m_protocol = 0;
+    if (response.size() < 2) {
         return false;
     }
 
-    return true;
+    if (response.find('>') == std::string::npos) {
+        return false;
+    }
+
+    static constexpr int HEX_BASE = 16;
+    m_protocol = std::stoi(response.substr(1, 1), nullptr, HEX_BASE);
+
+    return m_protocol > 0;
 }

@@ -80,7 +80,7 @@ Settings::Settings(MainWindow* main_window)
     btDeviceLabel =
         user_interface->get_widget<Gtk::Label>("bluetooth_device_label");
     m_bt_device_dropdown = Gtk::Builder::get_widget_derived<Dropdown>(
-        user_interface, "bluetooth_device_combo");
+        user_interface, "bluetooth_device_dropdown");
     m_bt_device_dropdown->property_selected_item().signal_changed().connect(
         sigc::mem_fun(*this, &Settings::selectBluetoothDevice));
 
@@ -128,7 +128,7 @@ Settings::Settings(MainWindow* main_window)
     serialBaudrateCombo->signal_changed().connect(
         sigc::mem_fun(*this, &Settings::selectSerialBaudrate));
 
-    populateComboBox(SerialPort::get_valid_baudrates(), serialBaudrateCombo,
+    populateComboBox(serialHardwareInterface->get_valid_baudrates(), serialBaudrateCombo,
                      std::to_string(settings->get_enum("baud-rate")));
 
     Logger::debug("Created Settings object.");

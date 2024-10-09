@@ -22,6 +22,7 @@
 #include <gtkmm/dropdown.h>
 #include <gtkmm/listitem.h>
 #include <giomm/liststore.h>
+#include <optional>
 #include <string>
 #include <utility>
 
@@ -56,10 +57,10 @@ class Dropdown : public Gtk::DropDown {
 
     Glib::RefPtr<Gio::ListStore<ListItemModel>> m_list_store;
 
-    void on_setup_selected(const Glib::RefPtr<Gtk::ListItem>& item);
-    void on_bind_selected(const Glib::RefPtr<Gtk::ListItem>& item);
-    void on_setup_list_item(const Glib::RefPtr<Gtk::ListItem>& item);
+    static void on_setup_selected(const Glib::RefPtr<Gtk::ListItem>& item);
+    static void on_bind_selected(const Glib::RefPtr<Gtk::ListItem>& item);
+    static void on_setup_list_item(const Glib::RefPtr<Gtk::ListItem>& item);
     void on_bind_list_item(const Glib::RefPtr<Gtk::ListItem>& item);
-    void on_unbind_list_item(const Glib::RefPtr<Gtk::ListItem>& item);
+    static void on_unbind_list_item(const Glib::RefPtr<Gtk::ListItem>& item);
     void on_selected_changed(const Glib::RefPtr<Gtk::ListItem>& item);
 };

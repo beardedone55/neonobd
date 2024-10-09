@@ -16,6 +16,26 @@
  */
 
 #include "dropdown.hpp"
+#include <giomm/liststore.h>
+#include <glibmm/refptr.h>
+#include <glibmm/utility.h>
+#include <gtk/gtk.h>
+#include <gtkmm/box.h>
+#include <gtkmm/builder.h>
+#include <gtkmm/dropdown.h>
+#include <gtkmm/enums.h>
+#include <gtkmm/image.h>
+#include <gtkmm/label.h>
+#include <gtkmm/listitem.h>
+#include <gtkmm/object.h>
+#include <gtkmm/signallistitemfactory.h>
+#include <memory>
+#include <optional>
+#include <sigc++/adaptors/bind.h>
+#include <sigc++/connection.h>
+#include <sigc++/functors/mem_fun.h>
+#include <string>
+#include <utility>
 
 Dropdown::Dropdown(BaseObjectType* cobj,
                    const Glib::RefPtr<Gtk::Builder>& /*builder*/)
@@ -25,20 +45,16 @@ Dropdown::Dropdown(BaseObjectType* cobj,
 
     // Factory for displaying selected item:
     auto factory = Gtk::SignalListItemFactory::create();
-    factory->signal_setup().connect(
-        sigc::mem_fun(*this, &DropDown::on_setup_selected));
-    factory->signal_bind().connect(
-        sigc::mem_fun(*this, &DropDown::on_bind_selected));
+    factory->signal_setup().connect(&Dropdown::on_setup_selected);
+    factory->signal_bind().connect(&Dropdown::on_bind_selected);
     set_factory(factory);
 
     // Factory for displaying list of items:
     factory = Gtk::SignalListItemFactory::create();
-    factory->signal_setup().connect(
-        sigc::mem_fun(*this, &DropDown::on_setup_list_item));
+    factory->signal_setup().connect(&Dropdown::on_setup_list_item);
     factory->signal_bind().connect(
-        sigc::mem_fun(*this, &DropDown::on_bind_list_item));
-    factory->signal_unbind().connect(
-        sigc::mem_fun(*this, &DropDown::on_unbind_list_item));
+        sigc::mem_fun(*this, &Dropdown::on_bind_list_item));
+    factory->signal_unbind().connect(&Dropdown::on_unbind_list_item);
     set_list_factory(factory);
 }
 
@@ -47,16 +63,17 @@ void Dropdown::append(const std::string& option,
     m_list_store->append(ListItemModel::create(option, description));
 }
 
-void Dropdown::remove_all() { m_list_store->clear(); }
+void Dropdown::remove_all() { m_list_store->remove_all(); }
 
 std::optional<std::pair<std::string, std::string>>
 Dropdown::get_active_values() {
     const auto selected = get_selected();
-    if (GTK_INVALID_LIST_POSITION) {
+    if (selected == GTK_INVALID_LIST_POSITION) {
         return {};
     }
     const auto selected_item = m_list_store->get_item(selected);
-    return {selected_item->m_option, selected_item->m_description};
+    return std::make_pair(selected_item->m_option,
+                          selected_item->m_description);
 }
 
 void Dropdown::on_setup_selected(const Glib::RefPtr<Gtk::ListItem>& item) {
@@ -68,27 +85,31 @@ void Dropdown::on_bind_selected(const Glib::RefPtr<Gtk::ListItem>& item) {
     if (!selection) {
         return;
     }
-    auto label = dynamic_cast<Gtk::Label*>(item->get_child());
-    if (!label) {
+    auto* label = dynamic_cast<Gtk::Label*>(item->get_child());
+    if (label == nullptr) {
         return;
     }
     label->set_text(selection->m_option);
 }
 
 void Dropdown::on_setup_list_item(const Glib::RefPtr<Gtk::ListItem>& item) {
-    auto hbox = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL, 10);
-    auto vbox = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL, 2);
+    constexpr int BOX_WIDTH = 10;
+    constexpr int BOX_HEIGHT = 2;
+    auto* hbox =
+        Gtk::make_managed<Gtk::Box>(Gtk::Orientation::HORIZONTAL, BOX_WIDTH);
+    auto* vbox =
+        Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL, BOX_HEIGHT);
     hbox->append(*vbox);
-    auto option = Gtk::make_managed<Gtk::Label>();
+    auto* option = Gtk::make_managed<Gtk::Label>();
     option->set_xalign(0.0);
-    vbox->append(option);
-    auto description = Gtk::make_managed<Gtk::Label>();
+    vbox->append(*option);
+    auto* description = Gtk::make_managed<Gtk::Label>();
     description->set_xalign(0.0);
     description->add_css_class("dim-label");
     vbox->append(*description);
-    auto checkmark = Gtk::make_managed<Gtk::Image>();
+    auto* checkmark = Gtk::make_managed<Gtk::Image>();
     checkmark->set_from_icon_name("object-select-symbolic");
-    checkmark->set_visbible(false);
+    checkmark->set_visible(false);
     hbox->append(*checkmark);
     item->set_child(*hbox);
 }
@@ -98,48 +119,48 @@ void Dropdown::on_bind_list_item(const Glib::RefPtr<Gtk::ListItem>& item) {
     if (!selection) {
         return;
     }
-    auto hbox = dynamic_cast<Gtk::Box*>(item->get_child());
-    if (!hbox) {
+    auto* hbox = dynamic_cast<Gtk::Box*>(item->get_child());
+    if (hbox == nullptr) {
         return;
     }
-    auto vbox = dynamic_cast<Gtk::Box*>(hbox->get_first_child());
-    if (!vbox) {
+    auto* vbox = dynamic_cast<Gtk::Box*>(hbox->get_first_child());
+    if (vbox == nullptr) {
         return;
     }
-    auto option = dynamic_cast<Gtk::Label*>(vbox->get_first_child());
-    if (!option) {
+    auto* option = dynamic_cast<Gtk::Label*>(vbox->get_first_child());
+    if (option == nullptr) {
         return;
     }
     option->set_text(selection->m_option);
-    auto description = dynamic_cast<Gtk::Label*>(option->get_next_sibling());
-    if (!description) {
+    auto* description = dynamic_cast<Gtk::Label*>(option->get_next_sibling());
+    if (description == nullptr) {
         return;
     }
     description->set_text(selection->m_description);
     auto connection = property_selected_item().signal_changed().connect(
-        sigc::bind(sigc::mem_fun(&Dropdown::on_selected_changed), item));
+        sigc::bind(sigc::mem_fun(*this, &Dropdown::on_selected_changed), item));
     item->set_data("connection", new sigc::connection(connection),
                    Glib::destroy_notify_delete<sigc::connection>);
     on_selected_changed(item);
 }
 
-void on_unbind_list_item(const Glib::RefPtr<Gtk::ListItem>& item) {
-    auto connection =
+void Dropdown::on_unbind_list_item(const Glib::RefPtr<Gtk::ListItem>& item) {
+    auto* connection =
         static_cast<sigc::connection*>(item->get_data("connection"));
-    if (connection) {
+    if (connection != nullptr) {
         connection->disconnect();
-        list_item->set_data("connection", nullptr);
+        item->set_data("connection", nullptr);
     }
 }
 
-void on_selected_changed(const Glib::RefPtr<Gtk::ListItem>& item) {
-    auto hbox = dynamic_cast<Gtk::Box*>(item->get_child());
-    if (!hbox) {
+void Dropdown::on_selected_changed(const Glib::RefPtr<Gtk::ListItem>& item) {
+    auto* hbox = dynamic_cast<Gtk::Box*>(item->get_child());
+    if (hbox == nullptr) {
         return;
     }
 
-    auto checkmark = dynamic_cast<Gtk::Image*>(hbox->get_last_child());
-    if (!checkmark) {
+    auto* checkmark = dynamic_cast<Gtk::Image*>(hbox->get_last_child());
+    if (checkmark == nullptr) {
         return;
     }
     checkmark->set_visible(get_selected_item() == item->get_item());

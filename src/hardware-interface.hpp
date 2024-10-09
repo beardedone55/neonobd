@@ -42,7 +42,7 @@ class HardwareInterface {
 
     template <typename Container,
               typename Contents = typename Container::value_type>
-    ssize_t read(Container& container, std::size_t buf_size = 1024) {
+    size_t read(Container& container, std::size_t buf_size = 1024) {
         static_assert(sizeof(Contents) == sizeof(char),
                       "Container used with HardwareInterface::read() must have "
                       "elements with size of char.");
@@ -54,7 +54,7 @@ class HardwareInterface {
 
     template <typename Container,
               typename Contents = typename Container::value_type>
-    ssize_t write(const Container& buf) {
+    size_t write(const Container& buf) {
         static_assert(sizeof(Contents) == sizeof(char),
                       "Container used with HardwareInterface::write() must "
                       "have elements with size of char.");
@@ -70,6 +70,6 @@ class HardwareInterface {
     int m_sock_fd = -1;
     std::shared_mutex m_sock_fd_mutex;
 
-    virtual ssize_t read(char* buf, std::size_t size);
-    virtual ssize_t write(const char* buf, std::size_t size);
+    virtual size_t read(char* buf, std::size_t size);
+    virtual size_t write(const char* buf, std::size_t size);
 };

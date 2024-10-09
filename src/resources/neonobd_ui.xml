@@ -230,7 +230,7 @@ along with neonobd.  If not, see <http://www.gnu.org/licenses/>.
                                                     </object>
                                                 </child>
                                                 <child>
-                                                    <object class="GtkComboBox" id="bluetooth_device_combo">
+                                                    <object class="GtkDropDown" id="bluetooth_device_dropdown">
                                                         <property name="name">bluetooth_device_combo</property>
                                                         <property name="visible">True</property>
                                                         <layout>

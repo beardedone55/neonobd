@@ -19,16 +19,12 @@
 
 #include "connection.hpp"
 #include "obd-device.hpp"
-
-#ifndef CPPCHECK
 #include <glibmm/dispatcher.h>
-#include <sigc++/signal.h>
-#endif
-
 #include <memory>
 #include <mutex>
 #include <queue>
 #include <semaphore>
+#include <sigc++/signal.h>
 #include <thread>
 #include <unordered_map>
 
@@ -102,7 +98,7 @@ class Elm327 : public ObdDevice, public sigc::trackable {
     Command get_next_cmd();
     Completion get_next_completion();
     static std::string command_to_string(const Command& command);
-    Completion string_to_completion(const std::string& s);
+    Completion string_to_completion(const std::string& s) const;
     void command_thread();
     void command_complete();
     void command_thread_exit();
