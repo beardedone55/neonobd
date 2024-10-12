@@ -32,7 +32,7 @@ class LogStream {
     }
 
   private:
-    LogStream(LogLevel level) noexcept
+    explicit LogStream(LogLevel level) noexcept
         : lvl{level}, out{(level == ERR) ? std::cerr : std::clog} {}
     LogLevel lvl;
     std::ostream& out;
@@ -43,7 +43,7 @@ class LogStream {
 
 class Logger {
   public:
-    Logger(LogLevel level) noexcept : lvl{level}, stream{level} {}
+    explicit Logger(LogLevel level) noexcept : lvl{level}, stream{level} {}
     void operator()(const std::string& msg) const;
     template <typename T> const LogStream& operator<<(const T& rhs) const {
         stream << log_header.at(lvl) << rhs;
