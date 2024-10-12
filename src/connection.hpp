@@ -17,9 +17,7 @@
 
 #pragma once
 
-#ifndef CPPCHECK
 #include <sigc++/connection.h>
-#endif
 
 class Connection {
   public:

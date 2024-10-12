@@ -18,12 +18,9 @@
 #pragma once
 
 #include "hardware-interface.hpp"
-
-#ifndef CPPCHECK
 #include <glibmm/ustring.h>
-#include <sigc++/signal.h>
-#endif
 #include <optional>
+#include <sigc++/signal.h>
 #include <vector>
 
 class ObdDevice {

@@ -64,6 +64,8 @@ using namespace std::chrono_literals;
 void Terminal::read_data() {
     Logger::debug("Terminal reader thread started.");
     auto hwif = window->hardwareInterface;
+    // std::operation""ms is included in <chrono> according to c++ docs.
+    // NOLINTNEXTLINE(misc-include-cleaner)
     static constexpr std::chrono::milliseconds timeout = 100ms;
     hwif->set_timeout(timeout);
     std::string tempBuffer;

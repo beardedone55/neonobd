@@ -128,7 +128,8 @@ Settings::Settings(MainWindow* main_window)
     serialBaudrateCombo->signal_changed().connect(
         sigc::mem_fun(*this, &Settings::selectSerialBaudrate));
 
-    populateComboBox(serialHardwareInterface->get_valid_baudrates(), serialBaudrateCombo,
+    populateComboBox(serialHardwareInterface->get_valid_baudrates(),
+                     serialBaudrateCombo,
                      std::to_string(settings->get_enum("baud-rate")));
 
     Logger::debug("Created Settings object.");

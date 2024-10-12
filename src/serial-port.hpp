@@ -47,7 +47,7 @@ class SerialPort : public HardwareInterface, public sigc::trackable {
     bool m_connected = false;
     unsigned char m_timeout = 0;
     static void close_file(std::FILE* file);
-    std::unique_ptr<FILE,decltype(&close_file)> m_sock_file; 
+    std::unique_ptr<FILE, decltype(&close_file)> m_sock_file;
 
     void initiate_connection(const Glib::ustring& device_name);
     void connect_complete();

@@ -22,7 +22,6 @@
 #include <shared_mutex>
 #include <sigc++/connection.h>
 #include <sigc++/functors/slot.h>
-#include <sys/types.h>
 #include <unistd.h>
 
 sigc::connection

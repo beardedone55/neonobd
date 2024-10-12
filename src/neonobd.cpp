@@ -17,10 +17,7 @@
 
 #include "logger.hpp"
 #include "mainwindow.hpp"
-
-#ifndef CPPCHECK
 #include <gtkmm/application.h>
-#endif
 
 int main(int argc, char* argv[]) {
 
