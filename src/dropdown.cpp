@@ -42,8 +42,9 @@
 
 Dropdown::Dropdown(BaseObjectType* cobj,
                    const Glib::RefPtr<Gtk::Builder>& /*builder*/)
-    : Gtk::DropDown(cobj) {
-    m_list_store = Gio::ListStore<ListItemModel>::create();
+    : Gtk::DropDown(cobj),
+      m_list_store{Gio::ListStore<ListItemModel>::create()} {
+
     set_model(m_list_store);
 
     // Factory for displaying selected item:
