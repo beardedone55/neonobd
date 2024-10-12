@@ -19,7 +19,10 @@
 #include "logger.hpp"
 #include "mainwindow.hpp"
 #include "neonobd_types.hpp"
-#include <glib.h>
+
+// glib.h provides guint32 indirectly.
+// direct inclusion of the header that provides it is not allowed.
+#include <glib.h> //NOLINT(misc-include-cleaner)
 #include <glibmm/refptr.h>
 #include <glibmm/ustring.h>
 #include <glibmm/variant.h>
@@ -160,6 +163,8 @@ void ConnectButton::user_text_response(int responseCode) {
 void ConnectButton::user_number_response(int responseCode) {
     auto text_input = get_user_input(responseCode, "number_user_input");
     if (!text_input.empty()) {
+        // guint32 is provided by glib.h indirectly
+        // NOLINTNEXTLINE(misc-include-cleaner)
         auto response = Glib::Variant<guint32>::create(
             static_cast<guint32>(std::stoi(text_input)));
         Logger::debug("Received response from user: " + text_input);

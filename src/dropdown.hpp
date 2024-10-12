@@ -17,11 +17,11 @@
 
 #pragma once
 
+#include <giomm/liststore.h>
 #include <glibmm/refptr.h>
 #include <gtkmm/builder.h>
 #include <gtkmm/dropdown.h>
 #include <gtkmm/listitem.h>
-#include <giomm/liststore.h>
 #include <optional>
 #include <string>
 #include <utility>
@@ -57,10 +57,13 @@ class Dropdown : public Gtk::DropDown {
 
     Glib::RefPtr<Gio::ListStore<ListItemModel>> m_list_store;
 
-    static void on_setup_selected(const Glib::RefPtr<Gtk::ListItem>& item);
-    static void on_bind_selected(const Glib::RefPtr<Gtk::ListItem>& item);
-    static void on_setup_list_item(const Glib::RefPtr<Gtk::ListItem>& item);
+    // These functions are converted to slots, and we use sigc::mem_fun
+    // to automatically disconnect connections when the dropdown is
+    // destroyed.  We cannot declare any of them static.
+    void on_setup_selected(const Glib::RefPtr<Gtk::ListItem>& item);
+    void on_bind_selected(const Glib::RefPtr<Gtk::ListItem>& item);
+    void on_setup_list_item(const Glib::RefPtr<Gtk::ListItem>& item);
     void on_bind_list_item(const Glib::RefPtr<Gtk::ListItem>& item);
-    static void on_unbind_list_item(const Glib::RefPtr<Gtk::ListItem>& item);
+    void on_unbind_list_item(const Glib::RefPtr<Gtk::ListItem>& item);
     void on_selected_changed(const Glib::RefPtr<Gtk::ListItem>& item);
 };

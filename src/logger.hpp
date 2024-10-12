@@ -62,8 +62,10 @@ class Logger {
 
 class NoLog {
   public:
-    template <typename T> const NoLog& operator<<(const T&) const { return *this; }
-    void operator()(const std::string&) const  {}
+    template <typename T> const NoLog& operator<<(const T&) const {
+        return *this;
+    }
+    void operator()(const std::string&) const {}
 };
 
 void setLogLevel(LogLevel lvl);

@@ -50,7 +50,9 @@
 #include <stdexcept>
 #include <string>
 #include <sys/socket.h>
-#include <sys/time.h>
+
+// time.h provides timeval
+#include <sys/time.h> //NOLINT(misc-include-cleaner)
 #include <unistd.h>
 #include <unordered_map>
 #include <utility>
@@ -161,6 +163,8 @@ bool BluetoothSerialPort::connect(const Glib::ustring& device_name) {
 }
 
 namespace {
+// timeval is provided by sys/time.h
+// NOLINTNEXTLINE(misc-include-cleaner)
 timeval milliseconds_to_time_val(std::chrono::milliseconds time) {
     const std::chrono::seconds seconds =
         std::chrono::duration_cast<std::chrono::seconds>(time);
@@ -172,9 +176,15 @@ timeval milliseconds_to_time_val(std::chrono::milliseconds time) {
 void BluetoothSerialPort::set_timeout(std::chrono::milliseconds timeout) {
     const std::shared_lock lock(m_sock_fd_mutex);
     if (m_sock_fd >= 0) {
+        // timeval is provided by sys/time.h
+        // NOLINTNEXTLINE(misc-include-cleaner)
         const timeval time = milliseconds_to_time_val(timeout);
+        // SOL_SOCKET, SO_RCVTIMEO, and SO_SNDTIMEO are provided
+        // by sys/socket.h
+        // NOLINTBEGIN(misc-include-cleaner)
         setsockopt(m_sock_fd, SOL_SOCKET, SO_RCVTIMEO, &time, sizeof(time));
         setsockopt(m_sock_fd, SOL_SOCKET, SO_SNDTIMEO, &time, sizeof(time));
+        // NOLINTEND(misc-include-cleaner)
     }
 }
 
@@ -468,7 +478,8 @@ guint BluetoothSerialPort::register_object(
     if (m_manager) {
         Logger::debug("Acquiring interface definition " + interface_path);
 
-        gsize size = 0;
+        // gsize is provided by glib.h
+        gsize size = 0; // NOLINT(misc-include-cleaner)
         auto interface_definition = Glib::ustring(static_cast<const char*>(
             Gio::Resource::lookup_data_global(interface_path)->get_data(size)));
 
@@ -520,6 +531,9 @@ void BluetoothSerialPort::register_profile() {
     options["Name"] = Glib::Variant<Glib::ustring>::create("obd-serial");
     options["Service"] = uuid;
     options["Role"] = Glib::Variant<Glib::ustring>::create("client");
+
+    // guint16 is provided by glib.h
+    // NOLINTNEXTLINE(misc-include-cleaner)
     options["Channel"] = Glib::Variant<guint16>::create(1);
     options["AutoConnect"] = Glib::Variant<bool>::create(true);
 
@@ -615,7 +629,8 @@ void BluetoothSerialPort::agent_method(
         Glib::Variant<Glib::DBusObjectPathString> device_path;
         parameters.get_child(device_path, 0);
 
-        Glib::Variant<guint32> pass_key;
+        // guint32 is provided by glib.h
+        Glib::Variant<guint32> pass_key; // NOLINT(misc-include-cleaner)
         parameters.get_child(pass_key, 1);
 
         Glib::Variant<guint16> entered;
@@ -742,7 +757,8 @@ void BluetoothSerialPort::profile_method(
         Logger::debug("Parameters = " + parameters.print());
 
         // 2nd parameter is fd index
-        Glib::Variant<gint32> fd_index;
+        // gint32 is provided by glib.h
+        Glib::Variant<gint32> fd_index; // NOLINT(misc-include-cleaner)
         parameters.get_child(fd_index, 1);
         Logger::debug("fd_index type = " + fd_index.get_type_string());
 

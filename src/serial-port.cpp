@@ -120,6 +120,10 @@ void SerialPort::initiate_connection(const Glib::ustring& device_name) {
     try {
         const std::lock_guard lock(m_sock_fd_mutex);
 
+        // I really don't know how to fix this warning.  I need to use
+        // fopen, so I can get the file descriptor.  The file will be
+        // automatically closed when m_sock_file is reset or destroyed.
+        // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
         m_sock_file.reset(std::fopen(device_name.c_str(), "r+e"));
 
         if (!m_sock_file) {
@@ -127,6 +131,9 @@ void SerialPort::initiate_connection(const Glib::ustring& device_name) {
                                     "Failed to open serial port.");
         }
 
+        // Documentation for fileno says that it is provided by
+        //<cstdio>
+        // NOLINTNEXTLINE(misc-include-cleaner)
         m_sock_fd = fileno(m_sock_file.get());
 
         // Device opened.  Set BAUD rate and other port settings.
@@ -208,5 +215,8 @@ void SerialPort::set_timeout(std::chrono::milliseconds timeout) {
 }
 
 void SerialPort::close_file(std::FILE* file) {
+    // This function is called when the unique_ptr
+    // that owns the file is destroyed or reset.
+    // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
     static_cast<void>(std::fclose(file));
 }

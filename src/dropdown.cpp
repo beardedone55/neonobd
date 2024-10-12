@@ -19,7 +19,10 @@
 #include <giomm/liststore.h>
 #include <glibmm/refptr.h>
 #include <glibmm/utility.h>
-#include <gtk/gtk.h>
+
+// gtk.h provides GTK_INVALID_LIST_POSITION indirectly.
+// direct inclusion of the header that provides it is not allowed.
+#include <gtk/gtk.h> //NOLINT(misc-include-cleaner)
 #include <gtkmm/box.h>
 #include <gtkmm/builder.h>
 #include <gtkmm/dropdown.h>
@@ -45,16 +48,20 @@ Dropdown::Dropdown(BaseObjectType* cobj,
 
     // Factory for displaying selected item:
     auto factory = Gtk::SignalListItemFactory::create();
-    factory->signal_setup().connect(&Dropdown::on_setup_selected);
-    factory->signal_bind().connect(&Dropdown::on_bind_selected);
+    factory->signal_setup().connect(
+        sigc::mem_fun(*this, &Dropdown::on_setup_selected));
+    factory->signal_bind().connect(
+        sigc::mem_fun(*this, &Dropdown::on_bind_selected));
     set_factory(factory);
 
     // Factory for displaying list of items:
     factory = Gtk::SignalListItemFactory::create();
-    factory->signal_setup().connect(&Dropdown::on_setup_list_item);
+    factory->signal_setup().connect(
+        sigc::mem_fun(*this, &Dropdown::on_setup_list_item));
     factory->signal_bind().connect(
         sigc::mem_fun(*this, &Dropdown::on_bind_list_item));
-    factory->signal_unbind().connect(&Dropdown::on_unbind_list_item);
+    factory->signal_unbind().connect(
+        sigc::mem_fun(*this, &Dropdown::on_unbind_list_item));
     set_list_factory(factory);
 }
 
@@ -68,6 +75,9 @@ void Dropdown::remove_all() { m_list_store->remove_all(); }
 std::optional<std::pair<std::string, std::string>>
 Dropdown::get_active_values() {
     const auto selected = get_selected();
+
+    // GTK_INVALID_LIST_POSITION is provided by gtk.h indirectly.
+    // NOLINTNEXTLINE(misc-include-cleaner)
     if (selected == GTK_INVALID_LIST_POSITION) {
         return {};
     }
@@ -76,6 +86,10 @@ Dropdown::get_active_values() {
                           selected_item->m_description);
 }
 
+// These functions are converted to slots, and we use sigc::mem_fun
+// to automatically disconnect connections when the dropdown is
+// destroyed.  We cannot declare any of them static.
+// NOLINTBEGIN(readability-convert-member-functions-to-static)
 void Dropdown::on_setup_selected(const Glib::RefPtr<Gtk::ListItem>& item) {
     item->set_child(*Gtk::make_managed<Gtk::Label>());
 }
@@ -139,6 +153,12 @@ void Dropdown::on_bind_list_item(const Glib::RefPtr<Gtk::ListItem>& item) {
     description->set_text(selection->m_description);
     auto connection = property_selected_item().signal_changed().connect(
         sigc::bind(sigc::mem_fun(*this, &Dropdown::on_selected_changed), item));
+
+    // The pointer is passed to the set_data function with a method that
+    // will destroy and disconnect the connection, so the lifetime of the
+    // connection object will be managed automatically if the item or the
+    // data associated with it are destroyed.
+    // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
     item->set_data("connection", new sigc::connection(connection),
                    Glib::destroy_notify_delete<sigc::connection>);
     on_selected_changed(item);
@@ -165,3 +185,4 @@ void Dropdown::on_selected_changed(const Glib::RefPtr<Gtk::ListItem>& item) {
     }
     checkmark->set_visible(get_selected_item() == item->get_item());
 }
+// NOLINTEND(readability-convert-member-functions-to-static)
