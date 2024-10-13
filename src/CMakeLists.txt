@@ -1,5 +1,5 @@
 # This file is part of neonobd - OBD diagnostic software.
-# Copyright (C) 2022-2023  Brian LePage
+# Copyright (C) 2022-2024  Brian LePage
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
