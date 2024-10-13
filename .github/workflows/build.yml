@@ -15,8 +15,9 @@ jobs:
           sudo apt-get update
           sudo apt-get -y install libgtkmm-4.0-dev
           sudo apt-get -y install cppcheck
+          sudo apt-get -y install clang-tidy
       - name: Configure cmake
-        run: cmake -B build src -DRUN_CPPCHECK=ON
+        run: cmake -B build src -DRUN_CPPCHECK=ON -DRUN_CLANG_TIDY=ON
       - name: Compile project
-        run: cmake --build build
+        run: cmake --build build -j
 
