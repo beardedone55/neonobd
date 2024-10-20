@@ -22,45 +22,64 @@ string(CONCAT ARCH_PACKAGE_NAME
 
 set(ARCH_PKG "${CPACK_PACKAGE_DIRECTORY}/packaging")
 
+find_program(UNAME uname REQURIED)
+execute_process(COMMAND "${UNAME}" -m OUTPUT_VARIABLE 
+                ARCH_PACKAGE_ARCHITECTURE
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+
 if(CPACK_TOPLEVEL_TAG STREQUAL "Linux")
     message("Creating Arch Package......")
 
     set(ARCH_BUILD_DIR "${CPACK_PACKAGE_DIRECTORY}")
     configure_file("${SOURCE_DIRECTORY}/packaging/PKGBUILD.in" "${ARCH_PKG}/PKGBUILD" @ONLY)
 
-    execute_process(COMMAND ${MAKEPKG} -f 
+    execute_process(COMMAND "${MAKEPKG}" -f 
                     WORKING_DIRECTORY "${ARCH_PKG}")
 
     string(CONCAT ARCH_PACKAGE_NAME "${ARCH_PACKAGE_NAME}"
-           "-x86_64.pkg.tar.zst")
+           "-${ARCH_PACKAGE_ARCHITECTURE}.pkg.tar.zst")
 
     list(APPEND CPACK_EXTERNAL_BUILT_PACKAGES 
-         ${ARCH_PKG}/${ARCH_PACKAGE_NAME})
+         "${ARCH_PKG}/${ARCH_PACKAGE_NAME}")
 
 elseif(CPACK_TOPLEVEL_TAG STREQUAL "Linux-Source")
     message("Creating Arch Source Package......")
     set(ARCH_PACKAGE_SOURCES ${CPACK_SOURCE_PACKAGE_FILE_NAME}.tar.gz)
     set(ARCH_BUILD_DIR "./build")
     configure_file("${SOURCE_DIRECTORY}/packaging/PKGBUILD.in" "${ARCH_PKG}/PKGBUILD" @ONLY)
-    find_program(TAR tar REQUIRED)
-    set(TAR_COMMAND ${TAR})
-    foreach(EXCLUDE_PATTERN ${CPACK_SOURCE_IGNORE_FILES})
-        list(APPEND TAR_COMMAND --exclude=*${EXCLUDE_PATTERN})
+
+
+    # Create exclusion list for source tarball.
+    # CPACK_SOURCE_IGNORE_FILES contains list of REGEX
+    # for files that should not be included.
+    set(EXCLUDE_FILE "${ARCH_PKG}/src_excludes")
+    file(REMOVE "${EXCLUDE_FILE}")
+    file(GLOB_RECURSE SRC_FILES RELATIVE "${SOURCE_DIRECTORY}/.."
+         LIST_DIRECTORIES true  "${SOURCE_DIRECTORY}/*")
+    foreach(SRC_FILE ${SRC_FILES})
+        foreach(EXCLUDE_PATTERN ${CPACK_SOURCE_IGNORE_FILES})
+            if(SRC_FILE MATCHES "${EXCLUDE_PATTERN}")
+               file(APPEND "${EXCLUDE_FILE}" "${SRC_FILE}\n")
+            endif()
+        endforeach()
     endforeach()
-    list(APPEND TAR_COMMAND -czf 
-        "${ARCH_PKG}/${ARCH_PACKAGE_SOURCES}"
-        src)
+
+    find_program(TAR tar REQUIRED)
+    set(TAR_COMMAND ${TAR} "--exclude-from=${EXCLUDE_FILE}" -czf
+        "${ARCH_PKG}/${ARCH_PACKAGE_SOURCES}" src)
+
     message("${TAR_COMMAND}")
-    execute_process(COMMAND ${TAR_COMMAND} 
+
+    execute_process(COMMAND "${TAR_COMMAND}" 
                     WORKING_DIRECTORY "${SOURCE_DIRECTORY}/..")
 
-    execute_process(COMMAND ${MAKEPKG} -g
+    execute_process(COMMAND "${MAKEPKG}" -g
                     OUTPUT_VARIABLE SOURCE_CHECKSUM
                     WORKING_DIRECTORY "${ARCH_PKG}")
 
     file(APPEND "${ARCH_PKG}/PKGBUILD" "${SOURCE_CHECKSUM}")
 
-    execute_process(COMMAND ${MAKEPKG} -f -S 
+    execute_process(COMMAND "${MAKEPKG}" -f -S 
                     WORKING_DIRECTORY "${ARCH_PKG}")
 
     string(CONCAT ARCH_PACKAGE_NAME "${ARCH_PACKAGE_NAME}"

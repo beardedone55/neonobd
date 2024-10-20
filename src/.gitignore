@@ -1,7 +1,0 @@
-/neonobd
-/*.valid
-/resources.c
-/*.o
-/*.in
-/Makefile
-/.deps
