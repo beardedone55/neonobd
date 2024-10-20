@@ -1,5 +1,5 @@
 # This file is part of neonobd - OBD diagnostic software.
-# Copyright (C) 2022-2024  Brian LePage
+# Copyright (C) 2024  Brian LePage
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,17 +14,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-add_library(resources OBJECT resources.c)
-
-add_custom_command(
-    OUTPUT resources.c 
-    COMMAND glib-compile-resources --target ${CMAKE_CURRENT_BINARY_DIR}/resources.c --generate-source app.gresource.xml
-    DEPENDS app.gresource.xml appstyle.css neonobd_ui.xml bluez-agent1.xml bluez-profile1.xml
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-
-target_include_directories(resources PRIVATE ${GTKMM_INCLUDE_DIRS})
-
-install(FILES com.github.beardedone55.neonobd.gschema.xml DESTINATION share/glib-2.0/schemas)
-
-install(SCRIPT compile_schema.cmake)
+if(NOT DEFINED SKIP_SCHEMA_COMPILATION)
+    find_program(GLIB_COMPILE_SCHEMAS glib-compile-schemas)
+    execute_process(COMMAND ${GLIB_COMPILE_SCHEMAS} ${CMAKE_INSTALL_PREFIX}/share/glib-2.0/schemas)
+else()
+    message("Skipping schema compilation.")
+endif()
 

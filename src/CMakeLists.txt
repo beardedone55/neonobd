@@ -16,7 +16,7 @@
 
 cmake_minimum_required(VERSION 3.20)
 
-project(neonobd VERSION 0.1)
+project(neonobd VERSION 0.1.1)
 
 option(RUN_CPPCHECK "Run cppcheck during compilation" OFF)
 option(RUN_CLANG_TIDY "Run clang-tidy during compilation" OFF)
@@ -55,5 +55,9 @@ target_link_libraries(neonobd PRIVATE ${GTKMM_LIBRARIES} resources)
 
 install(TARGETS neonobd RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-
 add_subdirectory(resources)
+
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/packaging")
+    add_subdirectory(packaging)
+endif()
+
