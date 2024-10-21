@@ -208,9 +208,13 @@ along with neonobd.  If not, see <http://www.gnu.org/licenses/>.
                                                     </object>
                                                 </child>
                                                 <child>
-                                                    <object class="GtkComboBoxText" id="host_combo">
+                                                    <object class="GtkDropDown" id="host_dropdown">
                                                         <property name="name">host_combo</property>
                                                         <property name="visible">True</property>
+                                                        <property name="model">
+                                                            <object class="GtkStringList">
+                                                            </object>
+                                                        </property>
                                                         <layout>
                                                             <property name="column">1</property>
                                                             <property name="row">0</property>
@@ -289,8 +293,12 @@ along with neonobd.  If not, see <http://www.gnu.org/licenses/>.
                                                     </object>
                                                 </child>
                                                 <child>
-                                                    <object class="GtkComboBoxText" id="serial_device">
+                                                    <object class="GtkDropDown" id="serial_device">
                                                         <property name="visible">True</property>
+                                                        <property name="model">
+                                                            <object class="GtkStringList">
+                                                            </object>
+                                                        </property>
                                                         <layout>
                                                             <property name="column">1</property>
                                                             <property name="row">0</property>
@@ -309,8 +317,12 @@ along with neonobd.  If not, see <http://www.gnu.org/licenses/>.
                                                     </object>
                                                 </child>
                                                 <child>
-                                                    <object class="GtkComboBoxText" id="serial_baudrate">
+                                                    <object class="GtkDropDown" id="serial_baudrate">
                                                         <property name="visible">True</property>
+                                                        <property name="model">
+                                                            <object class="GtkStringList">
+                                                            </object>
+                                                        </property>
                                                         <layout>
                                                             <property name="column">1</property>
                                                             <property name="row">1</property>
