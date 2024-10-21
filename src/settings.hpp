@@ -25,7 +25,6 @@
 #include <glibmm/ustring.h>
 #include <gtkmm/button.h>
 #include <gtkmm/checkbutton.h>
-#include <gtkmm/comboboxtext.h>
 #include <gtkmm/grid.h>
 #include <gtkmm/label.h>
 #include <gtkmm/messagedialog.h>
@@ -56,7 +55,7 @@ class Settings : public sigc::trackable {
     Gtk::CheckButton* bluetooth_rb;
     Gtk::CheckButton* serial_rb;
     Gtk::Label* btHostLabel;
-    Gtk::ComboBoxText* btHostCombo;
+    Gtk::DropDown* m_bt_host_dropdown;
     Gtk::Label* btDeviceLabel;
     Gtk::Button* btDeviceScan;
     Dropdown* m_bt_device_dropdown;
@@ -64,8 +63,8 @@ class Settings : public sigc::trackable {
     Gtk::ProgressBar* btScanProgress;
     Gtk::Grid* btGrid;
     Gtk::Grid* serialGrid;
-    Gtk::ComboBoxText* serialDeviceCombo;
-    Gtk::ComboBoxText* serialBaudrateCombo;
+    Gtk::DropDown* m_serial_device_dropdown;
+    Gtk::DropDown* m_serial_baudrate_dropdown;
     sigc::connection btScanConnection;
     Glib::RefPtr<Gio::Settings> settings;
     InterfaceType iftype;
@@ -80,7 +79,7 @@ class Settings : public sigc::trackable {
     void scanBluetooth();
     void scanComplete();
     void updateScanProgress(int percentComplete);
-    static void populateComboBox(const std::vector<Glib::ustring>& values,
-                                 Gtk::ComboBoxText* combobox,
+    static void populateDropdown(const std::vector<Glib::ustring>& values,
+                                 Gtk::DropDown* dropdown,
                                  const Glib::ustring& default_value);
 };

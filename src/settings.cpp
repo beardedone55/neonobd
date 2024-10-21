@@ -24,13 +24,20 @@
 #include "serial-port.hpp"
 #include <cstddef>
 #include <giomm/settings.h>
+#include <glib.h>
+
+// gtk.h provides GTK_INVALID_LIST_POSITION indirectly.
+// direct inclusion of the header that provides it is not allowed.
+#include <gtk/gtk.h> //NOLINT(misc-include-cleaner)
 #include <gtkmm/builder.h>
 #include <gtkmm/button.h>
 #include <gtkmm/checkbutton.h>
-#include <gtkmm/comboboxtext.h>
+#include <gtkmm/dropdown.h>
 #include <gtkmm/grid.h>
 #include <gtkmm/label.h>
 #include <gtkmm/progressbar.h>
+#include <gtkmm/stringlist.h>
+#include <memory>
 #include <sigc++/functors/mem_fun.h>
 #include <string>
 #include <vector>
@@ -72,8 +79,9 @@ Settings::Settings(MainWindow* main_window)
 
     btGrid = user_interface->get_widget<Gtk::Grid>("bluetooth_settings");
     btHostLabel = user_interface->get_widget<Gtk::Label>("host_label");
-    btHostCombo = user_interface->get_widget<Gtk::ComboBoxText>("host_combo");
-    btHostCombo->signal_changed().connect(
+    m_bt_host_dropdown =
+        user_interface->get_widget<Gtk::DropDown>("host_dropdown");
+    m_bt_host_dropdown->property_selected().signal_changed().connect(
         sigc::mem_fun(*this, &Settings::selectBluetoothController));
 
     // Select remote bluetooth device (OBD device):
@@ -107,8 +115,10 @@ Settings::Settings(MainWindow* main_window)
 
     auto controllerName = settings->get_string("bluetooth-controller");
     if (!controllerName.empty()) {
-        btHostCombo->append(controllerName);
-        btHostCombo->set_active(0);
+        auto list_model = std::dynamic_pointer_cast<Gtk::StringList>(
+            m_bt_host_dropdown->get_model());
+        list_model->append(controllerName);
+        m_bt_host_dropdown->set_selected(0);
     }
 
     auto deviceAddress = settings->get_string("selected-device-address");
@@ -118,18 +128,19 @@ Settings::Settings(MainWindow* main_window)
         m_bt_device_dropdown->set_selected(0);
     }
 
-    serialDeviceCombo =
-        user_interface->get_widget<Gtk::ComboBoxText>("serial_device");
-    serialBaudrateCombo =
-        user_interface->get_widget<Gtk::ComboBoxText>("serial_baudrate");
+    m_serial_device_dropdown =
+        user_interface->get_widget<Gtk::DropDown>("serial_device");
+    m_serial_baudrate_dropdown =
+        user_interface->get_widget<Gtk::DropDown>("serial_baudrate");
 
-    serialDeviceCombo->signal_changed().connect(
+    m_serial_device_dropdown->property_selected_item().signal_changed().connect(
         sigc::mem_fun(*this, &Settings::selectSerialDevice));
-    serialBaudrateCombo->signal_changed().connect(
-        sigc::mem_fun(*this, &Settings::selectSerialBaudrate));
+    m_serial_baudrate_dropdown->property_selected_item()
+        .signal_changed()
+        .connect(sigc::mem_fun(*this, &Settings::selectSerialBaudrate));
 
-    populateComboBox(serialHardwareInterface->get_valid_baudrates(),
-                     serialBaudrateCombo,
+    populateDropdown(serialHardwareInterface->get_valid_baudrates(),
+                     m_serial_baudrate_dropdown,
                      std::to_string(settings->get_enum("baud-rate")));
 
     Logger::debug("Created Settings object.");
@@ -181,13 +192,18 @@ void Settings::selectSerial() {
 }
 
 void Settings::selectBluetoothController() {
-    if (btHostCombo->get_active_row_number() == -1) {
+    // GTK_INVALID_LIST_POSITION is provided by gtk.h indirectly.
+    // NOLINTNEXTLINE(misc-include-cleaner)
+    if (m_bt_host_dropdown->get_selected() == GTK_INVALID_LIST_POSITION) {
         return;
     }
 
-    auto newBluetoothController = btHostCombo->get_active_text();
-    settings->set_string("bluetooth-controller", newBluetoothController);
-    btHardwareInterface->select_controller(newBluetoothController);
+    auto list_model = std::dynamic_pointer_cast<Gtk::StringList>(
+        m_bt_host_dropdown->get_model());
+    auto new_bluetooth_controller =
+        list_model->get_string(m_bt_host_dropdown->get_selected());
+    settings->set_string("bluetooth-controller", new_bluetooth_controller);
+    btHardwareInterface->select_controller(new_bluetooth_controller);
 }
 
 void Settings::selectBluetoothDevice() {
@@ -201,27 +217,37 @@ void Settings::selectBluetoothDevice() {
 }
 
 void Settings::selectSerialDevice() {
-    if (serialDeviceCombo->get_active_row_number() == -1) {
+    // GTK_INVALID_LIST_POSITION is provided by gtk.h indirectly.
+    // NOLINTNEXTLINE(misc-include-cleaner)
+    if (m_serial_device_dropdown->get_selected() == GTK_INVALID_LIST_POSITION) {
         return;
     }
 
-    auto selectedSerialDevice = serialDeviceCombo->get_active_text();
-    settings->set_string("serial-port", selectedSerialDevice);
+    auto list_model = std::dynamic_pointer_cast<Gtk::StringList>(
+        m_serial_device_dropdown->get_model());
+    auto selected_serial_device =
+        list_model->get_string(m_serial_device_dropdown->get_selected());
+    settings->set_string("serial-port", selected_serial_device);
 }
 
 void Settings::selectSerialBaudrate() {
-    if (serialBaudrateCombo->get_active_row_number() == -1) {
+    // GTK_INVALID_LIST_POSITION is provided by gtk.h indirectly.
+    if (m_serial_baudrate_dropdown->get_selected() ==
+        GTK_INVALID_LIST_POSITION) { // NOLINT(misc-include-cleaner)
         return;
     }
 
-    auto selectedBaudrate = serialBaudrateCombo->get_active_text();
-    settings->set_enum("baud-rate", std::stoi(selectedBaudrate));
+    auto list_model = std::dynamic_pointer_cast<Gtk::StringList>(
+        m_serial_baudrate_dropdown->get_model());
+    auto selected_baudrate =
+        list_model->get_string(m_serial_baudrate_dropdown->get_selected());
+    settings->set_enum("baud-rate", std::stoi(selected_baudrate));
 }
 
 void Settings::scanComplete() {
     auto& bluetooth = btHardwareInterface;
 
-    // Update Combo Box
+    // Update Dropdown
     auto devices = bluetooth->get_device_names_addresses();
     m_bt_device_dropdown->remove_all();
 
@@ -277,15 +303,22 @@ void Settings::scanBluetooth() {
     bluetooth->probe_remote_devices();
 }
 
-void Settings::populateComboBox(const std::vector<Glib::ustring>& values,
-                                Gtk::ComboBoxText* combobox,
+void Settings::populateDropdown(const std::vector<Glib::ustring>& values,
+                                Gtk::DropDown* dropdown,
                                 const Glib::ustring& default_value) {
-    combobox->remove_all();
+
+    auto list_model =
+        std::dynamic_pointer_cast<Gtk::StringList>(dropdown->get_model());
+    while (list_model->get_n_items() > 0) {
+        list_model->remove(0);
+    }
     for (size_t i = 0; i < values.size(); ++i) {
         const auto& value = values[i];
-        combobox->append(value);
+        list_model->append(value);
         if (value == default_value) {
-            combobox->set_active(static_cast<int>(i));
+            // guint is provided by glib.h
+            // NOLINTNEXTLINE(misc-include-cleaner)
+            dropdown->set_selected(static_cast<guint>(i));
         }
     }
 }
@@ -296,22 +329,22 @@ void Settings::on_show() {
     }
 
     Logger::debug("Showing settings dialog.");
-    // Populate Combo Box:
+    // Populate Dropdown:
     auto controllers = btHardwareInterface->get_controller_names();
-    populateComboBox(controllers, btHostCombo,
+    populateDropdown(controllers, m_bt_host_dropdown,
                      settings->get_string("bluetooth-controller"));
 
     // If we only have one controller, asking user to select one is silly.
     if (controllers.size() == 1) {
         Logger::debug("Only one bluetooth controller found, hiding dropdown.");
-        btHostCombo->set_active(0);
+        m_bt_host_dropdown->set_selected(0);
         btHostLabel->hide();
-        btHostCombo->hide();
+        m_bt_host_dropdown->hide();
     } else {
         Logger::debug("Showing bluetooth controller dropdown, " +
                       Glib::ustring::format(controllers.size()) + "found.");
         btHostLabel->show();
-        btHostCombo->show();
+        m_bt_host_dropdown->show();
     }
 
     // No bluetooth available...
@@ -324,6 +357,6 @@ void Settings::on_show() {
 
     // Populate comboboxes for serial port
 
-    populateComboBox(SerialPort::get_serial_devices(), serialDeviceCombo,
+    populateDropdown(SerialPort::get_serial_devices(), m_serial_device_dropdown,
                      settings->get_string("serial-port"));
 }
