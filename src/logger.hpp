@@ -70,7 +70,11 @@ class NoLog {
 
 void setLogLevel(LogLevel lvl);
 
+#ifdef NDEBUG
+extern const NoLog debug;
+#else
 extern const Logger debug;
+#endif
 extern const Logger info;
 extern const Logger warning;
 extern const Logger error;

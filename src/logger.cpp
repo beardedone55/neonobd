@@ -20,7 +20,11 @@
 
 Logger::LogLevel Logger::LogStream::logLevel = DEBUG;
 
+#ifdef NDEBUG
+const Logger::NoLog Logger::debug;
+#else
 const Logger::Logger Logger::debug(DEBUG);
+#endif
 const Logger::Logger Logger::info(INFO);
 const Logger::Logger Logger::warning(WARN);
 const Logger::Logger Logger::error(ERR);
