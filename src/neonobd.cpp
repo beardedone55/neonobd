@@ -21,7 +21,11 @@
 
 int main(int argc, char* argv[]) {
 
+#ifdef NDEBUG
+    Logger::setLogLevel(Logger::INFO);
+#else
     Logger::setLogLevel(Logger::DEBUG);
+#endif
 
     auto app = Gtk::Application::create("com.github.beardedone55.neonobd");
 
