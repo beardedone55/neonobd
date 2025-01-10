@@ -19,6 +19,7 @@
 #include "hardware-interface.hpp"
 #include "neonobd_exceptions.hpp"
 #include <cstddef>
+#include <future>
 #include <glibmm/ustring.h>
 #include <iomanip>
 #include <ios>
@@ -33,10 +34,6 @@
 #include <vector>
 
 Elm327::~Elm327() {
-    if (m_init_thread) {
-        m_init_thread->join();
-    }
-
     if (m_command_thread) {
         m_disconnect_in_progress = true;
         m_cmd_semaphore.release();
@@ -45,7 +42,7 @@ Elm327::~Elm327() {
 }
 
 sigc::signal<void(bool)> Elm327::init(std::shared_ptr<HardwareInterface> hwif) {
-    if (m_init_thread || m_init_complete) {
+    if (m_init_result.valid() || m_init_complete) {
         throw neon::InvalidState("Invalid state to issue init request.");
     }
 
@@ -54,14 +51,14 @@ sigc::signal<void(bool)> Elm327::init(std::shared_ptr<HardwareInterface> hwif) {
     m_init_complete_connection =
         m_init_complete_dispatcher.connect([this]() { init_done(); });
 
-    m_init_thread = std::make_unique<std::thread>([this]() { init_thread(); });
+    m_init_result = std::async(std::launch::async, &Elm327::init_thread, this);
 
     return m_init_signal;
 }
 
 Glib::ustring Elm327::get_error_string() const { return m_error_string; }
 
-void Elm327::init_thread() {
+bool Elm327::init_thread() {
     try {
         if (!reset()) {
             throw std::runtime_error("ELM327 reset failed.");
@@ -92,12 +89,11 @@ void Elm327::init_thread() {
         m_error_string = e.what();
     }
     m_init_complete_dispatcher.emit();
+    return m_init_complete;
 }
 
 void Elm327::init_done() {
-    m_init_thread->join();
-    m_init_thread.reset();
-    if (m_init_complete) {
+    if (m_init_result.get()) {
         m_command_complete_connection = m_command_complete_dispatcher.connect(
             [this]() { command_complete(); });
         m_command_thread_exit_connection =
@@ -130,7 +126,7 @@ bool Elm327::is_CAN() const {
     return m_protocol >= MIN_CAN_PROTOCOL;
 }
 
-bool Elm327::is_connecting() const { return !!m_init_thread; }
+bool Elm327::is_connecting() const { return m_init_result.valid(); }
 
 bool Elm327::is_connected() const { return m_init_complete; }
 

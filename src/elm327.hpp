@@ -19,6 +19,7 @@
 
 #include "connection.hpp"
 #include "obd-device.hpp"
+#include <future>
 #include <glibmm/dispatcher.h>
 #include <memory>
 #include <mutex>
@@ -70,7 +71,7 @@ class Elm327 : public ObdDevice, public sigc::trackable {
     volatile bool m_disconnect_in_progress = false;
     bool m_init_in_progress = false;
     bool m_init_complete = false;
-    std::unique_ptr<std::thread> m_init_thread;
+    std::future<bool> m_init_result;
     sigc::signal<void(bool)> m_init_signal;
     sigc::signal<void()> m_disconnect_signal;
     Glib::Dispatcher m_init_complete_dispatcher;
@@ -92,7 +93,7 @@ class Elm327 : public ObdDevice, public sigc::trackable {
     Glib::ustring m_error_string;
     int m_protocol = 0;
 
-    void init_thread();
+    bool init_thread();
     void init_done();
     void send_completion(Completion&& completion);
     Command get_next_cmd();

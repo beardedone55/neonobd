@@ -25,6 +25,7 @@
 #include <cstdio>
 #include <filesystem>
 #include <fstream>
+#include <future>
 #include <glibmm/ustring.h>
 #include <memory>
 #include <mutex>
@@ -43,10 +44,6 @@ SerialPort::SerialPort() : m_sock_file(nullptr, &SerialPort::close_file) {
 }
 
 SerialPort::~SerialPort() {
-    if (m_connect_thread && m_connect_thread->joinable()) {
-        m_connect_thread->join();
-    }
-
     Logger::debug("Destroying Serial Port");
 }
 
@@ -111,12 +108,11 @@ void SerialPort::set_baudrate(const Glib::ustring& new_baudrate) {
 }
 
 void SerialPort::connect_complete() {
-    m_connect_thread->join();
-    m_connect_thread.reset();
-    m_complete_connection.emit(m_connected);
+    m_complete_connection.emit(m_is_connected.get());
 }
 
-void SerialPort::initiate_connection(const Glib::ustring& device_name) {
+bool SerialPort::initiate_connection(const Glib::ustring& device_name) {
+    bool connected = false;
     try {
         const std::lock_guard lock(m_sock_fd_mutex);
 
@@ -156,7 +152,7 @@ void SerialPort::initiate_connection(const Glib::ustring& device_name) {
                                     "Failed to apply serial port settings");
         }
 
-        m_connected = true;
+        connected = true;
 
     } catch (const std::system_error& e) {
         Logger::error(e.what());
@@ -167,6 +163,7 @@ void SerialPort::initiate_connection(const Glib::ustring& device_name) {
     }
 
     m_dispatcher.emit();
+    return connected;
 }
 
 bool SerialPort::connect(const Glib::ustring& device_name) {
@@ -175,13 +172,12 @@ bool SerialPort::connect(const Glib::ustring& device_name) {
         return false;
     }
 
-    if (m_connect_thread) {
+    if (m_is_connected.valid()) {
         Logger::error("Connection attempt already in progress.");
         return false;
     }
 
-    m_connect_thread = std::make_unique<std::thread>(
-        [this, device_name]() { this->initiate_connection(device_name); });
+    m_is_connected = std::async(std::launch::async, &SerialPort::initiate_connection, this, device_name);
 
     return true;
 }
