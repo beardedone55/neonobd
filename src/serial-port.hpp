@@ -19,10 +19,10 @@
 #include "hardware-interface.hpp"
 #include <chrono>
 #include <cstdio>
+#include <future>
 #include <glibmm/dispatcher.h>
 #include <memory>
 #include <termios.h>
-#include <thread>
 
 class SerialPort : public HardwareInterface, public sigc::trackable {
   public:
@@ -43,12 +43,11 @@ class SerialPort : public HardwareInterface, public sigc::trackable {
         {"9600", B9600},   {"19200", B19200},   {"38400", B38400},
         {"57600", B57600}, {"115200", B115200}, {"230400", B230400}};
     Glib::Dispatcher m_dispatcher;
-    std::unique_ptr<std::thread> m_connect_thread;
-    bool m_connected = false;
+    std::future<bool> m_is_connected;
     unsigned char m_timeout = 0;
     static void close_file(std::FILE* file);
     std::unique_ptr<FILE, decltype(&close_file)> m_sock_file;
 
-    void initiate_connection(const Glib::ustring& device_name);
+    bool initiate_connection(const Glib::ustring& device_name);
     void connect_complete();
 };
