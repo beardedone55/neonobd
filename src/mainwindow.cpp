@@ -23,6 +23,7 @@
 #include "serial-port.hpp"
 #include "settings.hpp"
 #include "terminal.hpp"
+#include "ui_neonobd.h"
 #include <gdkmm/display.h>
 #include <gtk/gtkstyleprovider.h>
 #include <gtkmm/builder.h>
@@ -37,21 +38,8 @@
 MainWindow::MainWindow()
     : bluetoothSerialPort{BluetoothSerialPort::get_BluetoothSerialPort()},
       serialPort{new SerialPort}, css{Gtk::CssProvider::create()} {
-    css->load_from_resource("/stylesheets/appstyle.css");
-    Gtk::StyleContext::add_provider_for_display(
-        Gdk::Display::get_default(), css,
-        GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
-    ui = Gtk::Builder::create_from_resource("/ui/neonobd_ui.xml");
-
-    viewStack = ui->get_widget<Gtk::Stack>("view_stack");
-
-    if (viewStack == nullptr) {
-        Logger::error("Could not instantiate view_stack.");
-        return;
-    }
-
-    set_child(*viewStack);
+    ui.setupUi(&view_stack);
 
     home = std::make_unique<Home>(this);
     settings = std::make_unique<Settings>(this);

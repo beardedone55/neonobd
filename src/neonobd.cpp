@@ -1,5 +1,5 @@
 /* This file is part of neonobd - OBD diagnostic software.
- * Copyright (C) 2022-2024  Brian LePage
+ * Copyright (C) 2022-2025  Brian LePage
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 
 #include "logger.hpp"
 #include "mainwindow.hpp"
-#include <gtkmm/application.h>
+#include <QApplication>
 
 int main(int argc, char* argv[]) {
 
@@ -27,7 +27,8 @@ int main(int argc, char* argv[]) {
     Logger::setLogLevel(Logger::DEBUG);
 #endif
 
-    auto app = Gtk::Application::create("com.github.beardedone55.neonobd");
-
-    return app->make_window_and_run<MainWindow>(argc, argv);
+    QApplication app(argc, argv);
+    MainWindow window;
+    window.show();
+    return app.exec();
 }
