@@ -1,5 +1,5 @@
 # This file is part of neonobd - OBD diagnostic software.
-# Copyright (C) 2022-2024  Brian LePage
+# Copyright (C) 2022-2026  Brian LePage
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ add_custom_command(
     COMMAND glib-compile-resources --target ${CMAKE_CURRENT_BINARY_DIR}/resources.c --generate-source app.gresource.xml
     DEPENDS app.gresource.xml appstyle.css neonobd_ui.xml bluez-agent1.xml bluez-profile1.xml
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+
 
 target_include_directories(resources PRIVATE ${GTKMM_INCLUDE_DIRS})
 

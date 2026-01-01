@@ -1,5 +1,5 @@
 # This file is part of neonobd - OBD diagnostic software.
-# Copyright (C) 2022-2024  Brian LePage
+# Copyright (C) 2022-2026  Brian LePage
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,6 +28,10 @@ set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic -Wunuse
                      -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wnull-dereference \
                      -Wformat=2")
 
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
 if(RUN_CPPCHECK)
     find_program(CMAKE_CXX_CPPCHECK NAMES cppcheck REQUIRED)
     list(APPEND CMAKE_CXX_CPPCHECK --enable=all --error-exitcode=1 
@@ -46,12 +50,23 @@ endif()
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTKMM REQUIRED gtkmm-4.0)
 
-add_executable(neonobd neonobd.cpp hardware-interface.cpp bluetooth-serial-port.cpp home.cpp mainwindow.cpp settings.cpp logger.cpp connect-button.cpp terminal.cpp serial-port.cpp elm327.cpp obd.cpp dropdown.cpp)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
+
+qt_add_executable(neonobd
+                  neonobd.cpp
+                  hardware-interface.cpp
+                  bluetooth-serial-port.cpp
+                  home.cpp mainwindow.cpp
+                  settings.cpp logger.cpp
+                  connect-button.cpp
+                  terminal.cpp serial-port.cpp
+                  elm327.cpp dropdown.cpp
+                  neonobd.ui)
 
 target_include_directories(neonobd SYSTEM PRIVATE ${GTKMM_INCLUDE_DIRS})
 target_include_directories(neonobd PRIVATE "${PROJECT_SOURCE_DIR}")
 
-target_link_libraries(neonobd PRIVATE ${GTKMM_LIBRARIES} resources)
+target_link_libraries(neonobd PRIVATE ${GTKMM_LIBRARIES} resources Qt6::Core Qt6::Gui Qt6::Widgets)
 
 install(TARGETS neonobd RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 

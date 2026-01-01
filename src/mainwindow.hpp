@@ -1,5 +1,5 @@
 /* This file is part of neonobd - OBD diagnostic software.
- * Copyright (C) 2022-2024  Brian LePage
+ * Copyright (C) 2022-2026  Brian LePage
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,14 +24,16 @@
 #include "serial-port.hpp"
 #include "settings.hpp"
 #include "terminal.hpp"
+#include "ui_neonobd.h"
 #include <gtkmm/cssprovider.h>
 #include <gtkmm/window.h>
 #include <memory>
+#include <QWidget>
 
 using neon::InterfaceType;
 using neon::ResponseType;
 
-class MainWindow : public Gtk::Window {
+class MainWindow : public QWidget {
   public:
     MainWindow();
     MainWindow(const MainWindow&) = delete;
@@ -43,8 +45,7 @@ class MainWindow : public Gtk::Window {
     std::unique_ptr<Home> home;
     std::unique_ptr<Settings> settings;
     std::unique_ptr<Terminal> terminal;
-    Gtk::Stack* viewStack;
-    Glib::RefPtr<Gtk::Builder> ui;
+    QStackedWidget view_stack;
 
     void setHardwareInterface(InterfaceType ifType);
     void showPopup(const std::string& message, ResponseType type,
@@ -52,11 +53,11 @@ class MainWindow : public Gtk::Window {
     void hidePopup();
 
   protected:
+    Ui::ViewStack ui;
     Gtk::MessageDialog* popup = nullptr;
     sigc::connection popup_response_connection;
     bool popup_shown = false;
     std::unique_ptr<Gtk::MessageDialog> yes_no_dialog;
     std::unique_ptr<Gtk::MessageDialog> text_input_dialog;
     std::unique_ptr<Gtk::MessageDialog> number_input_dialog;
-    Glib::RefPtr<Gtk::CssProvider> css;
 };
