@@ -1,5 +1,5 @@
 /* This file is part of neonobd - OBD diagnostic software.
- * Copyright (C) 2022-2024  Brian LePage
+ * Copyright (C) 2022-2026  Brian LePage
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,71 +19,68 @@
 #include "connect-button.hpp"
 #include "logger.hpp"
 #include "mainwindow.hpp"
-#include <gtkmm/builder.h>
-#include <gtkmm/button.h>
-#include <sigc++/functors/mem_fun.h>
 
-Home::Home(MainWindow* main_window) : window{main_window} {
-    auto user_interface = window->ui;
+Home::Home(MainWindow* main_window) : m_window{main_window} {
+    auto& user_interface = m_window->m_ui;
     // Settings button
-    settings_btn = user_interface->get_widget<Gtk::Button>("settings_button");
-    settings_btn->signal_clicked().connect(
-        sigc::mem_fun(*this, &Home::settings_clicked));
-    enabled_buttons.insert(settings_btn);
+    m_settings_btn = user_interface.settings_button;
+    connect(m_settings_btn, &QButton::clicked, this,
+            &Home::settings_clicked);
+    enabled_buttons.insert(m_settings_btn);
 
     // Connect button
-    connect_btn = Gtk::Builder::get_widget_derived<ConnectButton>(
-        user_interface, "connect_button");
+    m_connect_btn = user_interface.connect_button;
     enabled_buttons.insert(connect_btn);
 
     // Terminal button
-    terminal_btn = user_interface->get_widget<Gtk::Button>("terminal_button");
-    // Disable this button until connected.
-    terminal_btn->set_sensitive(false);
-    terminal_btn->signal_clicked().connect(
-        sigc::mem_fun(*this, &Home::terminal_clicked));
+    m_terminal_btn = user_interface.terminal_button;
+    terminal_btn->setEnabled(false);
+    connect(m_terminal_btn, &QButton::clicked, this,
+            &Home::terminal_clicked);
 }
 
 void Home::settings_clicked() {
-    window->viewStack->set_visible_child("settings_view");
+    auto settings_view = m_window->m_ui.settings_view;
+    m_window->viewStack.setCurrentWidget(settings_view);
 }
 
 void Home::terminal_clicked() {
-    window->viewStack->set_visible_child("terminal_view");
+    auto terminal_view = m_window->m_ui.terminal_view;
+    m_window->viewStack.setCurrentWidget(terminal_view);
 }
 
 void Home::disable_all() {
-    for (auto* button : enabled_buttons) {
-        button->set_sensitive(false);
+    for (auto* button : m_enabled_buttons) {
+        disable_button(button);
     }
 }
 
 void Home::enable_all() {
-    for (auto* button : enabled_buttons) {
-        button->set_sensitive(true);
-    }
+    enable_button(m_settings_btn);
+    enable_button(m_connect_btn);
+    enable_button(m_terminal_btn);
 }
 
 void Home::set_connected(bool isConnected) {
-    connected = isConnected;
+    m_connected = isConnected;
 
-    if (connected) {
-        disable_button(connect_btn);
-        enable_button(terminal_btn);
+    if (m_connected) {
+        disable_button(m_connect_btn);
+        enable_button(m_terminal_btn);
     } else {
-        enable_button(connect_btn);
-        disable_button(terminal_btn);
+        enable_button(m_connect_btn);
+        disable_button(m_terminal_btn);
     }
 }
 
-void Home::disable_button(Gtk::Button* button) {
+void Home::disable_button(QPushButton* button) {
     if (enabled_buttons.contains(button)) {
-        button->set_sensitive(false);
+        button->setEnabled(false);
         enabled_buttons.erase(button);
     }
 }
 
-void Home::enable_button(Gtk::Button* button) {
-    button->set_sensitive(true);
+void Home::enable_button(QPushButton* button) {
+    button->setEnabled(true);
     enabled_buttons.insert(button);
 }

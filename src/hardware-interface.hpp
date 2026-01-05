@@ -1,5 +1,5 @@
 /* This file is part of neonobd - OBD diagnostic software.
- * Copyright (C) 2022-2024  Brian LePage
+ * Copyright (C) 2022-2026  Brian LePage
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,28 +17,25 @@
 
 #pragma once
 #include "neonobd_types.hpp"
-#include <glibmm/ustring.h>
-#include <glibmm/variant.h>
 #include <shared_mutex>
-#include <sigc++/connection.h>
-#include <sigc++/signal.h>
+#include <QObject>
+#include <QString>
+#include <QVariant>
 
 using neon::ResponseType;
 
-class HardwareInterface {
+class HardwareInterface : public QObject {
+
+  Q_OBJECT
+
   public:
     HardwareInterface() = default;
     HardwareInterface(const HardwareInterface&) = delete;
     HardwareInterface& operator=(const HardwareInterface&) = delete;
     virtual ~HardwareInterface() = default;
-    virtual bool connect(const Glib::ustring& device_name) = 0;
-    sigc::connection
-    attach_connect_complete(const sigc::slot<void(bool)>& slot);
-    sigc::connection
-    attach_user_prompt(const sigc::slot<void(const Glib::ustring&, ResponseType,
-                                             Glib::RefPtr<void>)>& slot);
-    virtual void respond_from_user(const Glib::VariantBase& response,
-                                   const Glib::RefPtr<void>& signal_handle) = 0;
+    virtual bool connect(const QString& device_name) = 0;
+    virtual void respond_from_user(const QVariant& response,
+                                   std::shared_ptr<void> signal_handle) = 0;
 
     template <typename Container,
               typename Contents = typename Container::value_type>
@@ -63,10 +60,11 @@ class HardwareInterface {
 
     virtual void set_timeout(std::chrono::milliseconds) {}
 
+  signals:
+	void complete_connection(bool);
+	void request_user_input(const QString&, ResponseType, std::shared_ptr<void>); 
+
   protected:
-    sigc::signal<void(bool)> m_complete_connection;
-    sigc::signal<void(const Glib::ustring&, ResponseType, Glib::RefPtr<void>)>
-        m_request_user_input;
     int m_sock_fd = -1;
     std::shared_mutex m_sock_fd_mutex;
 

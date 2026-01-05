@@ -1,5 +1,5 @@
 /* This file is part of neonobd - OBD diagnostic software.
- * Copyright (C) 2022-2024  Brian LePage
+ * Copyright (C) 2022-2026  Brian LePage
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,12 +26,10 @@
 #include <filesystem>
 #include <fstream>
 #include <future>
-#include <glibmm/ustring.h>
 #include <memory>
 #include <mutex>
 #include <ratio>
 #include <shared_mutex>
-#include <sigc++/functors/mem_fun.h>
 #include <sstream>
 #include <string>
 #include <system_error>
@@ -40,15 +38,15 @@
 #include <vector>
 
 SerialPort::SerialPort() : m_sock_file(nullptr, &SerialPort::close_file) {
-    m_dispatcher.connect(sigc::mem_fun(*this, &SerialPort::connect_complete));
+    connect(this, &SerialPort::connect_port, this, &SerialPort::connect_complete);
 }
 
 SerialPort::~SerialPort() {
     Logger::debug("Destroying Serial Port");
 }
 
-std::vector<Glib::ustring> SerialPort::get_valid_baudrates() {
-    std::vector<Glib::ustring> output;
+std::vector<QString> SerialPort::get_valid_baudrates() {
+    std::vector<QString> output;
     output.reserve(m_baudrates.size());
     for (const auto& [baudrate_str, baudrate] : m_baudrates) {
         output.emplace_back(baudrate_str);
@@ -56,7 +54,7 @@ std::vector<Glib::ustring> SerialPort::get_valid_baudrates() {
     return output;
 }
 
-std::vector<Glib::ustring> SerialPort::get_serial_devices() {
+std::vector<QString> SerialPort::get_serial_devices() {
     std::ifstream procfile("/proc/tty/drivers");
     if (!procfile) {
         return {};
@@ -87,7 +85,7 @@ std::vector<Glib::ustring> SerialPort::get_serial_devices() {
         file_prefixes[path.parent_path()].push_back(path.filename().string());
     }
 
-    std::vector<Glib::ustring> device_list;
+    std::vector<QString> device_list;
     for (auto& [folder, prefixes] : file_prefixes) {
         for (const auto& dir_entry :
              std::filesystem::directory_iterator(folder)) {
@@ -103,15 +101,15 @@ std::vector<Glib::ustring> SerialPort::get_serial_devices() {
     return device_list;
 }
 
-void SerialPort::set_baudrate(const Glib::ustring& new_baudrate) {
+void SerialPort::set_baudrate(const QString& new_baudrate) {
     m_baudrate = m_baudrates.at(new_baudrate);
 }
 
 void SerialPort::connect_complete() {
-    m_complete_connection.emit(m_is_connected.get());
+    emit m_complete_connection(m_is_connected.get()); 
 }
 
-bool SerialPort::initiate_connection(const Glib::ustring& device_name) {
+bool SerialPort::initiate_connection(const QString& device_name) {
     bool connected = false;
     try {
         const std::lock_guard lock(m_sock_fd_mutex);
@@ -162,11 +160,11 @@ bool SerialPort::initiate_connection(const Glib::ustring& device_name) {
         }
     }
 
-    m_dispatcher.emit();
+    emit connect_port();
     return connected;
 }
 
-bool SerialPort::connect(const Glib::ustring& device_name) {
+bool SerialPort::connect(const QString& device_name) {
     if (m_sock_file) {
         Logger::error("Connection to serial port already exists.");
         return false;

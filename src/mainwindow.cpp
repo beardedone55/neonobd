@@ -1,5 +1,5 @@
 /* This file is part of neonobd - OBD diagnostic software.
- * Copyright (C) 2022-2024  Brian LePage
+ * Copyright (C) 2022-2026  Brian LePage
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,33 +24,17 @@
 #include "settings.hpp"
 #include "terminal.hpp"
 #include "ui_neonobd.h"
-#include <gdkmm/display.h>
-#include <gtk/gtkstyleprovider.h>
-#include <gtkmm/builder.h>
-#include <gtkmm/cssprovider.h>
-#include <gtkmm/dialog.h>
-#include <gtkmm/messagedialog.h>
-#include <gtkmm/stack.h>
-#include <gtkmm/stylecontext.h>
 #include <memory>
-#include <sigc++/functors/slot.h>
 
 MainWindow::MainWindow()
-    : bluetoothSerialPort{BluetoothSerialPort::get_BluetoothSerialPort()},
-      serialPort{new SerialPort}, css{Gtk::CssProvider::create()} {
+    : m_view_stack(this), m_home(this), m_settings(this),
+      m_terminal(this) {
 
-    ui.setupUi(&view_stack);
+    m_ui.setupUi(&m_view_stack);
 
-    home = std::make_unique<Home>(this);
-    settings = std::make_unique<Settings>(this);
-    terminal = std::make_unique<Terminal>(this);
-    yes_no_dialog.reset(ui->get_widget<Gtk::MessageDialog>("yes_no_dialog"));
-    text_input_dialog.reset(
-        ui->get_widget<Gtk::MessageDialog>("text_input_dialog"));
-    number_input_dialog.reset(
-        ui->get_widget<Gtk::MessageDialog>("number_input_dialog"));
-
-    set_name("mainwindow");
+    m_home = std::make_unique<Home>(this);
+    m_settings = std::make_unique<Settings>(this);
+    m_terminal = std::make_unique<Terminal>(this);
 }
 
 MainWindow::~MainWindow() { Logger::debug("Destroying MainWindow."); }
@@ -58,55 +42,24 @@ MainWindow::~MainWindow() { Logger::debug("Destroying MainWindow."); }
 void MainWindow::setHardwareInterface(InterfaceType ifType) {
     switch (ifType) {
     case neon::BLUETOOTH_IF:
-        hardwareInterface = bluetoothSerialPort;
+        m_hardware_interface = &m_bluetooth_serial_port;
         break;
     case neon::SERIAL_IF:
-        hardwareInterface = serialPort;
+        m_hardware_interface = &m_serial_port;
         break;
     }
 }
 
-void MainWindow::showPopup(const std::string& message, ResponseType type,
-                           const sigc::slot<void(int)>& response) {
-
-    Logger::debug("Showing popup dialog.");
-
-    if (popup_shown) {
-        hidePopup();
-    }
-
-    switch (type) {
-    case neon::USER_YN:
-        popup = yes_no_dialog.get();
-        break;
-    case neon::USER_STRING:
-        popup = text_input_dialog.get();
-        break;
-    case neon::USER_INT:
-        popup = number_input_dialog.get();
-        break;
-    default:
-        return;
-    }
-
-    popup_shown = true;
-    popup_response_connection = popup->signal_response().connect(response);
-    popup->set_transient_for(*this);
-    popup->set_message(message);
-    if (type == neon::USER_YN) {
-        popup->set_default_response(Gtk::ResponseType::YES);
-    } else {
-        popup->set_default_response(Gtk::ResponseType::OK);
-    }
-    popup->show();
+int MainWindow::user_get_int(const QString& prompt, bool& ok) {
+    return QInputDialog::getInt(nullptr, "", prompt, QLineEdit::Normal,
+                                            "", &ok);
 }
 
-void MainWindow::hidePopup() {
-    if (!popup_shown) {
-        return;
-    }
+QString MainWindow::user_get_text(const QString& prompt, bool& ok) {
+    return QInputDialog::getText(nullptr, "", prompt, QLineEdit::Normal,
+                                            "", &ok);
+}
 
-    popup->hide();
-    popup_response_connection.disconnect();
-    popup_shown = false;
+bool MainWindow::user_get_yes_no(const QString& prompt) {
+    return QMessageBox::question(nullptr, "", prompt) == QMessageBox::Yes;
 }

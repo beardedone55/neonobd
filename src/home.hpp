@@ -1,5 +1,5 @@
 /* This file is part of neonobd - OBD diagnostic software.
- * Copyright (C) 2022-2024  Brian LePage
+ * Copyright (C) 2022-2026  Brian LePage
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,15 +20,14 @@
 #include "connect-button.hpp"
 #include "hardware-interface.hpp"
 #include "neonobd_types.hpp"
-#include <gtkmm/button.h>
-#include <sigc++/trackable.h>
 #include <unordered_set>
+#include <QPushButton>
+#include <QObject>
 
 class MainWindow;
 
-using neon::ResponseType;
-
-class Home : public sigc::trackable {
+class Home : public QObject {
+  Q_OBJECT
   public:
     explicit Home(MainWindow* window);
     void enable_all();
@@ -36,15 +35,17 @@ class Home : public sigc::trackable {
     void set_connected(bool connected);
 
   private:
-    MainWindow* window;
-    Gtk::Button* settings_btn;
-    ConnectButton* connect_btn;
-    Gtk::Button* terminal_btn;
-    std::unordered_set<Gtk::Button*> enabled_buttons;
-    bool connected = false;
+    MainWindow* m_window;
+    QPushButton* m_settings_btn;
+    ConnectButton* m_connect_btn;
+    QPushButton* m_terminal_btn;
+    std::unordered_set<QPushButton*> m_enabled_buttons;
+    bool m_connected = false;
 
+    void enable_button(QPushButton* button);
+    void disable_button(QPushButton* button);
+
+  slots:
     void settings_clicked();
     void terminal_clicked();
-    void enable_button(Gtk::Button* button);
-    void disable_button(Gtk::Button* button);
 };

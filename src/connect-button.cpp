@@ -1,5 +1,5 @@
 /* This file is part of neonobd - OBD diagnostic software.
- * Copyright (C) 2022-2024  Brian LePage
+ * Copyright (C) 2022-2026  Brian LePage
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,158 +20,117 @@
 #include "mainwindow.hpp"
 #include "neonobd_types.hpp"
 
-// glib.h provides guint32 indirectly.
-// direct inclusion of the header that provides it is not allowed.
-#include <glib.h> //NOLINT(misc-include-cleaner)
-#include <glibmm/refptr.h>
-#include <glibmm/ustring.h>
-#include <glibmm/variant.h>
-#include <gtk/gtk.h>
-#include <gtkmm/builder.h>
-#include <gtkmm/button.h>
-#include <gtkmm/dialog.h>
-#include <gtkmm/entry.h>
-#include <sigc++/connection.h>
-#include <sigc++/functors/mem_fun.h>
-#include <sigc++/functors/slot.h>
 #include <string>
 #include <utility>
+#include <QPushButton>
+#include <QVariant>
+#include <QString>
 
-ConnectButton::ConnectButton(BaseObjectType* cobj,
-                             const Glib::RefPtr<Gtk::Builder>& /*builder*/)
-    : Gtk::Button{cobj},
-      window{dynamic_cast<MainWindow*>(get_ancestor(GTK_TYPE_WINDOW))} {
-    signal_clicked().connect(sigc::mem_fun(*this, &ConnectButton::clicked));
+ConnectButton::ConnectButton()
+	: window{std::dynamic_cast<MainWindow>(window())}
+{
+	connect(this, &QPushButton::clicked, this &ConnectButton::on_clicked);
 }
 
-void ConnectButton::clicked() {
+void ConnectButton::on_clicked() {
     Logger::debug("Connect button clicked.");
     auto hwif = window->hardwareInterface;
 
-    window->home->disable_all();
+    window->home.disable_all();
 
-    user_prompt_connection = hwif->attach_user_prompt(
-        sigc::mem_fun(*this, &ConnectButton::user_prompt));
+    connect(hwif, &HardwareInterface::request_user_input,
+            this, &ConnectButton::user_prompt);
 
-    connect_complete_connection = hwif->attach_connect_complete(
-        sigc::mem_fun(*this, &ConnectButton::connect_complete));
+    connect(hwif, &HardwareInterface::complete_connection,
+            this, &ConnectButton::connect_complete);
 
-    if (!hwif->connect(window->settings->getSelectedDevice())) {
+    if (!hwif->connect(window->settings.getSelectedDevice())) {
         connect_complete(false);
     }
 }
 
 void ConnectButton::connect_complete(bool result) {
-    user_prompt_connection.disconnect();
-    connect_complete_connection.disconnect();
+    disconnect(hwif, &HardwareInterface::complete_connection,
+               this, &ConnectButton::user_prompt);
+    disconnect(hwif, &HardwareInterface::complete_connection,
+               this, &ConnectButton::connect_complete);
 
     if (result) {
         Logger::debug("Connection to device was successful!");
-        window->home->set_connected(true);
+        window->home.set_connected(true);
     } else {
         Logger::debug("Connection to device failed!");
     }
 
-    window->home->enable_all();
+    window->home.enable_all();
 }
 
-void ConnectButton::send_cancel() {
-    window->hidePopup();
+void ConnectButton::send_cancel(std::shared_ptr<void> handle) {
     auto hwif = window->hardwareInterface;
     Logger::debug("Responding with cancel from user.");
-    auto response = Glib::Variant<bool>::create(false);
-    hwif->respond_from_user(response, user_prompt_handle);
-    user_prompt_handle.reset();
+    auto response = QVariant<bool>(false);
+    hwif->respond_from_user(response, handle);
 }
 
-void ConnectButton::user_prompt(const Glib::ustring& prompt,
+void ConnectButton::user_prompt(const QString& prompt,
                                 ResponseType responseType,
-                                Glib::RefPtr<void> handle) {
-
-    if (user_prompt_handle) {
-        // Still have open dialog
-        // Respond with error.
-        send_cancel();
-    }
-
-    sigc::slot<void(int)> user_response;
+                                std::shared_ptr<void> handle) {
 
     switch (responseType) {
     case neon::USER_YN:
-        user_response =
-            sigc::mem_fun(*this, &ConnectButton::user_yes_no_response);
+        user_yes_no_response(prompt, handle);
         break;
     case neon::USER_STRING:
-        user_response =
-            sigc::mem_fun(*this, &ConnectButton::user_text_response);
+        user_text_response(prompt, handle);
         break;
     case neon::USER_INT:
-        user_response =
-            sigc::mem_fun(*this, &ConnectButton::user_number_response);
+        user_number_response(prompt, handle);
         break;
-    case neon::USER_NONE:
-        user_response =
-            sigc::mem_fun(*this, &ConnectButton::user_none_response);
+    default:
         break;
     }
 
-    window->showPopup(prompt, responseType, user_response);
-
-    user_prompt_handle = std::move(handle);
     Logger::debug("Received prompt: " + prompt);
 }
 
-void ConnectButton::user_yes_no_response(int responseCode) {
+void ConnectButton::user_yes_no_response(
+        const QString& prompt,
+        std::shared_ptr<void> handle) {
+    bool response = window->user_get_yes_no(prompt);
+
     Logger::debug("Received response from user: " +
-                  std::to_string(responseCode));
+                  response ? "Yes" : "No");
 
-    auto response =
-        Glib::Variant<bool>::create(responseCode == Gtk::ResponseType::YES);
-    window->hidePopup();
     auto hwif = window->hardwareInterface;
-    hwif->respond_from_user(response, user_prompt_handle);
-    user_prompt_handle.reset();
+    hwif->respond_from_user(QVariant<bool>(response),
+                            handle);
 }
 
-Glib::ustring ConnectButton::get_user_input(int responseCode,
-                                            const char* widget) {
-    Logger::debug("User responded with responseCode " +
-                  std::to_string(responseCode));
-    auto user_interface = window->ui;
-    auto text_input =
-        user_interface->get_widget<Gtk::Entry>(widget)->get_text();
-    if (responseCode != Gtk::ResponseType::OK || text_input.empty()) {
-        send_cancel();
-        return "";
-    }
-
-    window->hidePopup();
-    return text_input;
-}
-
-void ConnectButton::user_text_response(int responseCode) {
-    auto text_input = get_user_input(responseCode, "text_user_input");
-    if (!text_input.empty()) {
-        auto response = Glib::Variant<Glib::ustring>::create(text_input);
+void ConnectButton::user_text_response(const QString& prompt,
+                                       std::shared_ptr<void> handle) {
+    bool ok;
+    auto text_input = window->user_get_text(prompt, ok);
+    if (ok && !text_input.empty()) {
+        auto response = QVariant<QString>(text_input);
         Logger::debug("Received response from user: " + text_input);
         window->hardwareInterface->respond_from_user(response,
                                                      user_prompt_handle);
-        user_prompt_handle.reset();
+    } else if (!ok) {
+        send_cancel(handle);
     }
 }
 
-void ConnectButton::user_number_response(int responseCode) {
-    auto text_input = get_user_input(responseCode, "number_user_input");
-    if (!text_input.empty()) {
-        // guint32 is provided by glib.h indirectly
-        // NOLINTNEXTLINE(misc-include-cleaner)
-        auto response = Glib::Variant<guint32>::create(
-            static_cast<guint32>(std::stoi(text_input)));
-        Logger::debug("Received response from user: " + text_input);
-        window->hardwareInterface->respond_from_user(response,
-                                                     user_prompt_handle);
-        user_prompt_handle.reset();
+void ConnectButton::user_number_response(const QString& prompt,
+                                         std::shared_prt<void> handle) {
+    bool ok;
+    auto response = window->user_get_int(prompt, ok);
+    if (ok) {
+        Logger::debug("Received response from user: " + 
+                       std::to_string(response));
+        window->hardwareInterface->respond_from_user(
+                QVariant<int>(response), handle);
+    } else {
+        send_cancel(handle);
     }
 }
 
-void ConnectButton::user_none_response(int /*none*/) { window->hidePopup(); }

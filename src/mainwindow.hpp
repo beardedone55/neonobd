@@ -25,13 +25,9 @@
 #include "settings.hpp"
 #include "terminal.hpp"
 #include "ui_neonobd.h"
-#include <gtkmm/cssprovider.h>
-#include <gtkmm/window.h>
-#include <memory>
 #include <QWidget>
 
 using neon::InterfaceType;
-using neon::ResponseType;
 
 class MainWindow : public QWidget {
   public:
@@ -39,25 +35,20 @@ class MainWindow : public QWidget {
     MainWindow(const MainWindow&) = delete;
     MainWindow& operator=(const MainWindow&) = delete;
     virtual ~MainWindow();
-    std::shared_ptr<BluetoothSerialPort> bluetoothSerialPort;
-    std::shared_ptr<SerialPort> serialPort;
-    std::shared_ptr<HardwareInterface> hardwareInterface;
-    std::unique_ptr<Home> home;
-    std::unique_ptr<Settings> settings;
-    std::unique_ptr<Terminal> terminal;
-    QStackedWidget view_stack;
-
     void setHardwareInterface(InterfaceType ifType);
-    void showPopup(const std::string& message, ResponseType type,
-                   const sigc::slot<void(int)>& response);
-    void hidePopup();
+    int user_get_int(const QString& prompt, bool& ok);
+    QString user_get_text(const QString& prompt, bool& ok);
+    bool user_get_yes_no(const QString& prompt);
 
-  protected:
-    Ui::ViewStack ui;
-    Gtk::MessageDialog* popup = nullptr;
-    sigc::connection popup_response_connection;
-    bool popup_shown = false;
-    std::unique_ptr<Gtk::MessageDialog> yes_no_dialog;
-    std::unique_ptr<Gtk::MessageDialog> text_input_dialog;
-    std::unique_ptr<Gtk::MessageDialog> number_input_dialog;
+    Home m_home;
+    Settings m_settings;
+    Terminal m_terminal;
+
+  private:
+    Ui::ViewStack m_ui;
+    BluetoothSerialPort m_bluetooth_serial_port;
+    SerialPort m_serial_port;
+    HardwareInterface* m_hardware_interface = nullptr;
+    QStackedWidget m_view_stack;
+
 };

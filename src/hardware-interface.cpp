@@ -1,5 +1,5 @@
 /* This file is part of neonobd - OBD diagnostic software.
- * Copyright (C) 2022-2024  Brian LePage
+ * Copyright (C) 2022-2026  Brian LePage
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,22 +17,8 @@
 
 #include "hardware-interface.hpp"
 #include <cstddef>
-#include <glibmm/refptr.h>
-#include <glibmm/ustring.h>
 #include <shared_mutex>
-#include <sigc++/connection.h>
-#include <sigc++/functors/slot.h>
 #include <unistd.h>
-
-sigc::connection
-HardwareInterface::attach_connect_complete(const sigc::slot<void(bool)>& slot) {
-    return m_complete_connection.connect(slot);
-}
-sigc::connection HardwareInterface::attach_user_prompt(
-    const sigc::slot<void(const Glib::ustring&, ResponseType,
-                          Glib::RefPtr<void>)>& slot) {
-    return m_request_user_input.connect(slot);
-}
 
 size_t HardwareInterface::read(char* buf, std::size_t buf_size) {
     const std::shared_lock lock(m_sock_fd_mutex);
