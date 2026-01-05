@@ -1,5 +1,5 @@
 /* This file is part of neonobd - OBD diagnostic software.
- * Copyright (C) 2022-2024  Brian LePage
+ * Copyright (C) 2022-2026  Brian LePage
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,31 +22,32 @@
 #include <gtkmm/builder.h>
 #include <gtkmm/button.h>
 #include <sigc++/connection.h>
+#include <QPushButton>
 
 class MainWindow;
 
 using neon::ResponseType;
 
-class ConnectButton : public Gtk::Button {
+class ConnectButton : public QPushButton {
+  Q_OBJECT
   public:
-    ConnectButton(BaseObjectType* cobj, const Glib::RefPtr<Gtk::Builder>& ui);
+    ConnectButton();
 
   private:
     MainWindow* window;
-    sigc::connection user_prompt_connection;
-    sigc::connection connect_complete_connection;
-    Glib::RefPtr<void> user_prompt_handle;
 
-    void clicked();
+    void user_yes_no_response(const QString prompt,
+                              std::shared_ptr<void> handle);
+    void user_text_response(const QString& prompt,
+                            std::shared_ptr<void> handle);
+    void user_number_response(const QString& prompt,
+                              std::shared_ptr<void> handle);
+    void send_cancel(std::shared_ptr<void> handle);
+
+  private slots:
+    void on_clicked();
     void connect_complete(bool result);
-    void user_prompt(const Glib::ustring& prompt, ResponseType responseType,
-                     Glib::RefPtr<void>);
+    void user_prompt(const QString& prompt, ResponseType responseType,
+                     std::shared_ptr<void> handle);
 
-    void user_yes_no_response(int responseCode);
-
-    Glib::ustring get_user_input(int responseCode, const char* widget);
-    void user_text_response(int responseCode);
-    void user_number_response(int responseCode);
-    void user_none_response(int responseCode);
-    void send_cancel();
 };

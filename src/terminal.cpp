@@ -1,5 +1,5 @@
 /* This file is part of neonobd - OBD diagnostic software.
- * Copyright (C) 2022-2024  Brian LePage
+ * Copyright (C) 2022-2026  Brian LePage
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,35 +27,32 @@
 #include <sigc++/functors/mem_fun.h>
 
 Terminal::Terminal(MainWindow* main_window)
-    : window{main_window},
-      visibleView{window->viewStack->property_visible_child_name()} {
-    auto user_interface = window->ui;
-    visibleView.signal_changed().connect(
-        sigc::mem_fun(*this, &Terminal::on_show));
+    : m_window{main_window} {
+    
+    auto& user_interface = m_window->m_ui;
+    connect(&m_window.m_view_stack, &QStackedWidget::currentChanged,
+            this, &Terminal::on_show);
 
-    homeButton =
-        user_interface->get_widget<Gtk::Button>("terminal_home_button");
-    homeButton->signal_clicked().connect(
-        sigc::mem_fun(*this, &Terminal::homeClicked));
+    m_home_button = user_interface.terminal_home_button;
+    connect(m_home_button, &QPushButton::clicked, this,
+            &Terminal::home_clicked);
 
-    terminal = user_interface->get_widget<Gtk::TextView>("terminal_text_view");
-    textBuffer = Gtk::TextBuffer::create();
-    terminal->set_buffer(textBuffer);
-    textBuffer->signal_insert().connect(
-        sigc::mem_fun(*this, &Terminal::textEntered));
-    tagReadOnly = textBuffer->create_tag();
-    tagReadOnly->property_editable() = false;
-    inputBegin = textBuffer->create_mark(textBuffer->begin());
-    textBuffer->property_cursor_position().signal_changed().connect(
-        sigc::mem_fun(*this, &Terminal::cursorMoved));
+    m_terminal = user_interface.terminal_text_view;
+    
+    connect(m_terminal, &QPlainTextEdit::cursorPositionChanged,
+            this, &Terminal::cursor_moved);
 
-    dispatcher.connect(sigc::mem_fun(*this, &Terminal::reader_notification));
+    connect(this, &Terminal::read_data_available,
+            this, &Terminal::reader_notification);
+
+    connect(m_terminal, &QPlainTextEdit::textChanged,
+            this, text_entered);
 }
 
 Terminal::~Terminal() {
-    stop_reader = true;
-    if (reader_thread && reader_thread->joinable()) {
-        reader_thread->join();
+    m_stop_reader = true;
+    if (m_reader_thread && m_reader_thread->joinable()) {
+        m_reader_thread->join();
     }
 }
 
@@ -63,98 +60,96 @@ using namespace std::chrono_literals;
 
 void Terminal::read_data() {
     Logger::debug("Terminal reader thread started.");
-    auto hwif = window->hardwareInterface;
+    auto hwif = m_window->m_hardware_interface;
     // std::operation""ms is included in <chrono> according to c++ docs.
     // NOLINTNEXTLINE(misc-include-cleaner)
     static constexpr std::chrono::milliseconds timeout = 100ms;
     hwif->set_timeout(timeout);
     std::string tempBuffer;
-    while (!stop_reader) {
+    while (!m_stop_reader) {
         auto bytecount = hwif->read(tempBuffer);
         if (bytecount > 0) {
             const std::lock_guard lock(read_buffer_mutex);
-            read_buffer.append(tempBuffer);
-            dispatcher.emit();
+            m_read_buffer.append(tempBuffer);
+            emit read_data_available();
         }
     }
-    reader_stopped = true;
+    m_reader_stopped = true;
     Logger::debug("Terminal reader thread stopped.");
 }
 
 void Terminal::start_reader_thread() {
-    if (reader_thread && reader_thread->joinable()) {
-        reader_thread->join();
+    if (m_reader_thread && m_reader_thread->joinable()) {
+        m_reader_thread->join();
     }
 
-    reader_stopped = false;
-    read_buffer.resize(0);
-    reader_thread =
+    m_reader_stopped = false;
+    m_read_buffer.resize(0);
+    m_reader_thread =
         std::make_unique<std::thread>([this]() { this->read_data(); });
 }
 
 void Terminal::reader_notification() {
-    if (reader_stopped) {
-        reader_thread->join();
-        if (!stop_reader) {
+    if (m_reader_stopped) {
+        m_reader_thread->join();
+        if (!m_stop_reader) {
             start_reader_thread();
         }
         return;
     }
 
     const std::lock_guard lock(read_buffer_mutex);
-    auto pos = textBuffer->insert(inputBegin->get_iter(), read_buffer);
-    lock_text(pos);
-    terminal->scroll_to(inputBegin);
+    auto pos = m_terminal->textCursor();
+    pos.setPosition(m_input_begin);
+    m_terminal->setTextCursor(pos);
+    m_terminal->insertPlainText(read_buffer);
+    m_input_begin = m_terminal->textCursor().position();
     read_buffer.resize(0);
 }
 
-void Terminal::lock_text(const Gtk::TextBuffer::iterator& pos) {
-    textBuffer->apply_tag(tagReadOnly, textBuffer->begin(), pos);
-    textBuffer->move_mark(inputBegin, pos);
-}
-
 void Terminal::on_show() {
-    if (visibleView.get_value() != "terminal_view") {
+    if (m_window->m_view_stack.currentWidget() != 
+        m_window->m_ui.terminal_view) {
         return;
     }
 
-    terminal->grab_focus();
-    textBuffer->set_text(">");
-    lock_text(textBuffer->end());
+    m_terminal->setFocus();
+    m_terminal.setPlainText(">");
+    m_input_begin = m_terminal->textCursor().position();
 
-    stop_reader = false;
+    m_stop_reader = false;
 
-    if (!reader_stopped) {
+    if (!m_reader_stopped) {
         return;
     }
 
     start_reader_thread();
 }
 
-void Terminal::homeClicked() {
-    stop_reader = true;
-    window->viewStack->set_visible_child("home_view");
+void Terminal::home_clicked() {
+    m_stop_reader = true;
+    auto home_view = m_window->m_ui.home_view;
+    m_window->m_view_stack.setCurrentWidget(home_view);
 }
 
-void Terminal::cursorMoved() {
-    if (textBuffer->get_insert()->get_iter() < inputBegin->get_iter()) {
-        textBuffer->place_cursor(inputBegin->get_iter());
+void Terminal::cursor_moved() {
+    if (m_terminal->textCursor().position() < m_input_begin) {
+        m_terminal->moveCursor(QTextCursor::End);
     }
 }
 
-void Terminal::textEntered(Gtk::TextBuffer::iterator& pos,
-                           const Glib::ustring& text, int /*bytes*/) {
-    if (text == "\n" && pos > inputBegin->get_iter()) {
-        textBuffer->backspace(pos);
-        std::string user_input =
-            textBuffer->get_text(inputBegin->get_iter(), textBuffer->end());
+void Terminal::text_entered() {
+    auto document = m_terminal->document();
+    int last_pos = document->characterCount() - 1;
+    if (document->characterAt(last_pos) == '\n' && 
+        last_pos > m_input_begin) {
+        QTextCursor selection(document);
+        selection.setPosition(m_input_begin);
+        selection.setPosition(last_pos-1, QTextCursor::KeepAnchor);
+        std::string user_input = selection.selectedText();
         Logger::debug("User input: " + user_input);
-        textBuffer->place_cursor(textBuffer->end());
-        textBuffer->insert_at_cursor("\r\n");
-        lock_text(textBuffer->end());
-        terminal->scroll_to(inputBegin);
-
+        m_input_begin = document->characterCount();
         user_input.append("\r");
-        window->hardwareInterface->write(user_input);
+        m_window->m_hardware_interface->write(user_input);
     }
 }

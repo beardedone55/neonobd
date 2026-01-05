@@ -1,5 +1,5 @@
 /* This file is part of neonobd - OBD diagnostic software.
- * Copyright (C) 2022-2024  Brian LePage
+ * Copyright (C) 2022-2026  Brian LePage
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,12 +22,14 @@
 #include <gtkmm/button.h>
 #include <gtkmm/textbuffer.h>
 #include <gtkmm/textview.h>
-#include <sigc++/trackable.h>
 #include <thread>
+#include <QObject>
+#include <QPushButton>
 
 class MainWindow;
 
-class Terminal : public sigc::trackable {
+class Terminal : public QObject {
+  Q_OBJECT
   public:
     explicit Terminal(MainWindow* window);
     Terminal(const Terminal&) = delete;
@@ -35,27 +37,26 @@ class Terminal : public sigc::trackable {
     ~Terminal();
 
   private:
-    MainWindow* window;
-    Glib::PropertyProxy<Glib::ustring> visibleView;
-    Gtk::Button* homeButton;
-    Gtk::TextView* terminal;
-    Glib::RefPtr<Gtk::TextBuffer> textBuffer;
-    Glib::RefPtr<Gtk::TextBuffer::Tag> tagReadOnly;
-    Glib::RefPtr<Gtk::TextBuffer::Mark> inputBegin;
-    Glib::Dispatcher dispatcher;
-    std::unique_ptr<std::thread> reader_thread;
-    volatile bool stop_reader = false;
-    volatile bool reader_stopped = true;
-    std::string read_buffer;
-    std::mutex read_buffer_mutex;
+    MainWindow* m_window;
+    QPushButton* m_home_button;
+    QPlainTextEdit* m_terminal;
+    int m_input_begin = 0;
+    std::unique_ptr<std::thread> m_reader_thread;
+    volatile bool m_stop_reader = false;
+    volatile bool m_reader_stopped = true;
+    std::string m_read_buffer;
+    std::mutex m_read_buffer_mutex;
 
-    void on_show();
-    void homeClicked();
-    void textEntered(Gtk::TextBuffer::iterator& pos, const Glib::ustring& text,
-                     int bytes);
-    void cursorMoved();
-    void lock_text(const Gtk::TextBuffer::iterator& pos);
     void read_data();
     void start_reader_thread();
+
+  signals:
+    void read_data_available();
+
+  slots:
+    void on_show();
+    void home_clicked();
+    void text_entered();
+    void cursor_moved();
     void reader_notification();
 };

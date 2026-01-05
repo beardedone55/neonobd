@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1495</width>
-    <height>803</height>
+    <width>928</width>
+    <height>325</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -38,7 +38,7 @@
       <property name="font">
        <font>
         <family>Noto Color Emoji</family>
-        <pointsize>250</pointsize>
+        <pointsize>50</pointsize>
        </font>
       </property>
       <property name="text">
@@ -47,7 +47,7 @@
      </widget>
     </item>
     <item row="1" column="1">
-     <widget class="QPushButton" name="connect_button">
+     <widget class="ConnectButton" name="connect_button">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
         <horstretch>0</horstretch>
@@ -57,7 +57,7 @@
       <property name="font">
        <font>
         <family>Noto Color Emoji</family>
-        <pointsize>250</pointsize>
+        <pointsize>50</pointsize>
        </font>
       </property>
       <property name="text">
@@ -76,7 +76,7 @@
       <property name="font">
        <font>
         <family>Adwaita Mono</family>
-        <pointsize>250</pointsize>
+        <pointsize>50</pointsize>
        </font>
       </property>
       <property name="text">
@@ -134,13 +134,13 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>1475</width>
-         <height>739</height>
+         <width>908</width>
+         <height>257</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <widget class="QPlainTextEdit" name="plainTextEdit">
+         <widget class="QPlainTextEdit" name="terminal_text_view">
           <property name="plainText">
            <string notr="true"/>
           </property>
@@ -267,6 +267,12 @@
          </item>
          <item row="2" column="2">
           <widget class="QProgressBar" name="bluetooth_scan_progress">
+           <property name="font">
+            <font/>
+           </property>
+           <property name="autoFillBackground">
+            <bool>false</bool>
+           </property>
            <property name="value">
             <number>24</number>
            </property>
@@ -395,6 +401,13 @@
    </layout>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ConnectButton</class>
+   <extends>QPushButton</extends>
+   <header>connect-button.hpp</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
