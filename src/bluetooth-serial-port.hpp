@@ -1,5 +1,5 @@
 /* This file is part of neonobd - OBD diagnostic software.
- * Copyright (C) 2022-2024  Brian LePage
+ * Copyright (C) 2022-2026  Brian LePage
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,15 +17,17 @@
 
 #pragma once
 
-#include "connection.hpp"
+#include "dbus-type.hpp"
 #include "hardware-interface.hpp"
 #include "neonobd_types.hpp"
 #include <chrono>
 #include <cstdint>
-#include <giomm/dbusobjectmanagerclient.h>
-#include <giomm/dbusproxy.h>
 #include <memory>
+#include <string>
+#include <string_view>
+#include <systemd/sd-bus.h>
 #include <unordered_map>
+#include <vector>
 
 using neon::ResponseType;
 using namespace std::chrono_literals;
@@ -38,53 +40,58 @@ class BluetoothSerialPort : public HardwareInterface {
     ~BluetoothSerialPort() override;
 
     // HardwareInterface overrides
-    bool connect(const Glib::ustring& device_name) override;
-    void respond_from_user(const Glib::VariantBase& response,
-                           const Glib::RefPtr<void>& signal_handle) override;
+    bool connect(const std::string& device_address, std::function<void(bool)> callback) override;
+    void respond_from_user(const ResponseVariant& response, void* handle) override;
 
     void set_timeout(std::chrono::milliseconds timeout) override;
 
-    static std::shared_ptr<BluetoothSerialPort> get_BluetoothSerialPort();
+    //Event Loop Processing Methods
+    //-------------------------------------------------------
+    void process_events(std::chrono::microseconds timeout = 0s);
+
 
     // Host Controller Access Methods
     //--------------------------------------------------------
     // Get vector containing bluez dbus object paths of all
     // bluetooth controllers available on the system.
-    std::vector<Glib::ustring> get_controller_names();
+    std::vector<std::string> get_controller_names();
 
     // Select the default controller by dbus object path.
     // This controller will be used to find and connect
     // to remote devices.
-    bool select_controller(const Glib::ustring& controller_name);
+    bool select_controller(const std::string& controller_name);
 
     // Remote Device Access Methods
     //-------------------------------------------------
 
-    // Return map of remote device addresses to their device names
-    std::vector<std::pair<Glib::ustring, Glib::ustring>>
-    get_device_names_addresses();
+    // Disconnect remote device
+    void disconnect(std::function<void()> callback);
 
-    // Signal to connect to that will report progress of
-    // device scan.  Parameter is integer that represents
-    // percent complete.  At 100, scan is complete.
-    sigc::signal<void(int)> signal_probe_progress();
+    // Return map of remote device addresses to their device names
+
+    struct DeviceInfo {
+        std::string name;
+        std::string address;
+    };
+
+    std::vector<DeviceInfo> get_device_names_addresses();
 
     // Initiate scan of remote devices using default
     // bluetooth controller.
-    void probe_remote_devices(std::chrono::seconds probeTime = 10s);
+    void probe_remote_devices(std::function<void(int)> callback, std::chrono::seconds probeTime = 10s);
 
     // Pairing response methods
     //-----------------------------------------------
     // Send pin code in response to request for pin
     // code during device pairing.  Must be called
     // by slot that is connected to request_pin_code signal.
-    void send_pin_code(const Glib::ustring& pin_code);
+    void send_pin_code(const std::string& pin_code);
 
     // Send 6-digit passkey as integer in response
     // to request for passkey during device pairing.
     // Must be called by slot that is connected to
     // request_pass_key signal.
-    void send_pass_key(guint32 pin_code);
+    void send_pass_key(std::uint32_t pin_code);
 
     // Send confirmation (true = confirmed,
     // false = not confirmed) in response to request
@@ -101,82 +108,94 @@ class BluetoothSerialPort : public HardwareInterface {
     void send_authorization(bool authorized);
 
   private:
-    using ProxyMap =
-        std::unordered_map<std::string, Glib::RefPtr<Gio::DBus::Proxy>>;
 
-    static std::weak_ptr<BluetoothSerialPort> m_bluetooth_serial_port;
-    static int m_object_count;
+    using DBusPtr =
+        std::unique_ptr<sd_bus, void(*)(sd_bus*)>;
 
-    ProxyMap m_controllers;
-    ProxyMap m_remote_devices;
-    guint m_agent_id = 0;
-    guint m_profile_id = 0;
-    Glib::RefPtr<Gio::DBus::Proxy> m_selected_controller;
-    Glib::RefPtr<Gio::DBus::Proxy> m_agent_manager;
-    Glib::RefPtr<Gio::DBus::Proxy> m_profile_manager;
-    Glib::RefPtr<Gio::DBus::ObjectManagerClient> m_manager;
-    sigc::signal<void(int)> m_probe_progress_signal;
-    Connection m_pre_connection_scan_result;
-    bool m_probe_in_progress;
-    int m_probe_progress;
-    Glib::DBusObjectPathString m_connected_device_path;
-    sigc::signal<void()> m_agent_cancel;
-    Glib::RefPtr<Gio::DBus::MethodInvocation> m_request_pin_invocation;
-    Glib::RefPtr<Gio::DBus::MethodInvocation> m_request_passkey_invocation;
-    Glib::RefPtr<Gio::DBus::MethodInvocation> m_request_confirmation_invocation;
-    Glib::RefPtr<Gio::DBus::MethodInvocation>
-        m_request_authorization_invocation;
-    Connection m_object_add_connection;
-    Connection m_object_remove_connection;
-    Connection m_probe_timer_connection;
+    using DBusEventPtr =
+        std::unique_ptr<sd_event, void(*)(sd_event*)>;
+
+    DBusPtr m_system_bus;
+    DBusEventPtr m_event;
+
+    //Map object path to object's interfaces.
+    using DBusObjects = 
+        std::unordered_map<std::string, DBusType>;
+
+    DBusObjects m_controllers;
+    DBusObjects m_remote_devices;
+    std::unordered_map<std::string,std::string> m_dev_name_path_map;
+    std::string m_agent_manager;
+    std::string m_profile_manager;
+
+    static const sd_bus_vtable profile_vtable[];
+    static const sd_bus_vtable agent_vtable[];
+
+    std::string m_connected_device_path;
+    std::string m_selected_controller;
+
+    std::chrono::seconds m_probe_time;
+    bool m_probe_in_progress = false;
+    int m_probe_progress = 0;
+    std::function<void(int)> m_probe_callback;
+    std::function<void()> m_complete_disconnect;
 
     // Private Methods
-    void manager_created(Glib::RefPtr<Gio::AsyncResult>& result);
-    void update_object_state(const Glib::RefPtr<Gio::DBus::Object>& obj,
-                             bool addObject);
-    void add_object(const Glib::RefPtr<Gio::DBus::Object>& obj);
-    void remove_object(const Glib::RefPtr<Gio::DBus::Object>& obj);
-    void probe_finish(Glib::RefPtr<Gio::AsyncResult>& result,
-                      std::chrono::seconds timeout,
-                      const Glib::RefPtr<Gio::DBus::Proxy>& controller);
-    void initiate_connection(const Glib::RefPtr<Gio::DBus::Proxy>& device);
-    void finish_connection(Glib::RefPtr<Gio::AsyncResult>& result);
-    bool update_probe_progress();
-    void pre_connection_scan_progress(int percent_complete,
-                                      const Glib::ustring& device_name);
-    void stop_probe();
-    void stop_probe_finish(const Glib::RefPtr<Gio::AsyncResult>& result,
-                           const Glib::RefPtr<Gio::DBus::Proxy>& controller);
-    void emit_probe_progress(int percent_complete);
-    guint register_object(const std::string& interface_path,
-                          const Gio::DBus::InterfaceVTable& vtable);
+
+    static DBusPtr get_system_dbus();
+    DBusEventPtr get_dbus_event();
+    void connect_object_manager();
+    bool connect_object_manager(sd_bus_message_handler_t, std::string_view);
+    static int add_object(sd_bus_message*, void*, sd_bus_error*);
+    int add_object(const std::string& path, const DBusType& obj);
+    static int remove_object(sd_bus_message*, void*, sd_bus_error*);
+    int remove_object(const std::string& path, const DBusType& obj);
+    void get_objects();
+    static int get_objects_complete(sd_bus_message*, void*, sd_bus_error*);
     void register_profile();
     void register_agent();
-    static void
-    register_complete(const Glib::RefPtr<Gio::AsyncResult>& result,
-                      const Glib::RefPtr<Gio::DBus::Proxy>& manager);
-    static void
-    agent_method(const Glib::RefPtr<Gio::DBus::Connection>&,
-                 const Glib::ustring& sender, const Glib::ustring& object_path,
-                 const Glib::ustring& interface_name,
-                 const Glib::ustring& method_name,
-                 const Glib::VariantContainerBase& parameters,
-                 const Glib::RefPtr<Gio::DBus::MethodInvocation>& invocation);
+    int register_object(std::string_view interface, const sd_bus_vtable vtable[]);
+    static int register_complete(sd_bus_message*, void*, sd_bus_error*);
 
-    static void profile_method(
-        const Glib::RefPtr<Gio::DBus::Connection>&, const Glib::ustring& sender,
-        const Glib::ustring& object_path, const Glib::ustring& interface_name,
-        const Glib::ustring& method_name,
-        const Glib::VariantContainerBase& parameters,
-        const Glib::RefPtr<Gio::DBus::MethodInvocation>& invocation);
-    template <typename T>
-    void dbus_return(Glib::RefPtr<Gio::DBus::MethodInvocation>& invocation,
-                     const T& return_value);
-    void
-    dbus_confirm_request(bool confirmed,
-                         Glib::RefPtr<Gio::DBus::MethodInvocation>& invocation);
+    //Profile handlers
+    static int bt_release(sd_bus_message*, void*, sd_bus_error*);
+    static int bt_new_connection(sd_bus_message*, void*, sd_bus_error*);
+    static int bt_request_disconnection(sd_bus_message*, void*, sd_bus_error*);
+   
+    //Agent handlers
+    static std::string format_passkey(std::uint32_t value);
+    static int bt_agent_request(sd_bus_message*, void*, const std::string&, 
+                                const ResponseType response_type = neon::USER_STRING);
 
-    void request_from_user(
-        const Glib::ustring& message, const ResponseType response_type,
-        const Glib::RefPtr<Gio::DBus::MethodInvocation>& invocation);
+    template<typename T>
+    static int bt_agent_display(sd_bus_message*, void*, const std::string&);
+    static int bt_agent_release(sd_bus_message*, void*, sd_bus_error*);
+    static int bt_request_pin_code(sd_bus_message*, void*, sd_bus_error*);
+    static int bt_display_pin_code(sd_bus_message*, void*, sd_bus_error*);
+    static int bt_request_passkey(sd_bus_message*, void*, sd_bus_error*);
+    static int bt_display_passkey(sd_bus_message*, void*, sd_bus_error*);
+    static int bt_request_confirmation(sd_bus_message*, void*, sd_bus_error*);
+    static int bt_request_authorization(sd_bus_message*, void*, sd_bus_error*);
+    static int bt_authorize_service(sd_bus_message*, void*, sd_bus_error*);
+    static int bt_agent_cancel(sd_bus_message*, void*, sd_bus_error*);
+
+    static std::uint64_t get_tick_time(std::chrono::seconds probe_time);
+    static int probe_finish(sd_bus_message*, void*, sd_bus_error*);
+    static int update_probe_progress(sd_event_source *s, std::uint64_t usec, void* userdata);
+    void pre_connection_scan_progress(int percent_complete, const std::string& device_address);
+    int call_dbus(std::string_view path, std::string_view interface, std::string_view method,
+                  sd_bus_message_handler_t callback);
+
+    void initiate_connection(const std::string& device_address);
+    static int finish_connection(sd_bus_message* reply, void* userdata, sd_bus_error*);
+    void initiate_disconnect(const std::string& device_path);
+    static int finish_disconnect(sd_bus_message* reply, void* userdata, sd_bus_error*);
+
+    void stop_probe();
+    static int stop_probe_finish(sd_bus_message* reply, void* userdata, sd_bus_error*);
+    void emit_probe_progress(int percent_complete);
+
+    void request_from_user(const std::string& message, const ResponseType response_type,
+                           sd_bus_message* msg);
+
 };

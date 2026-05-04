@@ -17,25 +17,24 @@
 
 #pragma once
 #include "neonobd_types.hpp"
+#include <functional>
 #include <shared_mutex>
-#include <QObject>
-#include <QString>
-#include <QVariant>
+#include <stdexcept>
+#include <string>
 
 using neon::ResponseType;
+using neon::ResponseVariant;
+using UserInputFunction = std::function<void(const std::string&, const ResponseType, void*)>;
+using ConnectCompleteFunction = std::function<void(bool)>;
 
-class HardwareInterface : public QObject {
-
-  Q_OBJECT
-
+class HardwareInterface {
   public:
     HardwareInterface() = default;
     HardwareInterface(const HardwareInterface&) = delete;
     HardwareInterface& operator=(const HardwareInterface&) = delete;
     virtual ~HardwareInterface() = default;
-    virtual bool connect(const QString& device_name) = 0;
-    virtual void respond_from_user(const QVariant& response,
-                                   std::shared_ptr<void> signal_handle) = 0;
+    virtual bool connect(const std::string& device_name, std::function<void(bool)> callback) = 0;
+    virtual void respond_from_user(const ResponseVariant& response, void* handle) = 0;
 
     template <typename Container,
               typename Contents = typename Container::value_type>
@@ -60,13 +59,19 @@ class HardwareInterface : public QObject {
 
     virtual void set_timeout(std::chrono::milliseconds) {}
 
-  signals:
-	void complete_connection(bool);
-	void request_user_input(const QString&, ResponseType, std::shared_ptr<void>); 
+    void connect_user_input(UserInputFunction callback) {
+        if(m_request_user_input) {
+            throw std::runtime_error("Input handler already connected.");
+        }
+
+        m_request_user_input = callback;
+    }
 
   protected:
     int m_sock_fd = -1;
     std::shared_mutex m_sock_fd_mutex;
+    UserInputFunction m_request_user_input;
+    ConnectCompleteFunction m_complete_connection;
 
     virtual size_t read(char* buf, std::size_t size);
     virtual size_t write(const char* buf, std::size_t size);

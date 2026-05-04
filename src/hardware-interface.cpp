@@ -16,6 +16,7 @@
  */
 
 #include "hardware-interface.hpp"
+#include "logger.hpp"
 #include <cstddef>
 #include <shared_mutex>
 #include <unistd.h>
