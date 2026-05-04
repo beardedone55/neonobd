@@ -1,5 +1,5 @@
 /* This file is part of neonobd - OBD diagnostic software.
- * Copyright (C) 2022-2024  Brian LePage
+ * Copyright (C) 2022-2026  Brian LePage
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,9 +17,13 @@
 
 #pragma once
 
+#include <string>
+#include <variant>
+
 namespace neon {
 enum InterfaceType { BLUETOOTH_IF = 0, SERIAL_IF = 1 };
 
 enum ResponseType { USER_YN, USER_STRING, USER_INT, USER_NONE };
+using ResponseVariant = std::variant<std::monostate, bool, std::string, int>;
 
 }; // namespace neon
