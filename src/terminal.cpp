@@ -29,7 +29,7 @@
 Terminal::Terminal(MainWindow* main_window)
     : m_window{main_window} {
     
-    auto& user_interface = m_window->m_ui;
+    auto& user_interface = m_window->get_ui();
     connect(&m_window.m_view_stack, &QStackedWidget::currentChanged,
             this, &Terminal::on_show);
 
@@ -108,8 +108,8 @@ void Terminal::reader_notification() {
 }
 
 void Terminal::on_show() {
-    if (m_window->m_view_stack.currentWidget() != 
-        m_window->m_ui.terminal_view) {
+    if (m_window->get_view_stack().currentWidget() != 
+        m_window->get_ui().terminal_view) {
         return;
     }
 
@@ -128,7 +128,7 @@ void Terminal::on_show() {
 
 void Terminal::home_clicked() {
     m_stop_reader = true;
-    auto home_view = m_window->m_ui.home_view;
+    auto home_view = m_window->get_ui().home_view;
     m_window->m_view_stack.setCurrentWidget(home_view);
 }
 

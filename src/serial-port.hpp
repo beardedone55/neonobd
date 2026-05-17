@@ -23,38 +23,41 @@
 #include <memory>
 #include <string>
 #include <termios.h>
-#include <QString>
-#include <QVariant>
+
+using namespace std::chrono_literals;
 
 class SerialPort : public HardwareInterface {
-  Q_OBJECT
   public:
     SerialPort();
+    SerialPort(const SerialPort&) = delete;
+    SerialPort& operator=(const SerialPort&) = delete;
     ~SerialPort() override;
-    bool connect(const QString& device_name) override;
-    void respond_from_user(const QVariant&,
-                           const std::shared_ptr<void>) override {}
+    bool connect(const std::string& device_name, std::function<void(bool)> callback) override;
+    void respond_from_user(const ResponseVariant&, void* handle) override {}
     void set_timeout(std::chrono::milliseconds timeout) override;
+    
+    //Event Loop Processing Methods
+    //-------------------------------------------------------
+    void process_events(std::chrono::microseconds timeout = 0s) override;
+    int get_event_fd() override;
 
-    void set_baudrate(const QString& baudrate);
-    std::vector<QString> get_valid_baudrates();
-    static std::vector<QString> get_serial_devices();
+    void set_baudrate(const std::string& baudrate);
+    std::vector<std::string> get_valid_baudrates();
+    static std::vector<std::string> get_serial_devices();
 
   private:
     speed_t m_baudrate = B38400;
-    const std::unordered_map<std::string, speed_t> m_baudrates = {
-        {"9600", B9600},   {"19200", B19200},   {"38400", B38400},
-        {"57600", B57600}, {"115200", B115200}, {"230400", B230400}};
+    static const std::unordered_map<std::string, speed_t> m_baudrates;
     std::future<bool> m_is_connected;
     unsigned char m_timeout = 0;
     static void close_file(std::FILE* file);
     std::unique_ptr<FILE, decltype(&close_file)> m_sock_file;
+    std::function<void(bool)> m_connect_callback;
+    int m_event_fd[2]  = {-1, -1};
 
-    bool initiate_connection(const QString& device_name);
-
-  signals:
-    void connect_port();
-
-  slots:
-    void connect_complete();
+    bool initiate_connection(const std::string& device_name);
+    void connect_complete(); 
+    static ssize_t read_timed(int fd, char buf[], size_t sz, std::chrono::microseconds timeout);
+    void signal_event(const std::string& event_name);
 };
+

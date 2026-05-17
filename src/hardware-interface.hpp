@@ -35,6 +35,8 @@ class HardwareInterface {
     virtual ~HardwareInterface() = default;
     virtual bool connect(const std::string& device_name, std::function<void(bool)> callback) = 0;
     virtual void respond_from_user(const ResponseVariant& response, void* handle) = 0;
+    virtual void process_events(std::chrono::microseconds timeout) = 0;
+    virtual int get_event_fd() = 0;
 
     template <typename Container,
               typename Contents = typename Container::value_type>
@@ -65,6 +67,10 @@ class HardwareInterface {
         }
 
         m_request_user_input = callback;
+    }
+
+    void disconnect_user_input() {
+        m_request_user_input = nullptr;
     }
 
   protected:

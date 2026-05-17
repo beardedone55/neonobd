@@ -39,6 +39,8 @@ class MainWindow : public QWidget {
     int user_get_int(const QString& prompt, bool& ok);
     QString user_get_text(const QString& prompt, bool& ok);
     bool user_get_yes_no(const QString& prompt);
+    Ui::ViewStack& get_ui();
+    QStackedWidget& get_view_stack();
 
     Home m_home;
     Settings m_settings;

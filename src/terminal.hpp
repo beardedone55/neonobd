@@ -53,7 +53,7 @@ class Terminal : public QObject {
   signals:
     void read_data_available();
 
-  slots:
+  private slots:
     void on_show();
     void home_clicked();
     void text_entered();

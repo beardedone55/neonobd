@@ -21,33 +21,27 @@
 #include "dropdown.hpp"
 #include "neonobd_types.hpp"
 #include "serial-port.hpp"
-#include <giomm/settings.h>
-#include <glibmm/ustring.h>
-#include <gtkmm/button.h>
-#include <gtkmm/checkbutton.h>
-#include <gtkmm/grid.h>
-#include <gtkmm/label.h>
-#include <gtkmm/messagedialog.h>
-#include <gtkmm/progressbar.h>
-#include <gtkmm/stack.h>
-#include <sigc++/connection.h>
-#include <sigc++/trackable.h>
+#include <QString>
 
 class MainWindow;
 
 using neon::InterfaceType;
 
-class Settings : public sigc::trackable {
+class Settings {
+  Q_OBJECT
   public:
     explicit Settings(MainWindow* window);
     Settings(const Settings&) = delete;
     Settings& operator=(const Settings&) = delete;
     ~Settings();
 
-    Glib::ustring getSelectedDevice();
+    QString getSelectedDevice();
 
   private:
-    MainWindow* window;
+    QPushButton* m_home_button;
+    MainWindow* m_window;
+
+
     Glib::PropertyProxy<Glib::ustring> visibleView;
     std::shared_ptr<BluetoothSerialPort> btHardwareInterface;
     std::shared_ptr<SerialPort> serialHardwareInterface;
@@ -68,8 +62,10 @@ class Settings : public sigc::trackable {
     sigc::connection btScanConnection;
     Glib::RefPtr<Gio::Settings> settings;
     InterfaceType iftype;
-    void homeClicked();
+
+    void home_clicked();
     void on_show();
+
     void selectSerial();
     void selectBluetooth();
     void selectBluetoothController();
@@ -82,4 +78,8 @@ class Settings : public sigc::trackable {
     static void populateDropdown(const std::vector<Glib::ustring>& values,
                                  Gtk::DropDown* dropdown,
                                  const Glib::ustring& default_value);
+
+  private slots:
+    void home_clicked();
+    void on_show();
 };

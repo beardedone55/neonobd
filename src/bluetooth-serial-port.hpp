@@ -47,7 +47,8 @@ class BluetoothSerialPort : public HardwareInterface {
 
     //Event Loop Processing Methods
     //-------------------------------------------------------
-    void process_events(std::chrono::microseconds timeout = 0s);
+    void process_events(std::chrono::microseconds timeout = 0s) override;
+    int get_event_fd() override;
 
 
     // Host Controller Access Methods

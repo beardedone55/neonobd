@@ -346,6 +346,10 @@ void BTSP::process_events(std::chrono::microseconds timeout) {
     }
 }
 
+int BTSP::get_event_fd() {
+    return sd_event_get_fd(m_event.get());
+}
+
 bool BTSP::select_controller(
     const std::string& controller_name) {
     if (m_controllers.contains(controller_name)) {

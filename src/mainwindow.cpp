@@ -31,10 +31,6 @@ MainWindow::MainWindow()
       m_terminal(this) {
 
     m_ui.setupUi(&m_view_stack);
-
-    m_home = std::make_unique<Home>(this);
-    m_settings = std::make_unique<Settings>(this);
-    m_terminal = std::make_unique<Terminal>(this);
 }
 
 MainWindow::~MainWindow() { Logger::debug("Destroying MainWindow."); }
@@ -63,3 +59,12 @@ QString MainWindow::user_get_text(const QString& prompt, bool& ok) {
 bool MainWindow::user_get_yes_no(const QString& prompt) {
     return QMessageBox::question(nullptr, "", prompt) == QMessageBox::Yes;
 }
+
+Ui::ViewStack& MainWindow::get_ui() {
+    return m_ui;    
+}
+
+QStackedWidget& MainWindow::get_view_stack() {
+    return m_view_stack;
+}
+

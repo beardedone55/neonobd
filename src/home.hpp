@@ -45,7 +45,7 @@ class Home : public QObject {
     void enable_button(QPushButton* button);
     void disable_button(QPushButton* button);
 
-  slots:
+  private slots:
     void settings_clicked();
     void terminal_clicked();
 };

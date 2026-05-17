@@ -21,7 +21,7 @@
 #include "mainwindow.hpp"
 
 Home::Home(MainWindow* main_window) : m_window{main_window} {
-    auto& user_interface = m_window->m_ui;
+    auto& user_interface = m_window->get_ui();
     // Settings button
     m_settings_btn = user_interface.settings_button;
     connect(m_settings_btn, &QButton::clicked, this,
@@ -40,12 +40,12 @@ Home::Home(MainWindow* main_window) : m_window{main_window} {
 }
 
 void Home::settings_clicked() {
-    auto settings_view = m_window->m_ui.settings_view;
+    auto settings_view = m_window->get_ui().settings_view;
     m_window->viewStack.setCurrentWidget(settings_view);
 }
 
 void Home::terminal_clicked() {
-    auto terminal_view = m_window->m_ui.terminal_view;
+    auto terminal_view = m_window->get_ui().terminal_view;
     m_window->viewStack.setCurrentWidget(terminal_view);
 }
 
