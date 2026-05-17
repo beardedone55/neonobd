@@ -23,7 +23,6 @@
 #include <string>
 #include <utility>
 #include <QPushButton>
-#include <QVariant>
 #include <QString>
 
 ConnectButton::ConnectButton()
@@ -38,22 +37,19 @@ void ConnectButton::on_clicked() {
 
     window->home.disable_all();
 
-    connect(hwif, &HardwareInterface::request_user_input,
-            this, &ConnectButton::user_prompt);
+    hwif->connect_user_input(
+            [this](const std::string& text, const ResponseType response_type, void* handle) {
+                user_prompt(text, response_type, handle);
+            });
 
-    connect(hwif, &HardwareInterface::complete_connection,
-            this, &ConnectButton::connect_complete);
-
-    if (!hwif->connect(window->settings.getSelectedDevice())) {
+    if (!hwif->connect(window->settings.getSelectedDevice(), [this](bool success){connect_complete(success);})) {
         connect_complete(false);
     }
 }
 
 void ConnectButton::connect_complete(bool result) {
-    disconnect(hwif, &HardwareInterface::complete_connection,
-               this, &ConnectButton::user_prompt);
-    disconnect(hwif, &HardwareInterface::complete_connection,
-               this, &ConnectButton::connect_complete);
+    auto hwif = window->hardwareInterface;
+    hwif->disconnect_user_input();
 
     if (result) {
         Logger::debug("Connection to device was successful!");
@@ -65,26 +61,26 @@ void ConnectButton::connect_complete(bool result) {
     window->home.enable_all();
 }
 
-void ConnectButton::send_cancel(std::shared_ptr<void> handle) {
+void ConnectButton::send_cancel(void* handle) {
     auto hwif = window->hardwareInterface;
     Logger::debug("Responding with cancel from user.");
-    auto response = QVariant<bool>(false);
-    hwif->respond_from_user(response, handle);
+    hwif->respond_from_user(false, handle);
 }
 
-void ConnectButton::user_prompt(const QString& prompt,
+void ConnectButton::user_prompt(const std::string& prompt,
                                 ResponseType responseType,
-                                std::shared_ptr<void> handle) {
+                                void* handle) {
 
+    QString q_prompt = QString::fromStdString(prompt);
     switch (responseType) {
     case neon::USER_YN:
-        user_yes_no_response(prompt, handle);
+        user_yes_no_response(q_prompt, handle);
         break;
     case neon::USER_STRING:
-        user_text_response(prompt, handle);
+        user_text_response(q_prompt, handle);
         break;
     case neon::USER_INT:
-        user_number_response(prompt, handle);
+        user_number_response(q_prompt, handle);
         break;
     default:
         break;
@@ -95,40 +91,37 @@ void ConnectButton::user_prompt(const QString& prompt,
 
 void ConnectButton::user_yes_no_response(
         const QString& prompt,
-        std::shared_ptr<void> handle) {
+        void* handle) {
     bool response = window->user_get_yes_no(prompt);
 
     Logger::debug("Received response from user: " +
                   response ? "Yes" : "No");
 
     auto hwif = window->hardwareInterface;
-    hwif->respond_from_user(QVariant<bool>(response),
-                            handle);
+    hwif->respond_from_user(response, handle);
 }
 
 void ConnectButton::user_text_response(const QString& prompt,
-                                       std::shared_ptr<void> handle) {
+                                       void* handle) {
     bool ok;
     auto text_input = window->user_get_text(prompt, ok);
     if (ok && !text_input.empty()) {
-        auto response = QVariant<QString>(text_input);
+        std::string response = text_input;
         Logger::debug("Received response from user: " + text_input);
-        window->hardwareInterface->respond_from_user(response,
-                                                     user_prompt_handle);
+        window->hardwareInterface->respond_from_user(response, handle);
     } else if (!ok) {
         send_cancel(handle);
     }
 }
 
 void ConnectButton::user_number_response(const QString& prompt,
-                                         std::shared_prt<void> handle) {
+                                         void* handle) {
     bool ok;
     auto response = window->user_get_int(prompt, ok);
     if (ok) {
         Logger::debug("Received response from user: " + 
                        std::to_string(response));
-        window->hardwareInterface->respond_from_user(
-                QVariant<int>(response), handle);
+        window->hardwareInterface->respond_from_user(response, handle);
     } else {
         send_cancel(handle);
     }

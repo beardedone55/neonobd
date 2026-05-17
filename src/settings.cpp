@@ -52,14 +52,12 @@ Settings::Settings(MainWindow* main_window)
     auto user_interface = window->ui;
 
     // Detect if view has changed.
-    visibleView.signal_changed().connect(
-        sigc::mem_fun(*this, &Settings::on_show));
+    connect(&m_window.get_view_stack(), &QStackedWidget::currentChanged,
+            this, &Settings::on_show);
 
     // Assign action to home button
-    homeButton =
-        user_interface->get_widget<Gtk::Button>("settings_home_button");
-    homeButton->signal_clicked().connect(
-        sigc::mem_fun(*this, &Settings::homeClicked));
+    m_home_button = user_interface.settings_home_button;
+    connect(m_home_button, &QPushButton::clicked, this, &Settings::home_clicked);
 
     // Connection Settings
     // Assign actions to radio buttons
@@ -324,7 +322,8 @@ void Settings::populateDropdown(const std::vector<Glib::ustring>& values,
 }
 
 void Settings::on_show() {
-    if (visibleView.get_value() != "settings_view") {
+    if (m_window->get_view_stack().currentWidget() != 
+        m_window->get_ui().settings_view) {
         return;
     }
 

@@ -18,10 +18,6 @@
 #pragma once
 
 #include "neonobd_types.hpp"
-#include <glibmm/ustring.h>
-#include <gtkmm/builder.h>
-#include <gtkmm/button.h>
-#include <sigc++/connection.h>
 #include <QPushButton>
 
 class MainWindow;
@@ -37,17 +33,17 @@ class ConnectButton : public QPushButton {
     MainWindow* window;
 
     void user_yes_no_response(const QString prompt,
-                              std::shared_ptr<void> handle);
+                              void* handle);
     void user_text_response(const QString& prompt,
-                            std::shared_ptr<void> handle);
+                            void* handle);
     void user_number_response(const QString& prompt,
-                              std::shared_ptr<void> handle);
-    void send_cancel(std::shared_ptr<void> handle);
+                              void* handle);
+    void send_cancel(void* handle);
 
+    void connect_complete(bool result);
+    void user_prompt(const std::string& prompt, ResponseType responseType,
+                     void* handle);
   private slots:
     void on_clicked();
-    void connect_complete(bool result);
-    void user_prompt(const QString& prompt, ResponseType responseType,
-                     std::shared_ptr<void> handle);
 
 };
