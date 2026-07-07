@@ -33,7 +33,7 @@ class SerialPort : public HardwareInterface {
     SerialPort& operator=(const SerialPort&) = delete;
     ~SerialPort() override;
     bool connect(const std::string& device_name, std::function<void(bool)> callback) override;
-    void respond_from_user(const ResponseVariant&, void* handle) override {}
+    void respond_from_user(const ResponseVariant&, void*) override {}
     void set_timeout(std::chrono::milliseconds timeout) override;
     
     //Event Loop Processing Methods

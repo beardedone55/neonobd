@@ -49,6 +49,7 @@ endif()
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTKMM REQUIRED gtkmm-4.0)
+pkg_check_modules(SYSTEMD REQUIRED libsystemd)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 
@@ -60,13 +61,12 @@ qt_add_executable(neonobd
                   settings.cpp logger.cpp
                   connect-button.cpp
                   terminal.cpp serial-port.cpp
-                  elm327.cpp dropdown.cpp
-                  neonobd.ui)
+                  elm327.cpp neonobd.ui)
 
 target_include_directories(neonobd SYSTEM PRIVATE ${GTKMM_INCLUDE_DIRS})
 target_include_directories(neonobd PRIVATE "${PROJECT_SOURCE_DIR}")
 
-target_link_libraries(neonobd PRIVATE ${GTKMM_LIBRARIES} resources Qt6::Core Qt6::Gui Qt6::Widgets)
+target_link_libraries(neonobd PRIVATE ${GTKMM_LIBRARIES} ${SYSTEMD_LIBRARIES} resources Qt6::Core Qt6::Gui Qt6::Widgets)
 
 install(TARGETS neonobd RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 

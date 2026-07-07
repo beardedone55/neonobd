@@ -19,18 +19,16 @@
 #include "logger.hpp"
 #include "mainwindow.hpp"
 #include <chrono>
-#include <gtkmm/button.h>
-#include <gtkmm/textbuffer.h>
-#include <gtkmm/textview.h>
 #include <memory>
 #include <mutex>
-#include <sigc++/functors/mem_fun.h>
 
 Terminal::Terminal(MainWindow* main_window)
-    : m_window{main_window} {
-    
+    : m_window{main_window} { }
+
+
+void Terminal::init() {    
     auto& user_interface = m_window->get_ui();
-    connect(&m_window.m_view_stack, &QStackedWidget::currentChanged,
+    connect(&m_window->get_view_stack(), &QStackedWidget::currentChanged,
             this, &Terminal::on_show);
 
     m_home_button = user_interface.terminal_home_button;
@@ -40,13 +38,12 @@ Terminal::Terminal(MainWindow* main_window)
     m_terminal = user_interface.terminal_text_view;
     
     connect(m_terminal, &QPlainTextEdit::cursorPositionChanged,
-            this, &Terminal::cursor_moved);
+            this, &Terminal::reset_cursor);
 
     connect(this, &Terminal::read_data_available,
             this, &Terminal::reader_notification);
 
-    connect(m_terminal, &QPlainTextEdit::textChanged,
-            this, text_entered);
+    m_terminal->installEventFilter(this);
 }
 
 Terminal::~Terminal() {
@@ -60,7 +57,7 @@ using namespace std::chrono_literals;
 
 void Terminal::read_data() {
     Logger::debug("Terminal reader thread started.");
-    auto hwif = m_window->m_hardware_interface;
+    auto hwif = m_window->get_hardware_interface();
     // std::operation""ms is included in <chrono> according to c++ docs.
     // NOLINTNEXTLINE(misc-include-cleaner)
     static constexpr std::chrono::milliseconds timeout = 100ms;
@@ -69,7 +66,7 @@ void Terminal::read_data() {
     while (!m_stop_reader) {
         auto bytecount = hwif->read(tempBuffer);
         if (bytecount > 0) {
-            const std::lock_guard lock(read_buffer_mutex);
+            const std::lock_guard lock(m_read_buffer_mutex);
             m_read_buffer.append(tempBuffer);
             emit read_data_available();
         }
@@ -98,13 +95,14 @@ void Terminal::reader_notification() {
         return;
     }
 
-    const std::lock_guard lock(read_buffer_mutex);
+    const std::lock_guard lock(m_read_buffer_mutex);
     auto pos = m_terminal->textCursor();
     pos.setPosition(m_input_begin);
     m_terminal->setTextCursor(pos);
-    m_terminal->insertPlainText(read_buffer);
-    m_input_begin = m_terminal->textCursor().position();
-    read_buffer.resize(0);
+    m_terminal->insertPlainText(QString::fromStdString(m_read_buffer));
+    reset_input_begin();
+    m_terminal->moveCursor(QTextCursor::End);
+    m_read_buffer.resize(0);
 }
 
 void Terminal::on_show() {
@@ -114,8 +112,10 @@ void Terminal::on_show() {
     }
 
     m_terminal->setFocus();
-    m_terminal.setPlainText(">");
-    m_input_begin = m_terminal->textCursor().position();
+    m_terminal->setPlainText(">");
+    m_terminal->moveCursor(QTextCursor::End);
+
+    reset_input_begin();
 
     m_stop_reader = false;
 
@@ -129,27 +129,40 @@ void Terminal::on_show() {
 void Terminal::home_clicked() {
     m_stop_reader = true;
     auto home_view = m_window->get_ui().home_view;
-    m_window->m_view_stack.setCurrentWidget(home_view);
+    m_window->get_view_stack().setCurrentWidget(home_view);
 }
 
-void Terminal::cursor_moved() {
+void Terminal::reset_cursor() {
     if (m_terminal->textCursor().position() < m_input_begin) {
         m_terminal->moveCursor(QTextCursor::End);
     }
 }
 
-void Terminal::text_entered() {
-    auto document = m_terminal->document();
-    int last_pos = document->characterCount() - 1;
-    if (document->characterAt(last_pos) == '\n' && 
-        last_pos > m_input_begin) {
-        QTextCursor selection(document);
-        selection.setPosition(m_input_begin);
-        selection.setPosition(last_pos-1, QTextCursor::KeepAnchor);
-        std::string user_input = selection.selectedText();
-        Logger::debug("User input: " + user_input);
-        m_input_begin = document->characterCount();
-        user_input.append("\r");
-        m_window->m_hardware_interface->write(user_input);
+bool Terminal::eventFilter(QObject* obj, QEvent* event) {
+    if(obj == m_terminal && event->type() == QEvent::KeyPress) {
+        reset_cursor();
+        auto key = dynamic_cast<QKeyEvent*>(event)->key();
+        if(key == Qt::Key_Enter || key == Qt::Key_Return) {
+            m_terminal->moveCursor(QTextCursor::End);
+            text_entered();
+            m_terminal->insertPlainText("\n");
+            reset_input_begin();
+            return true;
+        }
     }
+    return false;
+}
+
+void Terminal::text_entered() {
+    auto cursor = m_terminal->textCursor();
+    cursor.setPosition(m_input_begin);
+    cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
+    std::string user_input = cursor.selectedText().toStdString();
+    Logger::debug("User input: " + user_input);
+    user_input.append("\r");
+    m_window->get_hardware_interface()->write(user_input);
+}
+
+void Terminal::reset_input_begin() {
+    m_input_begin = m_terminal->textCursor().position();
 }

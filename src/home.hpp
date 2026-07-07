@@ -30,6 +30,7 @@ class Home : public QObject {
   Q_OBJECT
   public:
     explicit Home(MainWindow* window);
+    void init();
     void enable_all();
     void disable_all();
     void set_connected(bool connected);

@@ -48,6 +48,7 @@ SerialPort::SerialPort() : m_sock_file(nullptr, close_file) {
     if(pipe2(m_event_fd, O_DIRECT | O_CLOEXEC) < 0) {
         throw std::runtime_error("Creation of event pipe failed...");
     }
+    Logger::debug << "Created SerialPort.\n";
 }
 
 SerialPort::~SerialPort() {
@@ -58,8 +59,11 @@ SerialPort::~SerialPort() {
 }
 
 ssize_t SerialPort::read_timed(int fd, char buf[], size_t sz, std::chrono::microseconds timeout) {
-    pollfd pfd = { .fd = fd, .events = POLLIN };
-    int ret = poll(&pfd, 1, std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count());
+    pollfd pfd = { .fd = fd, .events = POLLIN, .revents=0 };
+    auto poll_timeout = std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count();
+    if(poll_timeout > INT_MAX)
+        poll_timeout = INT_MAX;
+    int ret = poll(&pfd, 1, static_cast<int>(poll_timeout));
     if(ret > 0) {
         return ::read(fd, buf, sz);
     } else if (ret < 0) {

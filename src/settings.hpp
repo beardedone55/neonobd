@@ -1,5 +1,5 @@
 /* This file is part of neonobd - OBD diagnostic software.
- * Copyright (C) 2022-2024  Brian LePage
+ * Copyright (C) 2022-2026  Brian LePage
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,68 +18,69 @@
 #pragma once
 
 #include "bluetooth-serial-port.hpp"
-#include "dropdown.hpp"
 #include "neonobd_types.hpp"
 #include "serial-port.hpp"
+#include <QComboBox>
+#include <QLabel>
+#include <QPushButton>
+#include <QProgressBar>
+#include <QRadioButton>
+#include <QSettings>
 #include <QString>
+#include <QWidget>
 
 class MainWindow;
 
 using neon::InterfaceType;
 
-class Settings {
+class Settings : public QObject {
   Q_OBJECT
   public:
     explicit Settings(MainWindow* window);
     Settings(const Settings&) = delete;
     Settings& operator=(const Settings&) = delete;
     ~Settings();
-
-    QString getSelectedDevice();
+    void init();
+    QString get_selected_device();
 
   private:
     QPushButton* m_home_button;
     MainWindow* m_window;
-
-
-    Glib::PropertyProxy<Glib::ustring> visibleView;
-    std::shared_ptr<BluetoothSerialPort> btHardwareInterface;
-    std::shared_ptr<SerialPort> serialHardwareInterface;
-    Gtk::Button* homeButton;
-    Gtk::CheckButton* bluetooth_rb;
-    Gtk::CheckButton* serial_rb;
-    Gtk::Label* btHostLabel;
-    Gtk::DropDown* m_bt_host_dropdown;
-    Gtk::Label* btDeviceLabel;
-    Gtk::Button* btDeviceScan;
-    Dropdown* m_bt_device_dropdown;
-    Gtk::Label* btScanLabel;
-    Gtk::ProgressBar* btScanProgress;
-    Gtk::Grid* btGrid;
-    Gtk::Grid* serialGrid;
-    Gtk::DropDown* m_serial_device_dropdown;
-    Gtk::DropDown* m_serial_baudrate_dropdown;
-    sigc::connection btScanConnection;
-    Glib::RefPtr<Gio::Settings> settings;
-    InterfaceType iftype;
-
-    void home_clicked();
-    void on_show();
-
-    void selectSerial();
-    void selectBluetooth();
-    void selectBluetoothController();
-    void selectBluetoothDevice();
-    void selectSerialDevice();
-    void selectSerialBaudrate();
-    void scanBluetooth();
-    void scanComplete();
-    void updateScanProgress(int percentComplete);
-    static void populateDropdown(const std::vector<Glib::ustring>& values,
-                                 Gtk::DropDown* dropdown,
-                                 const Glib::ustring& default_value);
+    QRadioButton* m_bluetooth_rb;
+    QRadioButton* m_serial_rb;
+    QWidget* m_bt_grid;
+    QLabel* m_host_label;
+    QComboBox* m_bt_host_dropdown;
+    QLabel* m_bt_device_label;
+    QComboBox* m_bt_device_dropdown;
+    QLabel* m_bt_scan_label;
+    QProgressBar* m_bt_scan_progress;
+    QPushButton* m_bt_device_scan; 
+    QWidget* m_serial_grid;
+    QComboBox* m_serial_device_dropdown;
+    QComboBox* m_serial_baudrate_dropdown;
+    BluetoothSerialPort& m_bt_hardware_interface;
+    SerialPort& m_serial_hardware_interface;
+    QSettings m_settings;
+    InterfaceType m_iftype;
 
   private slots:
     void home_clicked();
     void on_show();
+    void select_serial();
+    void select_bluetooth();
+    void select_bluetooth_controller(int index);
+    void select_bluetooth_device(int index);
+    void scan_bluetooth();
+    void select_serial_device(int index);
+    void select_serial_baudrate(int index);
+  
+  private:  
+    void scan_complete();
+    void update_scan_progress(int percent_complete);
+    static void populate_dropdown(const std::vector<std::string>& values,
+                                 QComboBox* dropdown,
+                                 const QString& default_value);
+    static bool valid_dropdown_index(int index, QComboBox* dropdown);
+    void add_device(const QString& name, const QString& address);
 };
