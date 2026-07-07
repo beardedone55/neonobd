@@ -17,13 +17,10 @@
 
 #pragma once
 
-#include <glibmm/dispatcher.h>
-#include <glibmm/ustring.h>
-#include <gtkmm/button.h>
-#include <gtkmm/textbuffer.h>
-#include <gtkmm/textview.h>
+#include <mutex>
 #include <thread>
 #include <QObject>
+#include <QPlainTextEdit>
 #include <QPushButton>
 
 class MainWindow;
@@ -35,6 +32,10 @@ class Terminal : public QObject {
     Terminal(const Terminal&) = delete;
     Terminal& operator=(const Terminal&) = delete;
     ~Terminal();
+    void init();
+
+  protected:
+    bool eventFilter(QObject* obj, QEvent* event) override;
 
   private:
     MainWindow* m_window;
@@ -49,6 +50,8 @@ class Terminal : public QObject {
 
     void read_data();
     void start_reader_thread();
+    void text_entered();
+    void reset_input_begin();
 
   signals:
     void read_data_available();
@@ -56,7 +59,6 @@ class Terminal : public QObject {
   private slots:
     void on_show();
     void home_clicked();
-    void text_entered();
-    void cursor_moved();
+    void reset_cursor();
     void reader_notification();
 };

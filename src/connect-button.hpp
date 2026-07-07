@@ -19,6 +19,7 @@
 
 #include "neonobd_types.hpp"
 #include <QPushButton>
+#include <QWidget>
 
 class MainWindow;
 
@@ -27,12 +28,10 @@ using neon::ResponseType;
 class ConnectButton : public QPushButton {
   Q_OBJECT
   public:
-    ConnectButton();
+    ConnectButton(QWidget* parent);
 
   private:
-    MainWindow* window;
-
-    void user_yes_no_response(const QString prompt,
+    void user_yes_no_response(const QString& prompt,
                               void* handle);
     void user_text_response(const QString& prompt,
                             void* handle);

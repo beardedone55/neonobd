@@ -156,7 +156,7 @@ void BTSP::initiate_connection(const std::string& device_address) {
     call_dbus(m_dev_name_path_map[device_address], "org.bluez.Device1", "Connect", finish_connection);
 }
 
-int BTSP::finish_disconnect(sd_bus_message* reply, void* userdata, sd_bus_error*) {
+int BTSP::finish_disconnect(sd_bus_message*, void* userdata, sd_bus_error*) {
     Logger::debug("Disconnect finished.");
     BluetoothSerialPort* bt_ptr = static_cast<BTSP*>(userdata);
     if(bt_ptr->m_complete_disconnect) {
@@ -255,10 +255,12 @@ void BTSP::set_timeout(std::chrono::milliseconds timeout) {
 }
 
 void BTSP::get_objects() {
+    Logger::debug << "get_objects() called.\n";
     call_dbus("/", "org.freedesktop.DBus.ObjectManager", "GetManagedObjects", get_objects_complete);
 }
 
 int BTSP::get_objects_complete(sd_bus_message* reply, void* userdata, sd_bus_error*) {
+    Logger::debug << "get_objects_complete() called.\n";
     if(sd_bus_message_is_method_error(reply, nullptr)) {
         Logger::error << "Failed to get DBus Objects from Object Manager.\n";
         return 0;
@@ -342,12 +344,25 @@ int BTSP::remove_object(const std::string& path, const DBusType& obj) {
 
 void BTSP::process_events(std::chrono::microseconds timeout) {
     if(m_event) {
-        while(sd_event_run(m_event.get(), timeout.count()) > 0); 
+        if(timeout != 0s) {
+            auto start = std::chrono::system_clock::now();
+            auto end = start;
+            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+            while(duration <= timeout && sd_event_run(m_event.get(), (timeout - duration).count()) > 0) {
+                end = std::chrono::system_clock::now();
+                duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+            } 
+        } else {
+            while(sd_event_run(m_event.get(), 0) > 0);
+        }
     }
 }
 
 int BTSP::get_event_fd() {
-    return sd_event_get_fd(m_event.get());
+    Logger::debug << "get_event_fd: m_event = " << m_event.get() << "\n";
+    int result = sd_event_get_fd(m_event.get());
+    Logger::debug << "Event fd = " << result << "\n";
+    return result;
 }
 
 bool BTSP::select_controller(
@@ -408,7 +423,7 @@ std::uint64_t BTSP::get_tick_time(std::chrono::seconds probe_time) {
     return std::chrono::microseconds(probe_time).count() / TICK_COUNT;
 }
 
-int BTSP::update_probe_progress(sd_event_source *s, std::uint64_t usec, void* userdata) {
+int BTSP::update_probe_progress(sd_event_source *s, std::uint64_t, void* userdata) {
     BluetoothSerialPort* bt_ptr = static_cast<BTSP*>(userdata);
     bt_ptr->emit_probe_progress(bt_ptr->m_probe_progress++);
     if (bt_ptr->m_probe_progress == FINISHED) {
@@ -483,7 +498,7 @@ constexpr auto OBJECT_PATH = "/com/github/beardedone55/bluetooth_serial";
 // https://www.bluetooth.com/specifications/assigned-numbers/service-discovery/
 constexpr auto SERIAL_PORT_UUID = "00001101-0000-1000-8000-00805f9b34fb";
 
-int BTSP::register_complete(sd_bus_message* msg, void* userdata, sd_bus_error* error) {
+int BTSP::register_complete(sd_bus_message* msg, void*, sd_bus_error*) {
     if(sd_bus_message_is_method_error(msg, nullptr)) {
         Logger::error << "Error occurred registering agent.\n";
     }
@@ -658,7 +673,7 @@ int BTSP::bt_agent_display(sd_bus_message* msg, void* userdata, const std::strin
     return 0;
 }
 
-int BTSP::bt_agent_release(sd_bus_message* msg, void* userdata, sd_bus_error*) {
+int BTSP::bt_agent_release(sd_bus_message*, void*, sd_bus_error*) {
     return 0;
 }
 
@@ -844,7 +859,8 @@ void BTSP::respond_from_user(const ResponseVariant& response, void* handle) {
             if (bool_response) {
                 sd_bus_reply_method_return(msg, "");
             } else {
-                sd_bus_reply_method_errorf(msg, "org.bluez.Error.Rejected", "");
+                sd_bus_reply_method_errorf(msg, "org.bluez.Error.Rejected",
+                        "No response from user.");
             }
         } else {
             if(std::holds_alternative<std::string>(response)) {

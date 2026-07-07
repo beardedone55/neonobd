@@ -25,44 +25,46 @@
 #include <QPushButton>
 #include <QString>
 
-ConnectButton::ConnectButton()
-	: window{std::dynamic_cast<MainWindow>(window())}
+ConnectButton::ConnectButton(QWidget* parent)
+	: QPushButton{parent}
 {
-	connect(this, &QPushButton::clicked, this &ConnectButton::on_clicked);
+	connect(this, &QPushButton::clicked, this, &ConnectButton::on_clicked);
 }
 
 void ConnectButton::on_clicked() {
     Logger::debug("Connect button clicked.");
-    auto hwif = window->hardwareInterface;
+    auto main_window = dynamic_cast<MainWindow*>(window());
+    auto hwif = main_window->get_hardware_interface();
 
-    window->home.disable_all();
+    main_window->m_home.disable_all();
 
     hwif->connect_user_input(
             [this](const std::string& text, const ResponseType response_type, void* handle) {
                 user_prompt(text, response_type, handle);
             });
 
-    if (!hwif->connect(window->settings.getSelectedDevice(), [this](bool success){connect_complete(success);})) {
+    if (!hwif->connect(main_window->m_settings.get_selected_device().toStdString(), 
+                        [this](bool success){connect_complete(success);})) {
         connect_complete(false);
     }
 }
 
 void ConnectButton::connect_complete(bool result) {
-    auto hwif = window->hardwareInterface;
+    auto main_window = dynamic_cast<MainWindow*>(window());
+    auto hwif = main_window->get_hardware_interface();
     hwif->disconnect_user_input();
+    main_window->m_home.enable_all();
 
     if (result) {
         Logger::debug("Connection to device was successful!");
-        window->home.set_connected(true);
+        main_window->m_home.set_connected(true);
     } else {
         Logger::debug("Connection to device failed!");
     }
-
-    window->home.enable_all();
 }
 
 void ConnectButton::send_cancel(void* handle) {
-    auto hwif = window->hardwareInterface;
+    auto hwif = dynamic_cast<MainWindow*>(window())->get_hardware_interface();
     Logger::debug("Responding with cancel from user.");
     hwif->respond_from_user(false, handle);
 }
@@ -92,23 +94,25 @@ void ConnectButton::user_prompt(const std::string& prompt,
 void ConnectButton::user_yes_no_response(
         const QString& prompt,
         void* handle) {
-    bool response = window->user_get_yes_no(prompt);
+    auto main_window = dynamic_cast<MainWindow*>(window());
+    bool response = main_window->user_get_yes_no(prompt);
 
-    Logger::debug("Received response from user: " +
-                  response ? "Yes" : "No");
+    Logger::debug << "Received response from user: " <<
+                  (response ? "Yes" : "No") << "\n";
 
-    auto hwif = window->hardwareInterface;
+    auto hwif = main_window->get_hardware_interface();
     hwif->respond_from_user(response, handle);
 }
 
 void ConnectButton::user_text_response(const QString& prompt,
                                        void* handle) {
     bool ok;
-    auto text_input = window->user_get_text(prompt, ok);
-    if (ok && !text_input.empty()) {
-        std::string response = text_input;
-        Logger::debug("Received response from user: " + text_input);
-        window->hardwareInterface->respond_from_user(response, handle);
+    auto main_window = dynamic_cast<MainWindow*>(window());
+    auto text_input = main_window->user_get_text(prompt, ok);
+    if (ok && !text_input.isEmpty()) {
+        std::string response = text_input.toStdString();
+        Logger::debug << "Received response from user: " << text_input.toStdString()  << "\n";
+        main_window->get_hardware_interface()->respond_from_user(response, handle);
     } else if (!ok) {
         send_cancel(handle);
     }
@@ -117,11 +121,12 @@ void ConnectButton::user_text_response(const QString& prompt,
 void ConnectButton::user_number_response(const QString& prompt,
                                          void* handle) {
     bool ok;
-    auto response = window->user_get_int(prompt, ok);
+    auto main_window = dynamic_cast<MainWindow*>(window());
+    auto response = main_window->user_get_int(prompt, ok);
     if (ok) {
         Logger::debug("Received response from user: " + 
                        std::to_string(response));
-        window->hardwareInterface->respond_from_user(response, handle);
+        main_window->get_hardware_interface()->respond_from_user(response, handle);
     } else {
         send_cancel(handle);
     }
