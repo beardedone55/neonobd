@@ -44,20 +44,23 @@ class Obd {
     Connection m_disconnect_connection;
     bool disconnecting = false;
 
-    using CommandResult = const std::unordered_map<unsigned int, std::vector<unsigned char>>&;
+    using CommandResult =
+        const std::unordered_map<unsigned int, std::vector<unsigned char>>&;
     using ResultTypes = std::variant<std::string, int, bool>;
-    using CommandCompleteFunction = std::function<std::vector<ResultTypes>(std::span<unsigned char>&)>;
+    using CommandCompleteFunction =
+        std::function<std::vector<ResultTypes>(std::span<unsigned char>&)>;
     using ResultSignal = sigc::signal<void(std::vector<ResultTypes>&)>;
 
-    std::queue<std::pair<ResultSignal, CommandCompleteFunction>> m_command_queue;
+    std::queue<std::pair<ResultSignal, CommandCompleteFunction>>
+        m_command_queue;
 
     Connection m_command_connection;
 
     void initComplete(bool success);
     void disconnectComplete();
     void command_complete(CommandResult);
-    ResultSignal get_PID(unsigned char ecu, unsigned char service, unsigned char pid);
-    std::vector<ResultTypes> get_MIL_status_complete(std::span<unsigned char>& data);
-    
-    
+    ResultSignal get_PID(unsigned char ecu, unsigned char service,
+                         unsigned char pid);
+    std::vector<ResultTypes>
+    get_MIL_status_complete(std::span<unsigned char>& data);
 };

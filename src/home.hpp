@@ -20,14 +20,14 @@
 #include "connect-button.hpp"
 #include "hardware-interface.hpp"
 #include "neonobd_types.hpp"
-#include <unordered_set>
-#include <QPushButton>
 #include <QObject>
+#include <QPushButton>
+#include <unordered_set>
 
 class MainWindow;
 
 class Home : public QObject {
-  Q_OBJECT
+    Q_OBJECT
   public:
     explicit Home(MainWindow* window);
     void init();
@@ -37,9 +37,9 @@ class Home : public QObject {
 
   private:
     MainWindow* m_window;
-    QPushButton* m_settings_btn;
-    ConnectButton* m_connect_btn;
-    QPushButton* m_terminal_btn;
+    QPushButton* m_settings_btn = nullptr;
+    ConnectButton* m_connect_btn = nullptr;
+    QPushButton* m_terminal_btn = nullptr;
     std::unordered_set<QPushButton*> m_enabled_buttons;
     bool m_connected = false;
 

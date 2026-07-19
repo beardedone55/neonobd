@@ -17,16 +17,16 @@
 
 #pragma once
 
-#include <mutex>
-#include <thread>
 #include <QObject>
 #include <QPlainTextEdit>
 #include <QPushButton>
+#include <mutex>
+#include <thread>
 
 class MainWindow;
 
 class Terminal : public QObject {
-  Q_OBJECT
+    Q_OBJECT
   public:
     explicit Terminal(MainWindow* window);
     Terminal(const Terminal&) = delete;
@@ -39,8 +39,8 @@ class Terminal : public QObject {
 
   private:
     MainWindow* m_window;
-    QPushButton* m_home_button;
-    QPlainTextEdit* m_terminal;
+    QPushButton* m_home_button = nullptr;
+    QPlainTextEdit* m_terminal = nullptr;
     int m_input_begin = 0;
     std::unique_ptr<std::thread> m_reader_thread;
     volatile bool m_stop_reader = false;

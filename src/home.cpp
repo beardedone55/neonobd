@@ -17,13 +17,13 @@
 
 #include "home.hpp"
 #include "connect-button.hpp"
-#include "logger.hpp"
 #include "mainwindow.hpp"
+#include <QPushButton>
 
-Home::Home(MainWindow* main_window) : m_window{main_window} { }
+Home::Home(MainWindow* main_window) : m_window{main_window} {}
 
 void Home::init() {
-    auto& user_interface = m_window->get_ui();
+    const auto& user_interface = m_window->get_ui();
     // Settings button
     m_settings_btn = user_interface.settings_button;
     connect(m_settings_btn, &QPushButton::clicked, this,
@@ -42,17 +42,17 @@ void Home::init() {
 }
 
 void Home::settings_clicked() {
-    auto settings_view = m_window->get_ui().settings_view;
+    auto* settings_view = m_window->get_ui().settings_view;
     m_window->get_view_stack().setCurrentWidget(settings_view);
 }
 
 void Home::terminal_clicked() {
-    auto terminal_view = m_window->get_ui().terminal_view;
+    auto* terminal_view = m_window->get_ui().terminal_view;
     m_window->get_view_stack().setCurrentWidget(terminal_view);
 }
 
 void Home::disable_all() {
-    while(!m_enabled_buttons.empty()) {
+    while (!m_enabled_buttons.empty()) {
         disable_button(*m_enabled_buttons.begin());
     }
 }

@@ -27,8 +27,8 @@ int main(int argc, char* argv[]) {
     Logger::setLogLevel(Logger::DEBUG);
 #endif
 
-    QApplication app(argc, argv);
+    const QApplication app(argc, argv);
     MainWindow window;
     window.show();
-    return app.exec();
+    return QApplication::exec();
 }

@@ -24,7 +24,8 @@
 
 using neon::ResponseType;
 using neon::ResponseVariant;
-using UserInputFunction = std::function<void(const std::string&, const ResponseType, void*)>;
+using UserInputFunction =
+    std::function<void(const std::string&, const ResponseType, void*)>;
 using ConnectCompleteFunction = std::function<void(bool)>;
 
 class HardwareInterface {
@@ -33,9 +34,10 @@ class HardwareInterface {
     HardwareInterface(const HardwareInterface&) = delete;
     HardwareInterface& operator=(const HardwareInterface&) = delete;
     virtual ~HardwareInterface() = default;
-    virtual bool connect(const std::string& device_name, std::function<void(bool)> callback) = 0;
-    virtual void respond_from_user(const ResponseVariant& response, void* handle) = 0;
-    virtual void process_events(std::chrono::microseconds timeout) = 0;
+    virtual bool connect(const std::string& device_name,
+                         std::function<void(bool)> callback) = 0;
+    virtual void respond_from_user(const ResponseVariant& response,
+                                   void* handle) = 0;
     virtual int get_event_fd() = 0;
 
     template <typename Container,
@@ -62,16 +64,14 @@ class HardwareInterface {
     virtual void set_timeout(std::chrono::milliseconds) {}
 
     void connect_user_input(UserInputFunction callback) {
-        if(m_request_user_input) {
+        if (m_request_user_input) {
             throw std::runtime_error("Input handler already connected.");
         }
 
         m_request_user_input = callback;
     }
 
-    void disconnect_user_input() {
-        m_request_user_input = nullptr;
-    }
+    void disconnect_user_input() { m_request_user_input = nullptr; }
 
   protected:
     int m_sock_fd = -1;

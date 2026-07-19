@@ -1,5 +1,5 @@
 ---
-Checks:          '*,-llvmlibc-*,-fuchsia-*,-modernize-use-trailing-return-type,-altera-*,-abseil-*,-*-avoid-do-while'
+Checks:          '*,-android-*,-llvmlibc-*,-fuchsia-*,-modernize-use-trailing-return-type,-altera-*,-abseil-*,-*-avoid-do-while'
 WarningsAsErrors: '*'
 HeaderFileExtensions:
   - ''

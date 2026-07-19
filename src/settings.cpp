@@ -22,8 +22,11 @@
 #include "neonobd_types.hpp"
 #include "serial-port.hpp"
 #include "ui_neonobd.h"
-#include <cstddef>
-#include <memory>
+#include <QComboBox>
+#include <QPushButton>
+#include <QRadioButton>
+#include <QStackedWidget>
+#include <QWidget>
 #include <string>
 #include <vector>
 
@@ -31,30 +34,32 @@ Settings::Settings(MainWindow* main_window)
     : m_window{main_window},
       m_bt_hardware_interface{main_window->get_bt_serial_port()},
       m_serial_hardware_interface{main_window->get_serial_port()},
-      m_settings{"beardedone55","neonobd"}
+      m_settings{"beardedone55", "neonobd"}
 
 {}
 
 void Settings::init() {
-    auto& user_interface = m_window->get_ui();
+    const auto& user_interface = m_window->get_ui();
 
     // Detect if view has changed.
-    connect(&m_window->get_view_stack(), &QStackedWidget::currentChanged,
-            this, &Settings::on_show);
+    connect(&m_window->get_view_stack(), &QStackedWidget::currentChanged, this,
+            &Settings::on_show);
 
     // Assign action to home button
     m_home_button = user_interface.settings_home_button;
-    connect(m_home_button, &QPushButton::clicked, this, &Settings::home_clicked);
+    connect(m_home_button, &QPushButton::clicked, this,
+            &Settings::home_clicked);
 
     // Connection Settings
     // Assign actions to radio buttons
 
     m_bluetooth_rb = user_interface.bluetooth_rb;
-    connect(m_bluetooth_rb, &QRadioButton::clicked, this, &Settings::select_bluetooth);
+    connect(m_bluetooth_rb, &QRadioButton::clicked, this,
+            &Settings::select_bluetooth);
 
     m_serial_rb = user_interface.serial_rb;
-    connect(m_serial_rb, &QRadioButton::clicked, this, &Settings::select_serial);
-
+    connect(m_serial_rb, &QRadioButton::clicked, this,
+            &Settings::select_serial);
 
     // Bluetooth specific options
     //---------------------------
@@ -63,19 +68,20 @@ void Settings::init() {
     m_bt_grid = user_interface.bluetooth_settings;
     m_host_label = user_interface.host_label;
     m_bt_host_dropdown = user_interface.bluetooth_host_controller;
-    connect(m_bt_host_dropdown, &QComboBox::currentIndexChanged, 
-            this, &Settings::select_bluetooth_controller);
+    connect(m_bt_host_dropdown, &QComboBox::currentIndexChanged, this,
+            &Settings::select_bluetooth_controller);
 
     // Select remote bluetooth device (OBD device):
     m_bt_device_label = user_interface.bluetooth_device_label;
     m_bt_device_dropdown = user_interface.bluetooth_OBD_device;
-    connect(m_bt_device_dropdown, &QComboBox::currentIndexChanged,
-            this, &Settings::select_bluetooth_device);
+    connect(m_bt_device_dropdown, &QComboBox::currentIndexChanged, this,
+            &Settings::select_bluetooth_device);
 
     m_bt_scan_label = user_interface.bluetooth_scan_label;
     m_bt_scan_progress = user_interface.bluetooth_scan_progress;
     m_bt_device_scan = user_interface.bluetooth_scan;
-    connect(m_bt_device_scan, &QPushButton::clicked, this, &Settings::scan_bluetooth);
+    connect(m_bt_device_scan, &QPushButton::clicked, this,
+            &Settings::scan_bluetooth);
 
     // Serial port specific options
 
@@ -83,23 +89,24 @@ void Settings::init() {
 
     m_serial_device_dropdown = user_interface.serial_port_device;
     m_serial_baudrate_dropdown = user_interface.serial_port_baudrate;
-    connect(m_serial_device_dropdown, &QComboBox::currentIndexChanged,
-            this, &Settings::select_serial_device);
-    connect(m_serial_baudrate_dropdown, &QComboBox::currentIndexChanged,
-            this, &Settings::select_serial_baudrate);
+    connect(m_serial_device_dropdown, &QComboBox::currentIndexChanged, this,
+            &Settings::select_serial_device);
+    connect(m_serial_baudrate_dropdown, &QComboBox::currentIndexChanged, this,
+            &Settings::select_serial_baudrate);
 
     // Load Settings
-    m_iftype = static_cast<InterfaceType>(m_settings.value("interface-type",0).toInt());
-    switch(m_iftype) {
-        case neon::SERIAL_IF:
-           m_serial_rb->setChecked(true);
-           select_serial();
-           break;
-        case neon::BLUETOOTH_IF:
-        default:
-           m_bluetooth_rb->setChecked(true);
-           select_bluetooth();
-           break;
+    m_iftype = static_cast<InterfaceType>(
+        m_settings.value("interface-type", 0).toInt());
+    switch (m_iftype) {
+    case neon::SERIAL_IF:
+        m_serial_rb->setChecked(true);
+        select_serial();
+        break;
+    case neon::BLUETOOTH_IF:
+    default:
+        m_bluetooth_rb->setChecked(true);
+        select_bluetooth();
+        break;
     }
     m_window->set_hardware_interface(m_iftype);
 
@@ -109,16 +116,17 @@ void Settings::init() {
         m_bt_host_dropdown->setCurrentIndex(0);
     }
 
-    auto device_address = m_settings.value("selected-device-address").toString();
+    auto device_address =
+        m_settings.value("selected-device-address").toString();
     if (!device_address.isEmpty()) {
-        add_device(m_settings.value("selected-device-name").toString(), device_address);
+        add_device(m_settings.value("selected-device-name").toString(),
+                   device_address);
         m_bt_device_dropdown->setCurrentIndex(0);
     }
 
-
-    populate_dropdown(m_serial_hardware_interface.get_valid_baudrates(),
-                     m_serial_baudrate_dropdown,
-                     m_settings.value("baud-rate","9600").toString());
+    populate_dropdown(SerialPort::get_valid_baudrates(),
+                      m_serial_baudrate_dropdown,
+                      m_settings.value("baud-rate", "9600").toString());
 
     Logger::debug("Created Settings object.");
 }
@@ -130,14 +138,17 @@ void Settings::add_device(const QString& name, const QString& address) {
 }
 
 QString Settings::get_selected_device() {
-    auto if_type = m_settings.value("interface-type",0).toInt();
+    auto if_type = m_settings.value("interface-type", 0).toInt();
     QString selected_device;
     if (if_type == neon::BLUETOOTH_IF) {
         // Somebody wants the selected device in order to initiate a connection.
         // Make sure that the configured host adapter is selected.
-        auto bluetooth_controller = m_settings.value("bluetooth-controller").toString();
-        m_bt_hardware_interface.select_controller(bluetooth_controller.toStdString());
-        selected_device = m_settings.value("selected-device-address").toString();
+        auto bluetooth_controller =
+            m_settings.value("bluetooth-controller").toString();
+        m_bt_hardware_interface.select_controller(
+            bluetooth_controller.toStdString());
+        selected_device =
+            m_settings.value("selected-device-address").toString();
     } else {
         m_serial_hardware_interface.set_baudrate(
             m_settings.value("baud-rate").toString().toStdString());
@@ -178,7 +189,8 @@ bool Settings::valid_dropdown_index(int index, QComboBox* dropdown) {
 }
 
 void Settings::select_bluetooth_controller(int index) {
-    Logger::debug << "select_bluetooth_controller called for index " << index << ".\n";
+    Logger::debug << "select_bluetooth_controller called for index " << index
+                  << ".\n";
     if (!valid_dropdown_index(index, m_bt_host_dropdown)) {
         return;
     }
@@ -186,7 +198,8 @@ void Settings::select_bluetooth_controller(int index) {
     Logger::debug << "Setting bluetooth controller.\n";
     auto new_bluetooth_controller = m_bt_host_dropdown->currentText();
     m_settings.setValue("bluetooth-controller", new_bluetooth_controller);
-    m_bt_hardware_interface.select_controller(new_bluetooth_controller.toStdString());
+    m_bt_hardware_interface.select_controller(
+        new_bluetooth_controller.toStdString());
 }
 
 void Settings::select_bluetooth_device(int index) {
@@ -194,10 +207,11 @@ void Settings::select_bluetooth_device(int index) {
         return;
     }
     auto address_and_name = m_bt_device_dropdown->currentText().split('|');
-    auto name = address_and_name[0];
-    auto address = address_and_name[1].split('<')[1].split('>')[0];
+    const auto& name = address_and_name.at(0);
+    auto address = address_and_name.at(1).split('<').at(1).split('>').at(0);
     if (!address.isEmpty()) {
-        Logger::debug << "Settings: selected bluetooth device " << name.toStdString() << "\n";
+        Logger::debug << "Settings: selected bluetooth device "
+                      << name.toStdString() << "\n";
         m_settings.setValue("selected-device-address", address);
         m_settings.setValue("selected-device-name", name);
     }
@@ -227,21 +241,23 @@ void Settings::scan_complete() {
     auto devices = bluetooth.get_device_names_addresses();
     m_bt_device_dropdown->clear();
 
-    auto default_address = m_settings.value("selected-device-address").toString();
+    auto default_address =
+        m_settings.value("selected-device-address").toString();
     auto default_name = m_settings.value("selected-device-name").toString();
     if (!default_address.isEmpty()) {
         add_device(default_name, default_address);
     }
 
-    for (auto& device : devices) {
+    for (const auto& device : devices) {
         if (device.address != default_address.toStdString()) {
-            add_device(QString::fromStdString(device.name), QString::fromStdString(device.address));
+            add_device(QString::fromStdString(device.name),
+                       QString::fromStdString(device.address));
         }
     }
 
     m_bt_device_dropdown->setCurrentIndex(0);
 
-//    btScanConnection.disconnect();
+    //    btScanConnection.disconnect();
 
     // Hide Progress Bar
     m_bt_scan_progress->hide();
@@ -264,7 +280,7 @@ void Settings::update_scan_progress(int percent_complete) {
 
 void Settings::scan_bluetooth() {
     auto& bluetooth = m_bt_hardware_interface;
-    
+
     m_bt_scan_progress->setValue(0);
     m_bt_scan_label->show();
     m_bt_scan_progress->show();
@@ -273,23 +289,24 @@ void Settings::scan_bluetooth() {
     m_bt_device_dropdown->hide();
     m_bt_device_scan->hide();
 
-    bluetooth.probe_remote_devices(
-        [this](int percent_complete){update_scan_progress(percent_complete);});
+    bluetooth.probe_remote_devices([this](int percent_complete) {
+        update_scan_progress(percent_complete);
+    });
 }
 
 void Settings::populate_dropdown(const std::vector<std::string>& values,
-                                QComboBox* dropdown,
-                                const QString& default_value) {
+                                 QComboBox* dropdown,
+                                 const QString& default_value) {
 
     dropdown->clear();
     for (const auto& value : values) {
-        dropdown->addItem(QString::fromStdString(value));    
+        dropdown->addItem(QString::fromStdString(value));
     }
     dropdown->setCurrentText(default_value);
 }
 
 void Settings::on_show() {
-    if (m_window->get_view_stack().currentWidget() != 
+    if (m_window->get_view_stack().currentWidget() !=
         m_window->get_ui().settings_view) {
         return;
     }
@@ -298,16 +315,17 @@ void Settings::on_show() {
     // Populate Dropdown:
     auto controllers = m_bt_hardware_interface.get_controller_names();
     populate_dropdown(controllers, m_bt_host_dropdown,
-                     m_settings.value("bluetooth-controller").toString());
+                      m_settings.value("bluetooth-controller").toString());
 
     // If we only have one controller, asking user to select one is silly.
     if (controllers.size() == 1) {
-        Logger::debug("Only one bluetooth controller found, disabling dropdown.");
+        Logger::debug(
+            "Only one bluetooth controller found, disabling dropdown.");
         m_bt_host_dropdown->setCurrentIndex(0);
         m_bt_host_dropdown->setEnabled(false);
     } else {
-        Logger::debug << "Showing bluetooth controller dropdown, " <<
-                      controllers.size() << " found.\n";
+        Logger::debug << "Showing bluetooth controller dropdown, "
+                      << controllers.size() << " found.\n";
         m_bt_host_dropdown->setEnabled(true);
     }
 
@@ -322,6 +340,7 @@ void Settings::on_show() {
 
     // Populate comboboxes for serial port
 
-    populate_dropdown(SerialPort::get_serial_devices(), m_serial_device_dropdown,
-                     m_settings.value("serial-port").toString());
+    populate_dropdown(SerialPort::get_serial_devices(),
+                      m_serial_device_dropdown,
+                      m_settings.value("serial-port").toString());
 }

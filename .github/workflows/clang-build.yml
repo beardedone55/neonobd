@@ -1,5 +1,5 @@
-name: Build Project
-run-name: Building latest version of ${{ github.repository }}
+name: Build Project (clang)
+run-name: Building latest version of ${{ github.repository }} with Clang and Clang-Tidy
 on:
   pull_request:
     branches:
@@ -13,11 +13,9 @@ jobs:
       - name: Install Prerequisites
         run: |
           sudo apt-get update
-          sudo apt-get -y install libgtkmm-4.0-dev
-          sudo apt-get -y install cppcheck
           sudo apt-get -y install clang-tidy
       - name: Configure cmake
-        run: cmake -B build src -DRUN_CPPCHECK=ON -DRUN_CLANG_TIDY=ON
+        run: cmake -B build src -DRUN_CLANG_TIDY=ON -DCMAKE_CXX_COMPILER=clang
       - name: Compile project
         run: cmake --build build -j
 
