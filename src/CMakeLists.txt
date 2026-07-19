@@ -16,7 +16,7 @@
 
 cmake_minimum_required(VERSION 3.20)
 
-project(neonobd VERSION 0.1.1)
+project(neonobd VERSION 0.1.2)
 
 option(RUN_CPPCHECK "Run cppcheck during compilation" OFF)
 option(RUN_CLANG_TIDY "Run clang-tidy during compilation" OFF)
@@ -50,7 +50,6 @@ endif()
 
 
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(GTKMM REQUIRED gtkmm-4.0)
 pkg_check_modules(SYSTEMD REQUIRED libsystemd)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
@@ -71,14 +70,11 @@ else()
     unset(CMAKE_CXX_CLANG_TIDY CACHE)
 endif()
 
-target_include_directories(neonobd SYSTEM PRIVATE ${GTKMM_INCLUDE_DIRS})
 target_include_directories(neonobd PRIVATE "${PROJECT_SOURCE_DIR}")
 
-target_link_libraries(neonobd PRIVATE ${GTKMM_LIBRARIES} ${SYSTEMD_LIBRARIES} resources Qt6::Core Qt6::Gui Qt6::Widgets)
+target_link_libraries(neonobd PRIVATE ${SYSTEMD_LIBRARIES} Qt6::Core Qt6::Gui Qt6::Widgets)
 
 install(TARGETS neonobd RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-
-add_subdirectory(resources)
 
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/packaging")
     add_subdirectory(packaging)
