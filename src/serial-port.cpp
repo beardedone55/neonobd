@@ -17,6 +17,7 @@
 
 #include "serial-port.hpp"
 #include "logger.hpp"
+#include <algorithm>
 #include <array>
 #include <cerrno>
 #include <chrono>
@@ -26,82 +27,91 @@
 #include <fcntl.h>
 #include <filesystem>
 #include <fstream>
+#include <functional>
 #include <future>
+#include <linux/limits.h>
 #include <memory>
 #include <mutex>
-#include <poll.h>
 #include <ratio>
 #include <shared_mutex>
+#include <span>
 #include <sstream>
+#include <stdexcept>
 #include <string>
+#include <sys/poll.h>
+#include <sys/types.h>
 #include <system_error>
 #include <termios.h>
 #include <unistd.h>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
-const std::unordered_map<std::string, speed_t> SerialPort::m_baudrates = {
-    {"9600", B9600},   {"19200", B19200},   {"38400", B38400},
-    {"57600", B57600}, {"115200", B115200}, {"230400", B230400}};
-
 SerialPort::SerialPort() : m_sock_file(nullptr, close_file) {
-    if(pipe2(m_event_fd, O_DIRECT | O_CLOEXEC) < 0) {
+    if (pipe2(&m_event_fd[0], O_DIRECT | O_CLOEXEC) < 0) {
         throw std::runtime_error("Creation of event pipe failed...");
     }
     Logger::debug << "Created SerialPort.\n";
 }
 
 SerialPort::~SerialPort() {
-    for(auto fd : m_event_fd) {
-        close(fd);    
+    for (auto event_fd : m_event_fd) {
+        close(event_fd);
     }
     Logger::debug("Destroying Serial Port");
 }
 
-ssize_t SerialPort::read_timed(int fd, char buf[], size_t sz, std::chrono::microseconds timeout) {
-    pollfd pfd = { .fd = fd, .events = POLLIN, .revents=0 };
-    auto poll_timeout = std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count();
-    if(poll_timeout > INT_MAX)
-        poll_timeout = INT_MAX;
-    int ret = poll(&pfd, 1, static_cast<int>(poll_timeout));
-    if(ret > 0) {
-        return ::read(fd, buf, sz);
-    } else if (ret < 0) {
+ssize_t SerialPort::read_timed(int sock_fd, std::span<char> buf, size_t size,
+                               std::chrono::microseconds timeout) {
+    pollfd pfd = {.fd = sock_fd, .events = POLLIN, .revents = 0};
+    auto poll_timeout =
+        std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count();
+    poll_timeout =
+        std::min(poll_timeout, static_cast<decltype(poll_timeout)>(INT_MAX));
+    const int ret = poll(&pfd, 1, static_cast<int>(poll_timeout));
+    if (ret > 0) {
+        return ::read(sock_fd, buf.data(), size);
+    }
+
+    if (ret < 0) {
         throw std::runtime_error("Poll of read fd failed...");
     }
     return 0;
-} 
+}
 
 void SerialPort::process_events(std::chrono::microseconds timeout) {
     auto start = std::chrono::system_clock::now();
     auto end = start;
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+    auto duration =
+        std::chrono::duration_cast<std::chrono::microseconds>(end - start);
     do {
-        char buf[PIPE_BUF];
-        ssize_t count = (timeout == 0s) ? ::read(m_event_fd[0], buf, sizeof(buf)) :
-            read_timed(m_event_fd[0], buf, sizeof(buf), timeout - duration);
-        if(count > 0) {
-            buf[PIPE_BUF-1] = '\0';
-            static const std::unordered_map<std::string, std::function<void(SerialPort*)>> callbacks =
-                {
-                    {std::string("ConnectComplete"), &SerialPort::connect_complete }
-                };
+        std::array<char, PIPE_BUF> buf{};
+        // NOLINTNEXTLINE(misc-include-cleaner)
+        const ssize_t count =
+            (timeout == 0s) ? ::read(m_event_fd[0], buf.data(), sizeof(buf))
+                            : read_timed(m_event_fd[0], buf, sizeof(buf),
+                                         timeout - duration);
+        if (count > 0) {
+            buf.at(PIPE_BUF - 1) = '\0';
+            static const std::unordered_map<std::string,
+                                            std::function<void(SerialPort*)>>
+                callbacks = {{std::string("ConnectComplete"),
+                              &SerialPort::connect_complete}};
 
-            std::string function_name = buf;
-            if(callbacks.contains(function_name)) {
+            const std::string function_name = buf.data();
+            if (callbacks.contains(function_name)) {
                 callbacks.at(function_name)(this);
             }
         } else if (count < 0) {
             throw std::runtime_error("Read of event pipe fd failed...");
         }
         end = std::chrono::system_clock::now();
-        duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+        duration =
+            std::chrono::duration_cast<std::chrono::microseconds>(end - start);
     } while (duration < timeout);
 }
 
-int SerialPort::get_event_fd() {
-    return m_event_fd[0];
-}
+int SerialPort::get_event_fd() { return m_event_fd[0]; }
 
 std::vector<std::string> SerialPort::get_valid_baudrates() {
     std::vector<std::string> output;
@@ -134,11 +144,11 @@ std::vector<std::string> SerialPort::get_serial_devices() {
             }
         }
 
-        if (words.size() <= 2 || words[words.size() - 1] != "serial") {
+        if (words.size() <= 2 || words.at(words.size() - 1) != "serial") {
             continue;
         }
 
-        const std::filesystem::path path(words[1]);
+        const std::filesystem::path path(words.at(1));
 
         file_prefixes[path.parent_path()].push_back(path.filename().string());
     }
@@ -160,11 +170,16 @@ std::vector<std::string> SerialPort::get_serial_devices() {
 }
 
 void SerialPort::set_baudrate(const std::string& new_baudrate) {
-    m_baudrate = m_baudrates.at(new_baudrate);
+    for (const auto& [baudrate_str, baudrate] : m_baudrates) {
+        if (new_baudrate == baudrate_str) {
+            m_baudrate = baudrate;
+            break;
+        }
+    }
 }
 
 void SerialPort::connect_complete() {
-    if(m_connect_callback) {
+    if (m_connect_callback) {
         m_connect_callback(m_is_connected.get());
         m_connect_callback = nullptr;
     }
@@ -177,7 +192,7 @@ void SerialPort::signal_event(const std::string& event_name) {
 bool SerialPort::initiate_connection(const std::string& device_name) {
     bool connected = false;
     try {
-        const std::lock_guard lock(m_sock_fd_mutex);
+        const std::scoped_lock lock(m_sock_fd_mutex);
 
         // I really don't know how to fix this warning.  I need to use
         // fopen, so I can get the file descriptor.  The file will be
@@ -230,7 +245,8 @@ bool SerialPort::initiate_connection(const std::string& device_name) {
     return connected;
 }
 
-bool SerialPort::connect(const std::string& device_name, std::function<void(bool)> callback) {
+bool SerialPort::connect(const std::string& device_name,
+                         std::function<void(bool)> callback) {
     if (m_sock_file) {
         Logger::error("Connection to serial port already exists.");
         return false;
@@ -241,8 +257,10 @@ bool SerialPort::connect(const std::string& device_name, std::function<void(bool
         return false;
     }
 
-    m_connect_callback = callback;
-    m_is_connected = std::async(std::launch::async, &SerialPort::initiate_connection, this, device_name);
+    m_connect_callback = std::move(callback);
+    m_is_connected =
+        std::async(std::launch::async, &SerialPort::initiate_connection, this,
+                   device_name);
 
     return true;
 }

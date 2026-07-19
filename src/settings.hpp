@@ -22,8 +22,8 @@
 #include "serial-port.hpp"
 #include <QComboBox>
 #include <QLabel>
-#include <QPushButton>
 #include <QProgressBar>
+#include <QPushButton>
 #include <QRadioButton>
 #include <QSettings>
 #include <QString>
@@ -34,7 +34,7 @@ class MainWindow;
 using neon::InterfaceType;
 
 class Settings : public QObject {
-  Q_OBJECT
+    Q_OBJECT
   public:
     explicit Settings(MainWindow* window);
     Settings(const Settings&) = delete;
@@ -44,25 +44,25 @@ class Settings : public QObject {
     QString get_selected_device();
 
   private:
-    QPushButton* m_home_button;
-    MainWindow* m_window;
-    QRadioButton* m_bluetooth_rb;
-    QRadioButton* m_serial_rb;
-    QWidget* m_bt_grid;
-    QLabel* m_host_label;
-    QComboBox* m_bt_host_dropdown;
-    QLabel* m_bt_device_label;
-    QComboBox* m_bt_device_dropdown;
-    QLabel* m_bt_scan_label;
-    QProgressBar* m_bt_scan_progress;
-    QPushButton* m_bt_device_scan; 
-    QWidget* m_serial_grid;
-    QComboBox* m_serial_device_dropdown;
-    QComboBox* m_serial_baudrate_dropdown;
+    QPushButton* m_home_button = nullptr;
+    MainWindow* m_window = nullptr;
+    QRadioButton* m_bluetooth_rb = nullptr;
+    QRadioButton* m_serial_rb = nullptr;
+    QWidget* m_bt_grid = nullptr;
+    QLabel* m_host_label = nullptr;
+    QComboBox* m_bt_host_dropdown = nullptr;
+    QLabel* m_bt_device_label = nullptr;
+    QComboBox* m_bt_device_dropdown = nullptr;
+    QLabel* m_bt_scan_label = nullptr;
+    QProgressBar* m_bt_scan_progress = nullptr;
+    QPushButton* m_bt_device_scan = nullptr;
+    QWidget* m_serial_grid = nullptr;
+    QComboBox* m_serial_device_dropdown = nullptr;
+    QComboBox* m_serial_baudrate_dropdown = nullptr;
     BluetoothSerialPort& m_bt_hardware_interface;
     SerialPort& m_serial_hardware_interface;
     QSettings m_settings;
-    InterfaceType m_iftype;
+    InterfaceType m_iftype = neon::BLUETOOTH_IF;
 
   private slots:
     void home_clicked();
@@ -74,13 +74,13 @@ class Settings : public QObject {
     void scan_bluetooth();
     void select_serial_device(int index);
     void select_serial_baudrate(int index);
-  
-  private:  
+
+  private:
     void scan_complete();
     void update_scan_progress(int percent_complete);
     static void populate_dropdown(const std::vector<std::string>& values,
-                                 QComboBox* dropdown,
-                                 const QString& default_value);
+                                  QComboBox* dropdown,
+                                  const QString& default_value);
     static bool valid_dropdown_index(int index, QComboBox* dropdown);
     void add_device(const QString& name, const QString& address);
 };

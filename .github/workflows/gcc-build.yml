@@ -1,0 +1,21 @@
+name: Build Project (GCC)
+run-name: Building latest version of ${{ github.repository }} with GCC and CPPCHECK
+on:
+  pull_request:
+    branches:
+      - master
+jobs:
+  build_project:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout default branch
+        uses: actions/checkout@v4
+      - name: Install Prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install cppcheck
+      - name: Configure cmake
+        run: cmake -B build src -DRUN_CPPCHECK=ON -DCMAKE_CXX_COMPILER=g++
+      - name: Compile project
+        run: cmake --build build -j
+

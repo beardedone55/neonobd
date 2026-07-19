@@ -23,10 +23,17 @@ option(RUN_CLANG_TIDY "Run clang-tidy during compilation" OFF)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic -Wunused -Wcast-align \
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic -Wunused -Wcast-align \
                      -Wunused -Woverloaded-virtual -Wpedantic -Wconversion -Wmisleading-indentation \
                      -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wnull-dereference \
-                     -Wformat=2")
+                     -Wformat=2 -Werror")
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic -Wunused -Wcast-align \
+                     -Wunused -Woverloaded-virtual -Wpedantic -Wconversion -Wmisleading-indentation \
+                     -Wnull-dereference -Wformat=2 -Werror")
+endif()
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -34,18 +41,13 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 if(RUN_CPPCHECK)
     find_program(CMAKE_CXX_CPPCHECK NAMES cppcheck REQUIRED)
-    list(APPEND CMAKE_CXX_CPPCHECK --enable=all --error-exitcode=1 
+    list(APPEND CMAKE_CXX_CPPCHECK --library=qt --enable=all --error-exitcode=1 
         --suppressions-list=${CMAKE_SOURCE_DIR}/.cppcheck_suppression_list
          --suppress=unusedFunction --force) 
 else()
     unset(CMAKE_CXX_CPPCHECK CACHE)
 endif()
 
-if(RUN_CLANG_TIDY)
-    find_program(CMAKE_CXX_CLANG_TIDY NAMES clang-tidy REQUIRED)
-else()
-    unset(CMAKE_CXX_CLANG_TIDY CACHE)
-endif()
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTKMM REQUIRED gtkmm-4.0)
@@ -61,7 +63,13 @@ qt_add_executable(neonobd
                   settings.cpp logger.cpp
                   connect-button.cpp
                   terminal.cpp serial-port.cpp
-                  elm327.cpp neonobd.ui)
+                  neonobd.ui)
+
+if(RUN_CLANG_TIDY)
+    find_program(CMAKE_CXX_CLANG_TIDY NAMES clang-tidy REQUIRED)
+else()
+    unset(CMAKE_CXX_CLANG_TIDY CACHE)
+endif()
 
 target_include_directories(neonobd SYSTEM PRIVATE ${GTKMM_INCLUDE_DIRS})
 target_include_directories(neonobd PRIVATE "${PROJECT_SOURCE_DIR}")

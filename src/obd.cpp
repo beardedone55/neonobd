@@ -22,23 +22,23 @@
 #include <memory>
 #include <sigc++/signal.h>
 
+// Service $01: Power train and diagnostic data.
+// Service $02: Power train freeze frame data.
 
-//Service $01: Power train and diagnostic data.
-//Service $02: Power train freeze frame data.
+typedef std::vector<Obd::ResultTypes> (Obd::*CompletionCallback)(
+    std::span<unsigned char>&);
 
-typedef std::vector<Obd::ResultTypes>(Obd::*CompletionCallback)(std::span<unsigned char>&); 
-
-constexpr std::array<CompletionCallback,100> service_1_pid_table {
-    nullptr,
-    &Obd::get_MIL_status_complete
+constexpr std::array<CompletionCallback, 100> service_1_pid_table {
+    nullptr, &Obd::get_MIL_status_complete
 }
 
-constexpr std::array<std::array<Obd::CommandCompleteFunction>*,10> pid_request_table {
-    nullptr,
-    &service_1_pid_table,  //Service $01
-    &service_1_pid_table,  //Service $02
+constexpr std::array<std::array<Obd::CommandCompleteFunction>*, 10>
+    pid_request_table{
+        nullptr,
+        &service_1_pid_table, // Service $01
+        &service_1_pid_table, // Service $02
 
-};
+    };
 
 sigc::signal<void(bool)>
 Obd::init(const std::shared_ptr<ObdDevice>& obd_device,
@@ -64,12 +64,11 @@ void Obd::initComplete(bool success) {
     m_connecting = false;
     m_is_CAN = m_obdDevice->is_CAN();
     m_init_connection.disconnect();
-    if(success) {
-        m_command_connection = 
-            m_obdDevice->signal_command_complete().connect(
-                [this](const auto& result){command_complete(result);});
+    if (success) {
+        m_command_connection = m_obdDevice->signal_command_complete().connect(
+            [this](const auto& result) { command_complete(result); });
     }
-    
+
     m_init_signal.emit(success);
 }
 
@@ -87,7 +86,9 @@ void Obd::disconnectComplete() {
     m_disconnect_signal.emit();
 }
 
-void Obd::command_complete(const std::unordered_map<unsigned int, std::vector<unsigned char>>& result) {
+void Obd::command_complete(
+    const std::unordered_map<unsigned int, std::vector<unsigned char>>&
+        result) {
     auto& callback = m_command_queue.front().second;
     auto& [ecu, data] = *result.begin();
     auto processed_result = callback(std::span(data));
@@ -95,24 +96,23 @@ void Obd::command_complete(const std::unordered_map<unsigned int, std::vector<un
     m_command_queue.pop();
 }
 
-Obd::ResultSignal Obd::get_PID(unsigned char ecu, unsigned char service, unsigned char pid) {
+Obd::ResultSignal Obd::get_PID(unsigned char ecu, unsigned char service,
+                               unsigned char pid) {
     ResultSignal command_complete_signal;
     auto& callback = pid_request_table[service][pid];
-    m_command_queue.push(std::make_pair(command_complete_signal, [this](auto data){std::invoke(this,callback, data)});
+    m_command_queue.push(std::make_pair(command_complete_signal, [this](auto data){
+        std::invoke(this, callback, data)});
     m_obdDevice->send_command(ecu, service, {pid});
     return command_complete_signal;
 }
 
 namespace {
-void process_monitor_statuses(
-    std::vector<Obd::ResultTypes>& fmt_result,
-    unsigned char supported,
-    unsigned char ready,
-    int ready_start,
-    int size) {
+void process_monitor_statuses(std::vector<Obd::ResultTypes>& fmt_result,
+                              unsigned char supported, unsigned char ready,
+                              int ready_start, int size) {
 
-    for(int i=0; i < size; ++i) {
-        if((supported >> i) & 1 == 0) {
+    for (int i = 0; i < size; ++i) {
+        if ((supported >> i) & 1 == 0) {
             fmt_result.push_back("NOT SUPPORTED");
             continue;
         }
@@ -124,36 +124,33 @@ void process_monitor_statuses(
     }
 }
 
-bool check_response(std::span<unsigned char>& data, 
-                    int expected_size,
+bool check_response(std::span<unsigned char>& data, int expected_size,
                     unsigned char expected_response) {
-    if(expected_size > data.size() ||
-       data[0] != expected_response) {
+    if (expected_size > data.size() || data[0] != expected_response) {
         data = data.subspan(data.size());
         return false;
     }
     return true;
 }
 
-}
+} // namespace
 
-std::vector<Obd::ResultTypes> Obd::get_MIL_status_complete(std::span<unsigned char>& data) {
+std::vector<Obd::ResultTypes>
+Obd::get_MIL_status_complete(std::span<unsigned char>& data) {
     constexpr unsigned char GET_MIL_POSITIVE_RESPONSE = 0x41;
     constexpr int DATA_SIZE = 5;
-    if(!check_response(data, DATA_SIZE, GET_MIL_POSITIVE_RESPONSE)) {
+    if (!check_response(data, DATA_SIZE, GET_MIL_POSITIVE_RESPONSE)) {
         return {"ERROR"};
     }
     constexpr unsigned char MIL_MASK = 0x80;
     std::vector<ResultTypes> fmt_result;
-    //MIL Status and DTC Count (Byte A)
+    // MIL Status and DTC Count (Byte A)
     fmt_result.push_back((data[1] & MIL_MASK) == MIL_MASK);
     fmt_result.push_back(data[1] & ~MIL_MASK);
-    //Continuous Monitor Statuses (Misfire, Fuel System, Comprehensive)
+    // Continuous Monitor Statuses (Misfire, Fuel System, Comprehensive)
     process_monitor_statuses(fmt_result, data[2], data[2], 4, 3);
-    //Once-per-trip Monitor Statuses (Bytes C/D)
+    // Once-per-trip Monitor Statuses (Bytes C/D)
     process_monitor_statuses(fmt_result, data[3], data[4], 0, 8);
     data = data.subspan(DATA_SIZE);
     return processedResult;
 }
-
-

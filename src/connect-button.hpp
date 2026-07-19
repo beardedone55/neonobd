@@ -26,17 +26,14 @@ class MainWindow;
 using neon::ResponseType;
 
 class ConnectButton : public QPushButton {
-  Q_OBJECT
+    Q_OBJECT
   public:
-    ConnectButton(QWidget* parent);
+    explicit ConnectButton(QWidget* parent);
 
   private:
-    void user_yes_no_response(const QString& prompt,
-                              void* handle);
-    void user_text_response(const QString& prompt,
-                            void* handle);
-    void user_number_response(const QString& prompt,
-                              void* handle);
+    void user_yes_no_response(const QString& prompt, void* handle);
+    void user_text_response(const QString& prompt, void* handle);
+    void user_number_response(const QString& prompt, void* handle);
     void send_cancel(void* handle);
 
     void connect_complete(bool result);
@@ -44,5 +41,4 @@ class ConnectButton : public QPushButton {
                      void* handle);
   private slots:
     void on_clicked();
-
 };
