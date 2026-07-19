@@ -14,8 +14,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get -y install clang-tidy
+          sudo apt-get -y install libsystemd-dev
+          sudo apt-get -y install qt6-base-dev
       - name: Configure cmake
-        run: cmake -B build src -DRUN_CLANG_TIDY=ON -DCMAKE_CXX_COMPILER=clang
+        run: cmake -B build src -DRUN_CLANG_TIDY=ON -DCMAKE_CXX_COMPILER=clang++
       - name: Compile project
         run: cmake --build build -j
 
