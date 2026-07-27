@@ -1,5 +1,5 @@
 /* This file is part of neonobd - OBD diagnostic software.
- * Copyright (C) 2023-2024  Brian LePage
+ * Copyright (C) 2023-2026  Brian LePage
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,36 +17,37 @@
 
 #pragma once
 
-#include "connection.hpp"
+#include "hardware-interface.hpp"
 #include "obd-device.hpp"
+#include <arrary>
+#include <functional>
 #include <future>
-#include <glibmm/dispatcher.h>
 #include <memory>
 #include <mutex>
 #include <queue>
 #include <semaphore>
-#include <sigc++/signal.h>
+#include <string>
+#include <string_view>
 #include <thread>
 #include <unordered_map>
 
-class Elm327 : public ObdDevice, public sigc::trackable {
+using ObdDevice::CommandCallback;
+
+class Elm327 : public ObdDevice {
   public:
-    Elm327() = default;
+    Elm327();
     Elm327(const Elm327&) = delete;
     Elm327& operator=(const Elm327&) = delete;
     ~Elm327() override;
 
-    sigc::signal<void(bool)>
-    init(std::shared_ptr<HardwareInterface> hwif) override;
+    void init(HardwareInterface* hwif,
+              std::function<void(bool)> callback) override;
 
-    Glib::ustring get_error_string() const override;
-
-    sigc::signal<void(
-        const std::unordered_map<unsigned int, std::vector<unsigned char>>&)>
-    signal_command_complete() override;
+    std::string get_error_string() const override;
 
     void send_command(unsigned char obd_address, unsigned char obd_service,
-                      const std::vector<unsigned char>& obd_data) override;
+                      const std::vector<unsigned char>& obd_data,
+                      CommandCallback callback) override;
 
     bool is_CAN() const override;
 
@@ -54,43 +55,40 @@ class Elm327 : public ObdDevice, public sigc::trackable {
 
     bool is_connected() const override;
 
-    sigc::signal<void()> disconnect() override;
+    void disconnect(std::function<void()> callback) override;
 
   private:
     struct Command {
         unsigned int obd_address;
         unsigned char obd_service;
         std::vector<unsigned char> obd_data;
+        CommandCallback callback;
     };
 
     struct Completion {
         std::unordered_map<unsigned int, std::vector<unsigned char>> obd_data;
+        CommandCallback callback;
     };
 
-    std::shared_ptr<HardwareInterface> m_hwif;
+    void process_event(std::string_view event) override;
+
+    HardwareInterface* m_hwif = nullptr;
     volatile bool m_disconnect_in_progress = false;
+    std::function<void()> m_disconnect_callback = nullptr;
+    std::function<void(bool)> m_init_callback = nullptr;
     bool m_init_in_progress = false;
     bool m_init_complete = false;
     std::future<bool> m_init_result;
     sigc::signal<void(bool)> m_init_signal;
     sigc::signal<void()> m_disconnect_signal;
-    Glib::Dispatcher m_init_complete_dispatcher;
-    Connection m_init_complete_connection;
-    Glib::Dispatcher m_command_complete_dispatcher;
-    Connection m_command_complete_connection;
-    Glib::Dispatcher m_command_thread_exit_dispatcher;
-    Connection m_command_thread_exit_connection;
     std::mutex m_cmd_queue_lock;
     std::binary_semaphore m_cmd_semaphore;
     std::queue<Command> m_cmd_queue;
     std::unique_ptr<std::thread> m_command_thread;
     std::mutex m_completion_queue_lock;
     std::queue<Completion> m_completion_queue;
-    sigc::signal<void(
-        const std::unordered_map<unsigned int, std::vector<unsigned char>>&)>
-        m_command_complete_signal;
     unsigned int m_current_obd_address = 0;
-    Glib::ustring m_error_string;
+    std::string m_error_string;
     int m_protocol = 0;
 
     bool init_thread();

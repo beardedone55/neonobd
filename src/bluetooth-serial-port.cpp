@@ -35,6 +35,7 @@
 // time.h provides timeval
 #include <sys/time.h> //NOLINT(misc-include-cleaner)
 #include <system_error>
+// NOLINTNEXTLINE(misc-include-cleaner)
 #include <systemd/sd-bus-protocol.h>
 #include <systemd/sd-bus-vtable.h>
 #include <systemd/sd-bus.h>
@@ -54,7 +55,8 @@ constexpr int FINISHED = 100;
 
 BTSP::BluetoothSerialPort()
     : m_system_bus{get_system_dbus()}, m_event{get_dbus_event()} {
-    get_objects();
+
+    BTSP::init_event_handler();
     Logger::debug("Created BluetoothSerialPort.");
 }
 
@@ -371,31 +373,19 @@ int BTSP::remove_object(const std::string& path, const DBusType& obj) {
     return 0;
 }
 
-void BTSP::process_events(std::chrono::microseconds timeout) {
+void BTSP::init_event_handler() {
+    BTSP::process_events();
+    get_objects();
+}
+
+void BTSP::process_events() {
     if (m_event) {
-        if (timeout != 0s) { // NOLINT(misc-include-cleaner)
-            auto start = std::chrono::system_clock::now();
-            auto end = start;
-            auto duration =
-                std::chrono::duration_cast<std::chrono::microseconds>(end -
-                                                                      start);
-            while (duration <= timeout &&
-                   sd_event_run(m_event.get(),
-                                static_cast<std::uint64_t>(
-                                    (timeout - duration).count())) > 0) {
-                end = std::chrono::system_clock::now();
-                duration =
-                    std::chrono::duration_cast<std::chrono::microseconds>(
-                        end - start);
-            }
-        } else {
-            while (sd_event_run(m_event.get(), 0) > 0) {
-            };
-        }
+        while (sd_event_run(m_event.get(), 0) > 0) {
+        };
     }
 }
 
-int BTSP::get_event_fd() {
+int BTSP::get_event_fd() const {
     Logger::debug << "get_event_fd: m_event = " << m_event.get() << "\n";
     const int result = sd_event_get_fd(m_event.get());
     Logger::debug << "Event fd = " << result << "\n";
@@ -497,9 +487,9 @@ int BTSP::probe_finish(sd_bus_message* reply, void* userdata,
     sd_event_source* evt_src = nullptr;
 
     // CLOCK_MONOTONIC is provided by sys/time.h
-    // NOLINTNEXTLINE(misc-include-cleaner)
     sd_event_add_time_relative(sd_bus_get_event(bt_ptr->m_system_bus.get()),
-                               &evt_src, CLOCK_MONOTONIC,
+                               &evt_src,
+                               CLOCK_MONOTONIC, // NOLINT(misc-include-cleaner)
                                get_tick_time(bt_ptr->m_probe_time), 0,
                                update_probe_progress, userdata);
     sd_event_source_set_enabled(evt_src, SD_EVENT_ON);

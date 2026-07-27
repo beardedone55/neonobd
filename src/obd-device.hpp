@@ -1,5 +1,5 @@
 /* This file is part of neonobd - OBD diagnostic software.
- * Copyright (C) 2023-2024  Brian LePage
+ * Copyright (C) 2023-2026  Brian LePage
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,37 +17,36 @@
 
 #pragma once
 
+#include "event-handler.hpp"
 #include "hardware-interface.hpp"
-#include <glibmm/ustring.h>
+#include <functional>
 #include <optional>
-#include <sigc++/signal.h>
+#include <string>
+#include <unistd.h>
 #include <vector>
 
-class ObdDevice {
+class ObdDevice : public EventHandler {
   public:
-    ObdDevice() = default;
+    ObdDevice() { init_event_handler(); }
     ObdDevice(const ObdDevice&) = delete;
     ObdDevice& operator=(const ObdDevice&) = delete;
     virtual ~ObdDevice() = default;
 
-    virtual sigc::signal<void(bool)>
-    init(std::shared_ptr<HardwareInterface> hwif) = 0;
+    virtual void init(HardwareInterface* hwif,
+                      std::function<void(bool)> callback) = 0;
 
-    virtual Glib::ustring get_error_string() const = 0;
+    virtual std::string get_error_string() const = 0;
 
-    virtual sigc::signal<void(
-        const std::unordered_map<unsigned int, std::vector<unsigned char>>&)>
-    signal_command_complete() = 0;
+    using CommandCallback = std::function<void(
+        const std::unordered_map<unsigned int, std::vector<unsigned char>>&)>;
 
     virtual void send_command(unsigned char obd_module,
                               unsigned char obd_service,
-                              const std::vector<unsigned char>& obd_data) = 0;
+                              const std::vector<unsigned char>& obd_data,
+                              CommandCallback callback) = 0;
 
     virtual bool is_connecting() const = 0;
-
     virtual bool is_connected() const = 0;
-
     virtual bool is_CAN() const = 0;
-
-    virtual sigc::signal<void()> disconnect() = 0;
+    virtual disconnect(std::function<void()> callback) = 0;
 };

@@ -6,7 +6,7 @@ on:
       - master
 jobs:
   build_project:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout default branch
         uses: actions/checkout@v4
@@ -17,7 +17,9 @@ jobs:
           sudo apt-get -y install libsystemd-dev
           sudo apt-get -y install qt6-base-dev
       - name: Configure cmake
-        run: cmake -B build src -DRUN_CPPCHECK=ON -DCMAKE_CXX_COMPILER=g++
+        run: |
+          cmake -B build src -DRUN_CPPCHECK=ON -DCMAKE_CXX_COMPILER=g++ \
+             -DTESTING_ENABLED=ON -DINTERACTIVE_TESTS=ON
       - name: Compile project
         run: cmake --build build -j
 

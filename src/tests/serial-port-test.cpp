@@ -16,133 +16,157 @@
  */
 
 /* This program tests the functionality of the BluetoothSerial port class.
- * It is an interactive test, and it requires access to a bluetooth serial
+ * It is an interactive test, and it requires access to a serial
  * device in order to function.
  *
  * An automated version of this test would likely require some sort of driver
  * to emulate the bluetooth device.  I'll work on that later.
  */
 
-#include "serial-port.hpp"
+#include "hardware-interface.hpp"
 #include "logger.hpp"
-#include <poll.h>
+#include "serial-port.hpp"
+#include <cstddef>
+#include <exception>
+#include <functional>
+#include <iostream>
+#include <limits>
+#include <stdexcept>
+#include <string>
+#include <string_view>
+#include <sys/poll.h>
 #include <thread>
 
+// NOLINTBEGIN(misc-use-anonymous-namespace)
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 static bool device_connected = false;
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 static bool device_connecting = true;
 
-void connect_complete(bool complete) {
+static void connect_complete(bool complete) {
     device_connecting = false;
     device_connected = complete;
 }
 
-static auto select_from_list(const auto& list, std::string_view title, std::string_view prompt) {
+// NOLINTNEXTLINE(misc-use-internal-linkage)
+struct SelectionPrompt {
+    std::string_view title;
+    std::string_view prompt;
+};
+
+static auto select_from_list(const auto& list, const SelectionPrompt& prompt) {
     do {
-        std::cout << "\n" << title << "\n";
-        for(int i=0; i < list.size(); ++i) {
-            std::cout << "   " << i+1 << ") " << list[i] << "\n";
+        std::cout << "\n" << prompt.title << "\n";
+        for (size_t i = 0; i < list.size(); ++i) {
+            std::cout << "   " << i + 1 << ") " << list.at(i) << "\n";
         }
 
-        std::cout << "\n" << prompt << " (1-" << list.size() << "): ";
-        int selection;
+        std::cout << "\n" << prompt.prompt << " (1-" << list.size() << "): ";
+        size_t selection = 0;
         std::cin >> selection;
-        if(std::cin.fail()) {
+        if (std::cin.fail()) {
             std::cin.clear();
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             continue;
         }
-        if(selection > 0 && selection <= list.size()) {
-            return list[selection-1];
+        if (selection <= list.size()) {
+            return list.at(selection - 1);
         }
-    } while(true);
-    
+    } while (true);
 }
 
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 static bool stop_reader = false;
 
-void reader_thread(HardwareInterface& sp) {
+static void reader_thread(HardwareInterface& hwif) {
     std::string buf;
-    while(!stop_reader) {
-    while(sp.read(buf) > 0) {
-        std::cout << buf << std::flush;
-    }
+    while (!stop_reader) {
+        while (hwif.read(buf) > 0) {
+            std::cout << buf << std::flush;
+        }
     }
 }
 
-void wait_for_response(HardwareInterface& hwif) {
+static void wait_for_response(const HardwareInterface& hwif) {
     Logger::debug << "Entered wait_for_response.\n";
-    pollfd pfd = { .fd = hwif.get_event_fd(), .events = POLLIN };
-    int ret = poll(&pfd, 1, -1); 
-    if(ret <=0) {
+    pollfd pfd = {.fd = hwif.get_event_fd(), .events = POLLIN, .revents = 0};
+    const int ret = poll(&pfd, 1, -1);
+    if (ret <= 0) {
         Logger::error << "Poll returned " << ret << "\n";
         throw std::runtime_error("Poll returned an error!");
     }
-}   
+}
+// NOLINTEND(misc-use-anonymous-namespace)
 
 int main() {
-    SerialPort sp;
-
-    sp.process_events(1000us);
+    SerialPort serial_port;
 
     Logger::debug << "Serial port devices:\n";
-    auto devices = sp.get_serial_devices();
-    for(const auto& device : devices) {
+    auto devices = SerialPort::get_serial_devices();
+    for (const auto& device : devices) {
         Logger::debug << "   " << device << "\n";
     }
-    if(devices.empty()) {
+    if (devices.empty()) {
         Logger::error << "No Serial Port Devices found...\n";
         return 1;
     }
-    
-    std::string device = select_from_list(devices, "Serial Port Devices Found...", "Select device");
 
-    auto baudrates = sp.get_valid_baudrates();
+    const std::string device =
+        select_from_list(devices, {.title = "Serial Port Devices Found...",
+                                   .prompt = "Select device"});
 
-    if(baudrates.empty()) {
+    auto baudrates = SerialPort::get_valid_baudrates();
+
+    if (baudrates.empty()) {
         Logger::error << "No valid baudrates found...\n";
         return 1;
     }
 
-    std::string baudrate = select_from_list(baudrates, "Serial Port Baudrates", "Select Baudrate");
+    const std::string baudrate =
+        select_from_list(baudrates, {.title = "Serial Port Baudrates",
+                                     .prompt = "Select Baudrate"});
 
-    sp.set_baudrate(baudrate);
+    serial_port.set_baudrate(baudrate);
 
     Logger::debug << "Selected Serial Port " << device << "\n";
 
-    if(!sp.connect(device, connect_complete)) {
+    if (!serial_port.connect(device, connect_complete)) {
         Logger::error << "Connection failed!\n";
         return 1;
     }
 
-    while(device_connecting) {
-        wait_for_response(sp);
-        sp.process_events(0s);
+    while (device_connecting) {
+        try {
+            wait_for_response(serial_port);
+        } catch (const std::exception& e) {
+            return 1;
+        }
+        serial_port.process_events();
     }
 
-    if(!device_connected) {
+    if (!device_connected) {
         Logger::error << "Connection timed out.\n";
         return 1;
     }
 
-    std::thread t(reader_thread, std::ref(sp));
+    std::thread thread(reader_thread, std::ref(serial_port));
 
     std::string user_input;
-    
+
     std::cout << "Connection to serial device created.\n";
     std::cout << "Type \"exit\" to quit.\n";
 
-    while(true) {
+    while (true) {
         std::getline(std::cin, user_input);
-        if(user_input == "exit") {
+        if (user_input == "exit") {
             break;
         }
 
-        sp.write(user_input + "\r");
+        serial_port.write(user_input + "\r");
     }
 
     stop_reader = true;
-    t.join();
+    thread.join();
 
     return 0;
-
 }

@@ -18,6 +18,7 @@
 #pragma once
 
 #include "bluetooth-serial-port.hpp"
+#include "event-handler.hpp"
 #include "hardware-interface.hpp"
 #include "home.hpp"
 #include "neonobd_types.hpp"
@@ -28,6 +29,8 @@
 #include <QSocketNotifier>
 #include <QVBoxLayout>
 #include <QWidget>
+#include <unordered_map>
+#include <vector>
 
 using neon::InterfaceType;
 
@@ -47,20 +50,22 @@ class MainWindow : public QWidget {
     SerialPort& get_serial_port();
     HardwareInterface* get_hardware_interface();
 
+  private:
+    Ui::ViewStack m_ui;
+    BluetoothSerialPort m_bluetooth_serial_port;
+    SerialPort m_serial_port;
+    std::vector<std::unique_ptr<QSocketNotifier>> m_socket_notifiers;
+    std::unordered_map<int, EventHandler*> m_event_handlers;
+    HardwareInterface* m_hardware_interface = nullptr;
+    QVBoxLayout m_window_layout;
+    QStackedWidget m_view_stack;
+
+  public:
     Home m_home;
     Settings m_settings;
     Terminal m_terminal;
 
   private:
-    Ui::ViewStack m_ui;
-    BluetoothSerialPort m_bluetooth_serial_port;
-    QSocketNotifier m_bluetooth_socket_notifier;
-    SerialPort m_serial_port;
-    QSocketNotifier m_serial_socket_notifier;
-    HardwareInterface* m_hardware_interface = nullptr;
-    QVBoxLayout m_window_layout;
-    QStackedWidget m_view_stack;
-
-    void process_bluetooth_events(QSocketDescriptor, QSocketNotifier::Type);
-    void process_serial_port_events(QSocketDescriptor, QSocketNotifier::Type);
+    void add_event_handler(EventHandler& event_handler);
+    void process_events(QSocketDescriptor sock_fd, QSocketNotifier::Type);
 };
