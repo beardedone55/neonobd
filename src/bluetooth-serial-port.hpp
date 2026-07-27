@@ -26,6 +26,7 @@
 #include <memory>
 #include <span>
 #include <string>
+#include <string_view>
 // time.h provides timeval
 #include <sys/time.h> //NOLINT(misc-include-cleaner)
 #include <systemd/sd-bus.h>
@@ -53,8 +54,9 @@ class BluetoothSerialPort : public HardwareInterface {
 
     // Event Loop Processing Methods
     //-------------------------------------------------------
-    int get_event_fd() override;
-    void process_events(std::chrono::microseconds timeout = 0s);
+    int get_event_fd() const override;
+    void process_events() override;
+    void init_event_handler() override;
 
     // Host Controller Access Methods
     //--------------------------------------------------------

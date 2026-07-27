@@ -24,6 +24,7 @@
 #include <memory>
 #include <span>
 #include <string>
+#include <string_view>
 #include <termios.h>
 #include <utility>
 
@@ -39,11 +40,6 @@ class SerialPort : public HardwareInterface {
                  std::function<void(bool)> callback) override;
     void respond_from_user(const ResponseVariant&, void*) override {}
     void set_timeout(std::chrono::milliseconds timeout) override;
-
-    // Event Loop Processing Methods
-    //-------------------------------------------------------
-    void process_events(std::chrono::microseconds timeout = 0s);
-    int get_event_fd() override;
 
     void set_baudrate(const std::string& baudrate);
     static std::vector<std::string> get_valid_baudrates();
@@ -64,11 +60,8 @@ class SerialPort : public HardwareInterface {
     static void close_file(std::FILE* file);
     std::unique_ptr<FILE, decltype(&close_file)> m_sock_file;
     std::function<void(bool)> m_connect_callback;
-    int m_event_fd[2] = {-1, -1};
 
     bool initiate_connection(const std::string& device_name);
     void connect_complete();
-    static ssize_t read_timed(int fd, std::span<char> buf, size_t size,
-                              std::chrono::microseconds timeout);
-    void signal_event(const std::string& event_name);
+    void process_event(std::string_view event) override;
 };

@@ -20,6 +20,7 @@ project(neonobd VERSION 0.1.2)
 
 option(RUN_CPPCHECK "Run cppcheck during compilation" OFF)
 option(RUN_CLANG_TIDY "Run clang-tidy during compilation" OFF)
+option(TESTING_ENABLED "Enable unit tests" OFF)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -39,16 +40,6 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-if(RUN_CPPCHECK)
-    find_program(CMAKE_CXX_CPPCHECK NAMES cppcheck REQUIRED)
-    list(APPEND CMAKE_CXX_CPPCHECK --library=qt --enable=all --error-exitcode=1 
-        --suppressions-list=${CMAKE_SOURCE_DIR}/.cppcheck_suppression_list
-         --suppress=unusedFunction --force) 
-else()
-    unset(CMAKE_CXX_CPPCHECK CACHE)
-endif()
-
-
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(SYSTEMD REQUIRED libsystemd)
 
@@ -59,15 +50,27 @@ qt_add_executable(neonobd
                   hardware-interface.cpp
                   bluetooth-serial-port.cpp
                   home.cpp mainwindow.cpp
-                  settings.cpp logger.cpp
+                  settings.cpp 
                   connect-button.cpp
                   terminal.cpp serial-port.cpp
-                  neonobd.ui)
+                  event-handler.cpp neonobd.ui)
 
 if(RUN_CLANG_TIDY)
     find_program(CMAKE_CXX_CLANG_TIDY NAMES clang-tidy REQUIRED)
 else()
     unset(CMAKE_CXX_CLANG_TIDY CACHE)
+endif()
+
+if(RUN_CPPCHECK)
+    find_program(CPPCHECK_BIN NAMES cppcheck REQUIRED)
+    list(APPEND CPPCHECK_BIN --enable=all --error-exitcode=1 
+        --suppressions-list=${CMAKE_SOURCE_DIR}/.cppcheck_suppression_list
+        --force --check-level=exhaustive) 
+    set_target_properties(neonobd PROPERTIES CXX_CPPCHECK 
+        "${CPPCHECK_BIN};--library=qt;--suppress=unusedFunction")
+        
+else()
+    unset(CMAKE_CXX_CPPCHECK CACHE)
 endif()
 
 target_include_directories(neonobd PRIVATE "${PROJECT_SOURCE_DIR}")
@@ -79,4 +82,10 @@ install(TARGETS neonobd RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/packaging")
     add_subdirectory(packaging)
 endif()
+
+if(TESTING_ENABLED)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
+
 

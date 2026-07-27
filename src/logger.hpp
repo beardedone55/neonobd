@@ -32,6 +32,7 @@ class LogStream {
         }
         return *this;
     }
+    friend void setLogLevel(LogLevel lvl);
 
   private:
     explicit LogStream(LogLevel level) noexcept
@@ -39,14 +40,13 @@ class LogStream {
     LogLevel lvl;
     std::ostream& out;
     static LogLevel logLevel;
-    friend void setLogLevel(LogLevel lvl);
     friend class Logger;
 };
 
 class Logger {
   public:
     explicit Logger(LogLevel level) noexcept : lvl{level}, stream{level} {}
-    void operator()(const std::string& msg) const;
+    void operator()(const std::string& msg) const { *this << msg << '\n'; }
     template <typename T> const LogStream& operator<<(const T& rhs) const {
         stream << log_header.at(lvl) << rhs;
         return stream;
@@ -70,14 +70,16 @@ class NoLog {
     void operator()(const std::string&) const {}
 };
 
-void setLogLevel(LogLevel lvl);
+inline void setLogLevel(LogLevel lvl) { LogStream::logLevel = lvl; }
 
 #ifdef NDEBUG
-extern const NoLog debug;
+inline const NoLog debug;
+inline LogLevel LogStream::logLevel = INFO;
 #else
-extern const Logger debug;
+inline const Logger debug(DEBUG);
+inline LogLevel LogStream::logLevel = DEBUG;
 #endif
-extern const Logger info;
-extern const Logger warning;
-extern const Logger error;
+inline const Logger info(INFO);
+inline const Logger warning(WARN);
+inline const Logger error(ERR);
 }; // namespace Logger

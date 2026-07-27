@@ -1,5 +1,5 @@
 /* This file is part of neonobd - OBD diagnostic software.
- * Copyright (C) 2022-2024  Brian LePage
+ * Copyright (C) 2026  Brian LePage
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,22 +15,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "logger.hpp"
+#pragma once
+#include <array>
 #include <string>
+#include <string_view>
 
-Logger::LogLevel Logger::LogStream::logLevel = DEBUG;
+class EventHandler {
+  public:
+    EventHandler() = default;
+    EventHandler(const EventHandler&) = delete;
+    EventHandler& operator=(const EventHandler&) = delete;
+    virtual ~EventHandler();
 
-#ifdef NDEBUG
-const Logger::NoLog Logger::debug;
-#else
-const Logger::Logger Logger::debug(DEBUG);
-#endif
-const Logger::Logger Logger::info(INFO);
-const Logger::Logger Logger::warning(WARN);
-const Logger::Logger Logger::error(ERR);
+    virtual void process_events();
+    virtual int get_event_fd() const;
 
-void Logger::setLogLevel(LogLevel lvl) { LogStream::logLevel = lvl; }
+  protected:
+    virtual void process_event(std::string_view /*unused*/){};
+    virtual void init_event_handler();
+    virtual void signal_event(const std::string& event);
 
-void Logger::Logger::operator()(const std::string& msg) const {
-    *this << msg << '\n';
-}
+  private:
+    std::array<int, 2> m_event_fd = {-1, -1};
+};

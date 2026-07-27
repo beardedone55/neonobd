@@ -41,22 +41,27 @@ Elm327::~Elm327() {
     }
 }
 
-sigc::signal<void(bool)> Elm327::init(std::shared_ptr<HardwareInterface> hwif) {
-    if (m_init_result.valid() || m_init_complete) {
+void Elm327::init(HardwareInterface* hwif, std::function<void(bool)> callback) {
+    if (m_init_result.valid() || m_init_complete || m_init_callback) {
         throw neon::InvalidState("Invalid state to issue init request.");
     }
 
     m_hwif = hwif;
-
-    m_init_complete_connection =
-        m_init_complete_dispatcher.connect([this]() { init_done(); });
-
+    m_init_callback = std::move(callback);
     m_init_result = std::async(std::launch::async, &Elm327::init_thread, this);
-
-    return m_init_signal;
 }
 
-Glib::ustring Elm327::get_error_string() const { return m_error_string; }
+std::string Elm327::get_error_string() const { return m_error_string; }
+
+void Elm327::process_event(std::string_view event) {
+    if (event == "CommandComplete") {
+        command_complete();
+    } else if (event == "InitDone") {
+        init_done();
+    } else if (event == "CommandThreadExit") {
+        command_thread_exit();
+    }
+}
 
 bool Elm327::init_thread() {
     try {
@@ -88,35 +93,25 @@ bool Elm327::init_thread() {
     } catch (std::runtime_error& e) {
         m_error_string = e.what();
     }
-    m_init_complete_dispatcher.emit();
+    signal_event("InitDone");
     return m_init_complete;
 }
 
 void Elm327::init_done() {
-    if (m_init_result.get()) {
-        m_command_complete_connection = m_command_complete_dispatcher.connect(
-            [this]() { command_complete(); });
-        m_command_thread_exit_connection =
-            m_command_thread_exit_dispatcher.connect(
-                [this]() { command_thread_exit(); });
-    }
-    m_init_signal.emit(m_init_complete);
-}
-
-sigc::signal<
-    void(const std::unordered_map<unsigned int, std::vector<unsigned char>>&)>
-Elm327::signal_command_complete() {
-    return m_command_complete_signal;
+    m_init_callback(m_init_complete);
+    m_init_callback = nullptr;
 }
 
 void Elm327::send_command(unsigned char obd_address, unsigned char obd_service,
-                          const std::vector<unsigned char>& obd_data) {
+                          const std::vector<unsigned char>& obd_data,
+                          CommandCallback callback) {
 
     if (!m_init_complete || m_disconnect_in_progress) {
         return;
     }
-    const std::lock_guard lock(m_cmd_queue_lock);
-    m_cmd_queue.emplace(Command({obd_address, obd_service, obd_data}));
+    const std::scoped_lock lock(m_cmd_queue_lock);
+    m_cmd_queue.emplace(
+        Command{obd_address, obd_service, obd_data, std::move(callback)});
     m_cmd_semaphore.release();
 }
 
@@ -130,16 +125,15 @@ bool Elm327::is_connecting() const { return m_init_result.valid(); }
 
 bool Elm327::is_connected() const { return m_init_complete; }
 
-sigc::signal<void()> Elm327::disconnect() {
-    if (m_disconnect_in_progress || !m_init_complete) {
+void Elm327::disconnect(std::function<void()> callback) {
+    if (m_disconnect_in_progress || !m_init_complete || m_disconnect_callback) {
         throw neon::InvalidState("Invalid state to issue disconnect request.");
     }
 
     m_disconnect_in_progress = true;
     m_cmd_semaphore.release();
     m_init_complete = false;
-
-    return m_disconnect_signal;
+    m_disconnect_callback = std::move(callback);
 }
 
 void Elm327::send_completion(Completion&& completion) {
@@ -229,18 +223,20 @@ void Elm327::command_thread() {
             }
             auto response = send_command(command_to_string(command));
 
-            send_completion(string_to_completion(response));
+            auto completion = string_to_completion(response);
+            completion.callback = std::move(command.callback);
 
-            m_command_complete_dispatcher.emit(); // Let main thread know there
-                                                  // is a response on the queue.
+            send_completion(std::move(completion));
+
+            signal_event("CommandComplete");
         }
     }
-    m_command_thread_exit_dispatcher.emit();
+    signal_event("CommandThreadExit");
 }
 
 void Elm327::command_complete() {
     auto cpl = get_next_completion();
-    m_command_complete_signal.emit(cpl.obd_data);
+    cpl.callback(cpl.obd_data);
 }
 
 namespace {
@@ -258,7 +254,7 @@ void Elm327::command_thread_exit() {
     m_disconnect_in_progress = false;
     clear_queue(m_cmd_queue);
     clear_queue(m_completion_queue);
-    m_disconnect_signal.emit();
+    m_disconnect_callback();
 }
 
 std::string Elm327::send_command(const std::string& cmd) {

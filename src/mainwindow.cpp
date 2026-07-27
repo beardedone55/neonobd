@@ -17,6 +17,7 @@
 
 #include "mainwindow.hpp"
 #include "bluetooth-serial-port.hpp"
+#include "event-handler.hpp"
 #include "hardware-interface.hpp"
 #include "home.hpp"
 #include "logger.hpp"
@@ -32,24 +33,20 @@
 #include <QString>
 #include <QVBoxLayout>
 #include <climits>
+#include <memory>
+#include <utility>
 
 MainWindow::MainWindow()
-    : m_home(this), m_settings(this), m_terminal(this), m_ui{},
-      m_bluetooth_socket_notifier(m_bluetooth_serial_port.get_event_fd(),
-                                  QSocketNotifier::Read, this),
-      m_serial_socket_notifier(m_serial_port.get_event_fd(),
-                               QSocketNotifier::Read, this),
-      m_window_layout(this), m_view_stack(this) {
+    : m_ui{}, m_window_layout(this), m_view_stack(this), m_home(this),
+      m_settings(this), m_terminal(this) {
 
     m_ui.setupUi(&m_view_stack);
     m_home.init();
     m_settings.init();
     m_terminal.init();
-    connect(&m_bluetooth_socket_notifier, &QSocketNotifier::activated, this,
-            &MainWindow::process_bluetooth_events);
-    connect(&m_serial_socket_notifier, &QSocketNotifier::activated, this,
-            &MainWindow::process_serial_port_events);
-    m_bluetooth_serial_port.process_events();
+
+    add_event_handler(m_bluetooth_serial_port);
+    add_event_handler(m_serial_port);
 
     m_window_layout.addWidget(&m_view_stack);
 
@@ -66,6 +63,21 @@ void MainWindow::set_hardware_interface(InterfaceType if_type) {
     case neon::SERIAL_IF:
         m_hardware_interface = &m_serial_port;
         break;
+    }
+}
+
+void MainWindow::add_event_handler(EventHandler& event_handler) {
+    const int event_fd = event_handler.get_event_fd();
+    auto [iter, is_added] = m_event_handlers.emplace(event_fd, &event_handler);
+
+    if (!is_added) {
+        Logger::error << "Could not attach event handler to event loop.\n";
+    } else {
+        auto notifier = std::make_unique<QSocketNotifier>(
+            event_fd, QSocketNotifier::Read, this);
+        connect(notifier.get(), &QSocketNotifier::activated, this,
+                &MainWindow::process_events);
+        m_socket_notifiers.push_back(std::move(notifier));
     }
 }
 
@@ -97,12 +109,8 @@ HardwareInterface* MainWindow::get_hardware_interface() {
     return m_hardware_interface;
 }
 
-void MainWindow::process_bluetooth_events(QSocketDescriptor /*unused*/,
-                                          QSocketNotifier::Type /*unused*/) {
-    m_bluetooth_serial_port.process_events();
-}
+void MainWindow::process_events(QSocketDescriptor sock_fd,
+                                QSocketNotifier::Type /*unused*/) {
 
-void MainWindow::process_serial_port_events(QSocketDescriptor /*unused*/,
-                                            QSocketNotifier::Type /*unused*/) {
-    m_serial_port.process_events();
+    m_event_handlers.at(sock_fd)->process_events();
 }

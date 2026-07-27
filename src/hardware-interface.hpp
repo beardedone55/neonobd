@@ -16,6 +16,7 @@
  */
 
 #pragma once
+#include "event-handler.hpp"
 #include "neonobd_types.hpp"
 #include <functional>
 #include <shared_mutex>
@@ -28,17 +29,16 @@ using UserInputFunction =
     std::function<void(const std::string&, const ResponseType, void*)>;
 using ConnectCompleteFunction = std::function<void(bool)>;
 
-class HardwareInterface {
+class HardwareInterface : public EventHandler {
   public:
     HardwareInterface() = default;
     HardwareInterface(const HardwareInterface&) = delete;
     HardwareInterface& operator=(const HardwareInterface&) = delete;
-    virtual ~HardwareInterface() = default;
+    ~HardwareInterface() override = default;
     virtual bool connect(const std::string& device_name,
                          std::function<void(bool)> callback) = 0;
     virtual void respond_from_user(const ResponseVariant& response,
                                    void* handle) = 0;
-    virtual int get_event_fd() = 0;
 
     template <typename Container,
               typename Contents = typename Container::value_type>

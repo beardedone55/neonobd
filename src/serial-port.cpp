@@ -17,101 +17,42 @@
 
 #include "serial-port.hpp"
 #include "logger.hpp"
-#include <algorithm>
 #include <array>
 #include <cerrno>
 #include <chrono>
 #include <climits>
 #include <cstdint>
 #include <cstdio>
-#include <fcntl.h>
 #include <filesystem>
 #include <fstream>
 #include <functional>
 #include <future>
-#include <linux/limits.h>
 #include <memory>
 #include <mutex>
 #include <ratio>
 #include <shared_mutex>
-#include <span>
 #include <sstream>
-#include <stdexcept>
 #include <string>
-#include <sys/poll.h>
-#include <sys/types.h>
+#include <string_view>
 #include <system_error>
 #include <termios.h>
-#include <unistd.h>
 #include <unordered_map>
 #include <utility>
 #include <vector>
 
 SerialPort::SerialPort() : m_sock_file(nullptr, close_file) {
-    if (pipe2(&m_event_fd[0], O_DIRECT | O_CLOEXEC) < 0) {
-        throw std::runtime_error("Creation of event pipe failed...");
-    }
+    init_event_handler();
     Logger::debug << "Created SerialPort.\n";
 }
 
-SerialPort::~SerialPort() {
-    for (auto event_fd : m_event_fd) {
-        close(event_fd);
+SerialPort::~SerialPort() { Logger::debug("Destroying Serial Port"); }
+
+void SerialPort::process_event(std::string_view event) {
+    Logger::debug << "SerialPort processing event " << event << "\n";
+    if (event == "ConnectComplete") {
+        connect_complete();
     }
-    Logger::debug("Destroying Serial Port");
 }
-
-ssize_t SerialPort::read_timed(int sock_fd, std::span<char> buf, size_t size,
-                               std::chrono::microseconds timeout) {
-    pollfd pfd = {.fd = sock_fd, .events = POLLIN, .revents = 0};
-    auto poll_timeout =
-        std::chrono::duration_cast<std::chrono::milliseconds>(timeout).count();
-    poll_timeout =
-        std::min(poll_timeout, static_cast<decltype(poll_timeout)>(INT_MAX));
-    const int ret = poll(&pfd, 1, static_cast<int>(poll_timeout));
-    if (ret > 0) {
-        return ::read(sock_fd, buf.data(), size);
-    }
-
-    if (ret < 0) {
-        throw std::runtime_error("Poll of read fd failed...");
-    }
-    return 0;
-}
-
-void SerialPort::process_events(std::chrono::microseconds timeout) {
-    auto start = std::chrono::system_clock::now();
-    auto end = start;
-    auto duration =
-        std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-    do {
-        std::array<char, PIPE_BUF> buf{};
-        // NOLINTNEXTLINE(misc-include-cleaner)
-        const ssize_t count =
-            (timeout == 0s) ? ::read(m_event_fd[0], buf.data(), sizeof(buf))
-                            : read_timed(m_event_fd[0], buf, sizeof(buf),
-                                         timeout - duration);
-        if (count > 0) {
-            buf.at(PIPE_BUF - 1) = '\0';
-            static const std::unordered_map<std::string,
-                                            std::function<void(SerialPort*)>>
-                callbacks = {{std::string("ConnectComplete"),
-                              &SerialPort::connect_complete}};
-
-            const std::string function_name = buf.data();
-            if (callbacks.contains(function_name)) {
-                callbacks.at(function_name)(this);
-            }
-        } else if (count < 0) {
-            throw std::runtime_error("Read of event pipe fd failed...");
-        }
-        end = std::chrono::system_clock::now();
-        duration =
-            std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-    } while (duration < timeout);
-}
-
-int SerialPort::get_event_fd() { return m_event_fd[0]; }
 
 std::vector<std::string> SerialPort::get_valid_baudrates() {
     std::vector<std::string> output;
@@ -183,10 +124,6 @@ void SerialPort::connect_complete() {
         m_connect_callback(m_is_connected.get());
         m_connect_callback = nullptr;
     }
-}
-
-void SerialPort::signal_event(const std::string& event_name) {
-    ::write(m_event_fd[1], event_name.c_str(), event_name.size());
 }
 
 bool SerialPort::initiate_connection(const std::string& device_name) {
